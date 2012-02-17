@@ -1946,6 +1946,74 @@ make_turbo_trampoline_internal(base0)
 
 ); End of #+:coral
 
+#+xyzzy
+(progn
+(defun allocate-funcallable-instance-1 ()
+  (let ((data (make-vector (1+ (length funcallable-instance-data)))))
+    #'(lambda (&rest args)
+        (apply (svref data 0) args))))
+
+(defun funcallable-instance-p (object)
+  (and (si:*closurep object)
+       (vectorp (funcallable-instance-data object))))
+
+(defun funcallable-instance-data (fin)
+  (cdr (assoc 'data (si:closure-variable fin))))
+
+(defun set-funcallable-instance-function (fin new-value)
+  (let ((h (funcallable-instance-data fin)))
+    (setf (svref h 0) new-value)
+    (let ((args (cadr (si:closure-body new-value))))
+      (multiple-value-bind (params apply-p)
+          (arguments-to-parameters args)
+        (setf (cdr (si:closure-body fin))
+              (cdr `(lambda (,@args)
+                      ,(if apply-p
+                           `(apply ,new-value ,@params)
+                         `(funcall ,new-value ,@params))))
+              )))))
+
+(defun funcallable-instance-data-1 (fin data-name)
+  (let ((h (funcallable-instance-data fin)))
+    (ecase data-name
+      (wrapper (svref h 1))
+      (slots (svref h 2)))
+    ))
+
+(defun set-funcallable-instance-data-1 (fin data-name value)
+  (let ((h (funcallable-instance-data fin)))
+    (ecase data-name
+      (wrapper (setf (svref h 1) value))
+      (slots (setf (svref h 2) value))
+      )))
+
+
+(defsetf funcallable-instance-data-1 set-funcallable-instance-data-1)
+
+(defun arguments-to-parameters (ll)
+  (multiple-value-bind (nreq nopt keysp restp allow-other-keys-p keywords keyword-parameters)
+      (pcl::analyze-lambda-list ll)
+    (let (r)
+      (dotimes (i nreq)
+        (push (pop ll) r))
+      (when (and nopt (< 0 nopt))
+        (pop ll)
+        (dotimes (i nopt)
+          (push (pop ll) r)))
+      (cond (restp
+             (pop ll)
+             (push (pop ll) r)
+             (values (nreverse r) t))
+            (keysp
+             (pop ll)
+             (dolist (kv (mapcar #'cons keywords keyword-parameters))
+               (push (car kv) r)
+               (push (cdr kv) r))
+             (values (nreverse r) nil))
+            (t
+             (values (nreverse r) nil))
+            ))))
+)
 
 
 ;;;; Slightly Higher-Level stuff built on the implementation-dependent stuff.

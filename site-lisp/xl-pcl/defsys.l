@@ -861,6 +861,8 @@ and load your system with:
    (macros          t            t            ())
    (low             (pkg macros) t            (macros))
 
+   (xyzzy-low      (low)         (low)        (low)            xyzzy)
+
    (fin         t                                   t (low))
    (defclass    t                                   t (low))
    (defs        t                                   t (defclass macros iterate))

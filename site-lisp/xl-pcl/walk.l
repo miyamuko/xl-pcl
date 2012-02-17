@@ -897,6 +897,61 @@
 ); end of #+:CMU
 
 
+#+xyzzy
+(progn
+
+(defmacro with-augmented-environment
+  ((new-env old-env &key functions macros) &body body)
+  `(let ((,new-env (with-augmented-environment-internal ,old-env
+							,functions
+							,macros)))
+     ,@body))
+
+(defun with-augmented-environment-internal (env functions macros)
+  (dolist (f functions)
+    (push (list* f 'function (gensym)) env))
+  (dolist (m macros)
+    (cond ((and (consp m)
+		(consp (cadr m))
+		(eq (caadr m) 'lisp::macro))
+	   ;; for macroexpand (<macroname> lisp:macro <macrargs> <macrobody>)
+	   (push (list* (car m) (cadr m)) env))
+	  ((and (consp m)
+		(eq (car m) *key-to-walker-environment*))
+	   ;; for environment-macro (<macroname> lisp:macro <function>)
+	   (push (list* (car m) 'lisp::macro (cadr m)) env))
+	  (t
+	   ;; for environment-macro
+	   (push (list (car m) 'lisp::macro (cadr m)) env)
+	   ;; for macroexpand
+	   (push (list (car m) 'lisp::macro '(&rest args)
+		       `(block nil (eval `(funcall ,',(cadr m) '(,',(car m) ,@args) nil)))) env))
+	  ))
+  env)
+
+(defun environment-function (env fn)
+  (let ((entry (assoc fn env :test #'equal)))
+    (and entry
+	 (eq (cadr entry) 'function)
+	 (cddr entry))))
+
+(defun environment-macro (env macro)
+  (when (consp env)
+    (let ((entry
+	   (cond ((eq macro *key-to-walker-environment*)
+		  (assoc macro env))
+		 (t
+		  (find-if #'(lambda (e)
+			       (and (eq (cadr e) 'lisp::macro)
+				    (si:*closurep (caddr e))))
+			   env))
+		 )))
+    (and entry
+	 (eq (cadr entry) 'lisp::macro)
+	 (cddr entry)))))
+)
+;#+xyzzy
+
 
 (defmacro with-new-definition-in-environment
 	  ((new-env old-env macrolet/flet/labels-form) &body body)
