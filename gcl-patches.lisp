@@ -112,7 +112,7 @@
 
 ;;;
 ;;; Patch to PROGV
-;;; 
+;;;
 (in-package sys::*compiler-package-load*)
 
 ;;; This is a fully portable (though not very efficient)
@@ -135,7 +135,7 @@
        (if (eq ,val-to-restore ,place-holder)
 	   (makunbound ,symbol)
 	   (setf (symbol-value ,symbol) ,val-to-restore)))))
-  
+
 
 (deftransform PROGV PORTABLE-PROGV-TRANSFORM
 	      (symbols-form values-form &rest body)

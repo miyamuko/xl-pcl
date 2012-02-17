@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -23,7 +23,7 @@
 ;;;
 ;;; Suggestions, comments and requests for improvements are also welcome.
 ;;; *************************************************************************
-;;; 
+;;;
 ;;; A simple code walker, based IN PART on: (roll the credits)
 ;;;   Larry Masinter's Masterscope
 ;;;   Moon's Common Lisp code walker
@@ -49,7 +49,7 @@
 ;;;
 ;;; The code which implements the macroexpansion environment manipulation
 ;;; mechanisms is in the first part of the file, the real walker follows it.
-;;; 
+;;;
 
 (in-package :walker)
 
@@ -59,7 +59,7 @@
 ;;; variable-lexical-p, variable-special-p and variable-class.  Some users
 ;;; will need to call define-walker-template, they will have to figure that
 ;;; out for themselves.
-;;; 
+;;;
 (export '(define-walker-template
 	  walk-form
 	  walk-form-expand-macros-p
@@ -111,7 +111,7 @@
 ;;; ENVIRONMENT-FUNCTION
 ;;;
 ;;; ENVIRONMENT-MACRO
-;;; 
+;;;
 
 (defun unbound-lexical-function (&rest args)
   (declare (ignore args))
@@ -131,13 +131,13 @@
 ;;; FUNCTION.  In these cases the element is interpreted as follows.
 ;;;
 ;;;   (<function-name> CCL::MACRO . macroexpansion-function)
-;;;   
+;;;
 ;;;   (<function-name> FUNCTION . <fn>)
-;;;   
+;;;
 ;;;   When in the compiler, <fn> is a gensym which will be
 ;;;   a variable which bound at run-time to the function.
 ;;;   When in the interpreter, <fn> is the actual function.
-;;;   
+;;;
 ;;;
 #+:Coral
 (progn
@@ -193,7 +193,7 @@
 ;;;
 ;;;      In both interpreter and compiler, this is the
 ;;;      representation used for macro definitions.
-;;;   
+;;;
 ;;;
 #+:ExCL
 (progn
@@ -233,7 +233,7 @@
 
 #+Lucid
 (progn
-  
+
 (proclaim '(inline
 	    %alphalex-p
 	    add-contour-to-env-shape
@@ -254,7 +254,7 @@
   #+Prime
   (eq (caddr (cddddr object)) 'lucid::%alphalex))
 
-#+Prime 
+#+Prime
 (defun lucid::augment-lexenv-fvars-dummy (lexical vars)
   (lucid::augment-lexenv-fvars-aux lexical vars '() '() 'flet '()))
 
@@ -317,7 +317,7 @@
 
 
 (defmacro with-augmented-environment
-	  ((new-env old-env &key functions macros) &body body)     
+	  ((new-env old-env &key functions macros) &body body)
   `(let* ((,new-env (with-augmented-environment-internal ,old-env
 							 ,functions
 							 ,macros)))
@@ -326,7 +326,7 @@
 ;;;
 ;;; with-augmented-environment-internal is where the real work of augmenting
 ;;; the environment happens.
-;;; 
+;;;
 (defun with-augmented-environment-internal (env functions macros)
   (let ((function-names (mapcar #'first functions))
 	(macro-names (mapcar #'first macros))
@@ -359,7 +359,7 @@
 			 (pairlis macro-names macro-functions)
 			 env)))))
     env))
-	 
+
 
 (defun environment-function (env fn)
   (cond ((null env) nil)
@@ -379,7 +379,7 @@
 		     ((eql type macrolet-sfc-contour)
 		      (when (find-macrolet-in-contour fn contour)
 			(return nil)))))))))
-		      
+
 (defun environment-macro (env macro)
   (cond ((null env) nil)
 	((contour-p (first env))
@@ -395,7 +395,7 @@
 		      (let ((fn (find-macrolet-in-contour macro contour)))
 			(when fn
 			  (return fn))))))))))
-  
+
 
 );#+Lucid
 
@@ -416,7 +416,7 @@
 ;;;	the value.  Variables are looked up with ASSQ.
 ;;;
 ;;;    si:env-functions returns a list of which each element is:
-;;;     
+;;;
 ;;;		(symbol definition)
 ;;;
 ;;;	where definition is anything that could go in a function cell.
@@ -456,7 +456,7 @@
 					   .old-tags.
 					   .old-dcls.)
 	   ,@body)))))
-  
+
 
 (defun environment-function (env fn)
   (if (null env)
@@ -511,12 +511,12 @@
 ;;; In Xerox Lisp, the compiler and interpreter use different structures for
 ;;; the environment.  This doesn't cause a serious problem, the parts of the
 ;;; environments we are concerned with are fairly similar.
-;;; 
+;;;
 #+:Xerox
 (progn
 
 (defmacro with-augmented-environment
-	  ((new-env old-env &key functions macros) &body body)     
+	  ((new-env old-env &key functions macros) &body body)
   `(let* ((,new-env (with-augmented-environment-internal ,old-env
 							 ,functions
 							 ,macros)))
@@ -528,7 +528,7 @@
 ;;; anymore because we have to know what kind of environment we are supposed
 ;;; to be building up.  This is probably never a real concern in practice.
 ;;; It better not be because we don't do anything about it.
-;;; 
+;;;
 (defun with-augmented-environment-internal (env functions macros)
   (cond
      ((compiler::env-p env)
@@ -561,7 +561,7 @@
 				    :function))
 	(t nil)))
 
-(defun environment-macro (env macro) 
+(defun environment-macro (env macro)
   (cond ((compiler::env-p env)
 	 (multiple-value-bind (type def)
 	     (compiler:env-fboundp env macro)
@@ -577,10 +577,10 @@
 
 ;;;
 ;;; In IBUKI Common Lisp, the macroexpansion environment is a three element
-;;; list.  The second element describes lexical functions and macros.  The 
-;;; function entries in this list have the form 
+;;; list.  The second element describes lexical functions and macros.  The
+;;; function entries in this list have the form
 ;;;     (<name> . (FUNCTION . (<function-value> . nil))
-;;; The macro entries have the form 
+;;; The macro entries have the form
 ;;;     (<name> . (MACRO . (<macro-value> . nil)).
 ;;;
 ;;;
@@ -602,7 +602,7 @@
       (push `(,(car f) .  (function  . (,#'unbound-lexical-function . nil)))
 	    lexicals))
     (dolist (m macros)
-      (push `(,(car m)  .  (macro . ( ,(cadr m) . nil))) 
+      (push `(,(car m)  .  (macro . ( ,(cadr m) . nil)))
 	    lexicals))
     (list first lexicals third)))
 
@@ -643,7 +643,7 @@
 
 ;;; the environment arg to macroexpand-1 when called on
 ;;; (bar (some-local-fn 1 2) 3)
-;;;is 
+;;;is
 ;;;(NIL ((#<DTP-LOCATIVE 4710602> NIL
 ;;;       #<DTP-LOCATIVE 4710671> NIL)
 ;;;      (#<DTP-LOCATIVE 7346562>
@@ -655,11 +655,11 @@
 ;;;		   (SYS::*MACROARG* &OPTIONAL SYS::*MACROENVIRONMENT*)
 ;;;		   (BLOCK BAR2 ....))))
 #+TI
-(progn 
+(progn
 
 ;;; from sys:site;macros.lisp
 (eval-when (compile load eval)
-  
+
 (DEFMACRO MACRO-DEF? (thing)
   `(AND (CONSP ,thing) (EQ (CAR ,thing) 'TICL::MACRO)))
 
@@ -674,11 +674,11 @@
 	 (DOLIST (frame  ,local-function-environment)
 	   ;; <value> is nil or a locative
 	   (LET ((value (sys::GET-LOCATION-OR-NIL (ticl::LOCF frame)
-						  vcell))) 
+						  vcell)))
 	     (When value (RETURN (CAR value))))))
        nil)))
 
- 
+
 ;;;Edited by Reed Hastings         13 Jan 88  16:29
 (defun environment-macro (env macro)
   "returns what macro-function would, ie. the expansion function"
@@ -703,7 +703,7 @@
 	       (return nil))
 	      (t
 	       (error "we are confused")))))))
-	     
+
 
 ;;;Edited by Reed Hastings         13 Jan 88  16:29
 ;;;Edited by Reed Hastings         7 Mar 88  19:07
@@ -718,10 +718,10 @@
 	   (mapcan #'(lambda (m)
 		       (list (ticl:locf (symbol-function (car m))) (cons 'ticl::macro (cadr m))))
 		   macros)))
-    (when new-local-fns-frame 
+    (when new-local-fns-frame
       (push new-local-fns-frame local-definitions))
     (when new-local-macros-frame
-      (push new-local-macros-frame local-definitions))   
+      (push new-local-macros-frame local-definitions))
     `(,(car env) ,local-definitions)))
 
 
@@ -748,7 +748,7 @@
 
 (defun with-augmented-environment-internal (env functions macros)
   #'(lambda (op &optional (arg nil arg-p))
-      (cond ((eq op :macro-function) 
+      (cond ((eq op :macro-function)
 	     (unless arg-p (error "Invalid environment use."))
 	     (lookup-macro-function arg env functions macros))
             (arg-p
@@ -765,7 +765,7 @@
 
 (defun environment-macro (env macro)
   (let ((m (and env (funcall env macro))))
-    (and (not (eq m :function)) 
+    (and (not (eq m :function))
          m)))
 
 ;;; Nobody calls environment-function.  What would it return, anyway?
@@ -774,23 +774,23 @@
 
 ;;;
 ;;; In Golden Common Lisp, the macroexpansion environment is just a list
-;;; of environment entries.  Unless the car of the list is :compiler-menv 
-;;; it is an interpreted environment.  The cadr of each element specifies 
+;;; of environment entries.  Unless the car of the list is :compiler-menv
+;;; it is an interpreted environment.  The cadr of each element specifies
 ;;; the type of the element.  The only types that interest us are GCL:MACRO
 ;;; and FUNCTION.  In these cases the element is interpreted as follows.
 ;;;
 ;;; Compiled:
 ;;;   (<function-name> <gensym> macroexpansion-function)
 ;;;   (<function-name> <fn>)
-;;;   
+;;;
 ;;; Interpreted:
 ;;;   (<function-name> GCL:MACRO macroexpansion-function)
 ;;;   (<function-name> <fn>)
-;;;   
+;;;
 ;;;   When in the compiler, <fn> is a gensym which will be
 ;;;   a variable which bound at run-time to the function.
 ;;;   When in the interpreter, <fn> is the actual function.
-;;;   
+;;;
 ;;;
 #+gclisp
 (progn
@@ -820,7 +820,7 @@
 
 (defun environment-function (env fn)
   (let ((entry (lisp::lexical-function fn env)))
-    (and entry 
+    (and entry
 	 (eq entry 'lisp::lexical-function)
 	 fn)))
 
@@ -864,7 +864,7 @@
   ;; off, 'cause anything real we do would be wrong.  We still have to
   ;; make an entry so we can tell functions from macros.
   (let ((env (or env (c::make-null-environment))))
-    (c::make-lexenv 
+    (c::make-lexenv
       :default env
       :functions
       (append (mapcar #'(lambda (f)
@@ -885,7 +885,7 @@
 (defun environment-macro (env macro)
   (when env
     (let ((entry (assoc macro (c::lexenv-functions env) :test #'eq)))
-      (and entry 
+      (and entry
 	   (eq (cadr entry) 'c::macro)
 	   (function-lambda-expression (cddr entry))))))
 
@@ -961,7 +961,7 @@
 		  (if wfop walk-form         (cadr lock))
 		  (if decp declarations      (caddr lock))
 		  (if lexp lexical-variables (cadddr lock)))))))
-		  
+
 (defun env-walk-function (env)
   (car (env-lock env)))
 
@@ -1056,12 +1056,12 @@
 	t)))
 
 
-  ;;   
+  ;;
 ;;;;;; Handling of special forms (the infamous 24).
   ;;
 ;;;
 ;;; and I quote...
-;;; 
+;;;
 ;;;     The set of special forms is purposely kept very small because
 ;;;     any program analyzing program (read code walker) must have
 ;;;     special knowledge about every type of special form. Such a
@@ -1133,9 +1133,9 @@
   ())
 
 
-  ;;   
+  ;;
 ;;;;;; The actual templates
-  ;;   
+  ;;
 
 (define-walker-template BLOCK                (NIL NIL REPEAT (EVAL)))
 (define-walker-template CATCH                (NIL EVAL REPEAT (EVAL)))
@@ -1308,7 +1308,7 @@
 ;;;     2. Otherwise, if macro-function is true of the symbol apply
 ;;;        either macroexpand or macroexpand-1 and start over.
 ;;;     3. Otherwise, assume it is a function call. "
-;;;     
+;;;
 
 (defun walk-form-internal (form context env)
   ;; First apply the walk-function to perform whatever translation
@@ -1359,7 +1359,7 @@
 		      Define a template for this special form and try again."
 		     fn))
 		   (t
-		    ;; Otherwise, walk the form as if its just a standard 
+		    ;; Otherwise, walk the form as if its just a standard
 		    ;; functioncall using a template for standard function
 		    ;; call.
 		    (walk-template
@@ -1431,7 +1431,7 @@
   (cond ((null form) ())
         ((eq form stop-form)
          (if (null repeat-template)
-             (walk-template stop-form (cdr template) context env)       
+             (walk-template stop-form (cdr template) context env)
              (error "While handling repeat:
                      ~%~Ran into stop while still in repeat template.")))
         ((null repeat-template)
@@ -1477,7 +1477,7 @@
 	      (relist-internal (cdr x) (cdr args) *p))))
 
 
-  ;;   
+  ;;
 ;;;;;; Special walkers
   ;;
 
@@ -1589,7 +1589,7 @@
     (let* ((let/let* (car form))
 	   (bindings (cadr form))
 	   (body (cddr form))
-	   (walked-bindings 
+	   (walked-bindings
 	     (walk-bindings-1 bindings
 			      old-env
 			      new-env
@@ -1618,14 +1618,14 @@
 	  (if blocked-prog
 	      (values (car form) (cadr form) (caddr form) (cdddr form))
 	      (values (car form) nil	     (cadr  form) (cddr  form)))
-	(let* ((walked-bindings 
+	(let* ((walked-bindings
 		 (walk-bindings-1 bindings
 				  old-env
 				  new-env
 				  context
 				  sequentialp))
 	       (walked-body
-		 (walk-declarations 
+		 (walk-declarations
 		   body
 		   #'(lambda (real-body real-env)
 		       (walk-tagbody-1 real-body context real-env))
@@ -1677,7 +1677,7 @@
 	      vars)
 	(let* ((temps (mapcar #'(lambda (var) (declare (ignore var)) (gensym)) vars))
 	       (sets (mapcar #'(lambda (var temp) `(setq ,var ,temp)) vars temps))
-	       (expanded `(multiple-value-bind ,temps 
+	       (expanded `(multiple-value-bind ,temps
 			       ,(caddr form)
 			     ,@sets))
 	       (walked (walk-form-internal expanded context env)))
@@ -1694,7 +1694,7 @@
 	   (body (cdddr form))
 	   walked-bindings
 	   (walked-body
-	     (walk-declarations 
+	     (walk-declarations
 	       body
 	       #'(lambda (real-body real-env)
 		   (setq walked-bindings
@@ -1745,7 +1745,7 @@
 			      (walk-template (cddr binding)
 					     '(eval)
 					     context
-					     env)))		 
+					     env)))
                  (walk-bindings-2 (cdr bindings)
 				  (cdr walked-bindings)
 				  context
@@ -1775,7 +1775,7 @@
                (car form)
 	       name
 	       walked-arglist
-               walked-body))))  
+               walked-body))))
 
 (defun walk-setq (form context env)
   (if (cdddr form)
@@ -1901,7 +1901,7 @@
 (defun walk-if (form context env)
   (let ((predicate (cadr form))
 	(arm1 (caddr form))
-	(arm2 
+	(arm2
 	  (if (cddddr form)
 	      (progn
 		(warn "In the form:~%~S~%~
@@ -1929,11 +1929,11 @@
 ;;;
 
 #|
-;;; 
+;;;
 ;;; Here are some examples of the kinds of things you should be able to do
 ;;; with your implementation of the macroexpansion environment hacking
 ;;; mechanism.
-;;; 
+;;;
 ;;; with-lexical-macros is kind of like macrolet, but it only takes names
 ;;; of the macros and actual macroexpansion functions to use to macroexpand
 ;;; them.  The win about that is that for macros which want to wrap several
@@ -1960,10 +1960,10 @@
 
 
 ;;;
-;;; Unfortunately, I don't have an automatic tester for the walker.  
+;;; Unfortunately, I don't have an automatic tester for the walker.
 ;;; Instead there is this set of test cases with a description of
 ;;; how each one should go.
-;;; 
+;;;
 (defmacro take-it-out-for-a-test-walk (form)
   `(take-it-out-for-a-test-walk-1 ',form))
 
@@ -2011,7 +2011,7 @@
 ;;; This is a fairly simple macrolet case.  While walking the body of the
 ;;; macro, x should be lexically bound. In the body of the macrolet form
 ;;; itself, x should not be bound.
-;;; 
+;;;
 (take-it-out-for-a-test-walk
   (macrolet ((foo (x) (list x) ''inner))
     x
@@ -2022,7 +2022,7 @@
 ;;; should not be lexically bound.  In the body of the macrolet form itself
 ;;; x should be bound.  Note that THIS CASE WILL CAUSE AN ERROR when it
 ;;; tries to macroexpand the call to foo.
-;;; 
+;;;
 (take-it-out-for-a-test-walk
      (let ((x 1))
        (macrolet ((foo () (list x) ''inner))
@@ -2034,7 +2034,7 @@
 ;;; macro x should not be lexically bound.  In the body of the macrolet
 ;;; itself x should not be lexically bound.  But the macro should expand
 ;;; into 1.
-;;; 
+;;;
 (take-it-out-for-a-test-walk
   (compiler-let ((x 1))
     (let ((x 2))
@@ -2176,7 +2176,7 @@
 	   (member 'b the-lexical-variables)
 	   (member 'x the-lexical-variables))
       (error "Walker didn't do lexical variables of a closure properly.")))
-    
+
 |#
 
 ()

@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -37,11 +37,11 @@
 ;;; Other implementations may not implement native LAP assemblers for all
 ;;; of their ports.  All of this implies that this portable LAP assembler
 ;;; needs to generate the best code it possibly can.
-;;; 
+;;;
 
 
 ;;;
-;;; 
+;;;
 ;;;
 
 (defmacro lap-case (operand &body cases)
@@ -65,23 +65,23 @@
 
 (eval-when (load eval)
   (setq *make-lap-closure-generator*
-	#'(lambda (closure-var-names arg-names index-regs 
+	#'(lambda (closure-var-names arg-names index-regs
 		   vector-regs fixnum-vector-regs t-regs lap-code)
 	    (compile-lambda
 	      (make-lap-closure-generator-lambda
-		closure-var-names arg-names index-regs 
+		closure-var-names arg-names index-regs
 		vector-regs fixnum-vector-regs t-regs lap-code)))
 
 	*precompile-lap-closure-generator*
 	#'(lambda (cvars args i-regs v-regs fv-regs t-regs lap)
 	    `(function
-	       ,(make-lap-closure-generator-lambda cvars args i-regs 
+	       ,(make-lap-closure-generator-lambda cvars args i-regs
 		 v-regs fv-regs t-regs lap)))
 	*lap-in-lisp*
 	#'(lambda (cvars args iregs vregs fvregs tregs lap)
 	    (declare (ignore cvars args))
 	    (make-lap-prog
-	      iregs vregs fvregs tregs 
+	      iregs vregs fvregs tregs
 	      (flatten-lap lap ;(opcode :label 'exit-lap-in-lisp)
 			   )))))
 
@@ -130,7 +130,7 @@
   (make-array 8
 	      :element-type 'fixnum
 	      :initial-element 0))
- 
+
 (defun lap-reg-initial-value-form (reg)
   (cond ((member reg *lap-i-regs*) 0)
         ((member reg *lap-v-regs*) '*empty-vector*)
@@ -139,11 +139,11 @@
         (t
          (error "What kind of register is ~S?" reg))))
 
-(defun lap-opcode (opcode)    
+(defun lap-opcode (opcode)
   (lap-case opcode
     (:move (from to)
      `(setf ,(lap-operand to) ,(lap-operand from)))
-      
+
     ((:eq :neq :fix=) (arg1 arg2 label)
      `(when ,(lap-operands (ecase (car opcode)
 			     (:eq 'eq) (:neq 'neq) (:fix= 'RUNTIME\ FIX=))
@@ -164,7 +164,7 @@
      `(when ,t (go ,label)))			                ;***
     (:structure-instance-p (from label)
      `(when ,(lap-operands 'RUNTIME\ STRUCTURE-INSTANCE-P from) (go ,label)))	;***
-    
+
     ((:jmp :emf-call) (fn)
      (if (eq *lap-args* 'lap-in-lisp)
 	 (error "Can't do a :JMP in LAP-IN-LISP.")
@@ -178,12 +178,12 @@
 
     (:return (value)
      `(return ,(lap-operand value)))
-      
+
     (:label (label) label)
     (:go   (label)  `(go ,label))
 
     (:exit-lap-in-lisp () `(go exit-lap-in-lisp))
-    
+
     (:break ()      `(break))
     (:beep  ()      #+Genera`(zl:beep))
     (:print (val)   (lap-operands 'print val))
@@ -208,17 +208,17 @@
 		                         'RUNTIME\ BUILT-IN-OR-STRUCTURE-WRAPPER)
 		     (:std-slots         'RUNTIME\ STD-SLOTS)
 		     (:fsc-slots         'RUNTIME\ FSC-SLOTS)
-		     (:wrapper-cache-number-vector 
+		     (:wrapper-cache-number-vector
 		      'RUNTIME\ WRAPPER-CACHE-NUMBER-VECTOR))
 		   x))
-    
-     
+
+
     (:i1+     (index)         (lap-operands 'RUNTIME\ I1+ index))
     (:i+      (index1 index2) (lap-operands 'RUNTIME\ I+ index1 index2))
     (:i-      (index1 index2) (lap-operands 'RUNTIME\ I- index1 index2))
     (:ilogand (index1 index2) (lap-operands 'RUNTIME\ ILOGAND index1 index2))
     (:ilogxor (index1 index2) (lap-operands 'RUNTIME\ ILOGXOR index1 index2))
-    
+
     (:iref    (vector index)       (lap-operands 'RUNTIME\ IREF vector index))
     (:iset    (vector index value) (lap-operands 'RUNTIME\ ISET vector index value))
 
@@ -245,7 +245,7 @@
 ;;; LAP code generator, it may still be provident to consider reimplementing
 ;;; one or more of these to get the compiler to produce better code.  That
 ;;; is why they are split out.
-;;; 
+;;;
 (proclaim '(declaration pcl-fast-call))
 
 (defmacro RUNTIME\ FUNCALL (fn &rest args)
@@ -336,7 +336,7 @@
 (defmacro RUNTIME\ I+ (index1 index2)
   `(the fixnum (+ (the fixnum ,index1) (the fixnum ,index2))))
 
-(defmacro RUNTIME\ I- (index1 index2)  
+(defmacro RUNTIME\ I- (index1 index2)
   `(the fixnum (- (the fixnum ,index1) (the fixnum ,index2))))
 
 (defmacro RUNTIME\ I1+ (index)
@@ -351,7 +351,7 @@
 
 ;;;
 ;;; In the portable implementation, indexes are just fixnums.
-;;; 
+;;;
 
 (defconstant index-value-limit most-positive-fixnum)
 
@@ -365,5 +365,4 @@
     (dotimes (i cache-size-in-bits) (setq mask (dpb 1 (byte 1 i) mask)))
     (dotimes (i line-size-in-bits)  (setq mask (dpb 0 (byte 1 i) mask)))
     mask))
-
 

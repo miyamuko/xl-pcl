@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -35,7 +35,7 @@
 ;;;
 ;;; This preallocation only creates about 25% more caches than PCL itself
 ;;; uses need.  Some ports may want to preallocate some more of these.
-;;; 
+;;;
 (eval-when (load)
   (flet ((allocate (n size)
 	   (mapcar #'free-cache-vector

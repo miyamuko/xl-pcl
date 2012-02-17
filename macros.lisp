@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -36,7 +36,7 @@
 (proclaim '(declaration
 	     #-Genera values          ;I use this so that Zwei can remind
 				      ;me what values a function returns.
-	     
+
 	     #-Genera arglist	      ;Tells me what the pretty arglist
 				      ;of something (which probably takes
 				      ;&rest args) is.
@@ -113,7 +113,7 @@
                    (push ,gensym-var ,run-time-vars)
                    (push ,var ,run-time-vals)
                    ,gensym-var))
-            expand-time-val-forms))    
+            expand-time-val-forms))
     `(let* (,run-time-vars
             ,run-time-vals
             (wrapped-body
@@ -204,7 +204,7 @@
 ;;;
 ;;; Common Lisp BUG:
 ;;;    Common Lisp should have destructuring-bind.
-;;;    
+;;;
 (defmacro destructuring-bind (pattern form &body body)
   (multiple-value-bind (ignore declares body)
       (extract-declarations body)
@@ -242,7 +242,7 @@
 	(setqs ()))
     (labels
         ((make-pop (var form pop-into)
-	   (prog1 
+	   (prog1
 	     (cond ((zerop pending-pops)
 		    `(progn ,(and var `(setq ,var (car ,form)))
 			    ,(and pop-into `(setq ,pop-into (cdr ,form)))))
@@ -258,7 +258,7 @@
 	    (progn
 	      #-:coral (unless (memq var '(nil ignore))
 			 (push var *destructure-vars*))
-	      #+:coral (push var *destructure-vars*)	      
+	      #+:coral (push var *destructure-vars*)
 	      (cond ((null (cdr pat))
 		     (push (make-pop var form ()) setqs))
 		    ((symbolp (cdr pat))
@@ -327,7 +327,7 @@
                  ,@body)
                (,improper-list-handler)))))
 
-  ;;   
+  ;;
 ;;;;;; printing-random-thing
   ;;
 ;;; Similar to printing-random-object in the lisp machine but much simpler
@@ -344,8 +344,8 @@
   (declare (ignore thing stream))
   nil)
 
-  ;;   
-;;;;;; 
+  ;;
+;;;;;;
   ;;
 
 (defun capitalize-words (string &optional (dashes-p t))
@@ -453,7 +453,7 @@
 
 (defun find-class-predicate (symbol &optional (errorp t) environment)
   (declare (ignore environment))
-  (find-class-predicate-from-cell 
+  (find-class-predicate-from-cell
    symbol (find-class-cell symbol errorp) errorp))
 
 #-setf
@@ -507,8 +507,8 @@
        ,@body)))
 
 ;;;
-;;; 
-;;; 
+;;;
+;;;
 (defmacro vectorizing (&key (size 0))
   `(let* ((limit ,size)
 	  (result (make-array limit))
@@ -563,10 +563,10 @@
 ;;; only place that knows about this hack.
 ;;;
 (eval-when (compile load eval)
-; In 15e (and also 16c), using the built in setf mechanism costs 
+; In 15e (and also 16c), using the built in setf mechanism costs
 ; a hash table lookup every time a setf function is called.
 ; Uncomment the next line to use the built in setf mechanism.
-;#+cmu (pushnew :setf *features*) 
+;#+cmu (pushnew :setf *features*)
 )
 
 (eval-when (compile load eval)
@@ -596,9 +596,9 @@
 ;;; do-standard-defsetf                  A macro interface for use at top level
 ;;;                                      in files.  Unfortunately, users may
 ;;;                                      have to use this for a while.
-;;;                                      
+;;;
 ;;; do-standard-defsetfs-for-defclass    A special version called by defclass.
-;;; 
+;;;
 ;;; do-standard-defsetf-1                A functional interface called by the
 ;;;                                      above, defmethod and defgeneric.
 ;;;                                      Since this is all a crock anyways,
@@ -620,7 +620,7 @@
 	       (get function-name 'standard-setf))
     (setf (get function-name 'standard-setf) t)
     (let* ((setf-function-name (get-setf-function-name function-name)))
-    
+
       #+Genera
       (let ((fn #'(lambda (form)
 		    (lt::help-defsetf
@@ -631,7 +631,7 @@
 	      (get function-name 'lt::setf-method-internal) fn))
 
       #+Lucid
-      (lucid::set-simple-setf-method 
+      (lucid::set-simple-setf-method
 	function-name
 	#'(lambda (form new-value)
 	    (let* ((bindings (mapcar #'(lambda (x) `(,(gensym) ,x))
@@ -641,7 +641,7 @@
 	      ;;   but the PQC compiler will unwrap then.
 	      `(LET (,.bindings)
 		 (,setf-function-name ,new-value . ,vars)))))
-      
+
       #+kcl
       (let ((helper (gensym)))
 	(setf (macro-function helper)
@@ -672,14 +672,14 @@
 				     (symbol-package function-name))))
 	  (setf (get function-name :setf-method-expander) setf-method-expander
 		(symbol-function setf-method-expander) #'setf-expander)))
-      
+
       #-(or Genera Lucid kcl Xerox)
       (eval `(defsetf ,function-name (&rest accessor-args) (new-value)
 	       (let* ((bindings (mapcar #'(lambda (x) `(,(gensym) ,x)) accessor-args))
 		      (vars (mapcar #'car bindings)))
 		  `(let ,bindings
 		      (,',setf-function-name ,new-value ,@vars)))))
-      
+
       )))
 
 (defun setfboundp (symbol)
@@ -714,7 +714,7 @@
 ;;; PCL, like user code, must endure the fact that we don't have a properly
 ;;; working setf.  Many things work because they get mentioned by a defclass
 ;;; or defmethod before they are used, but others have to be done by hand.
-;;; 
+;;;
 (do-standard-defsetf
   class-wrapper                                 ;***
   generic-function-name

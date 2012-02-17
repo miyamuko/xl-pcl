@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -41,7 +41,7 @@
 ;;;     into the same top-level form.
 ;;;   - Telling the programming environment what the pretty version
 ;;;     of the name of this form is.  This is used by WARN.
-;;; 
+;;;
 (defun make-top-level-form (name times form)
   (flet ((definition-name ()
 	   (if (and (listp name)
@@ -121,7 +121,7 @@
 
 
 
-;;; 
+;;;
 ;;; Like the DEFMETHOD macro, the expansion of the DEFCLASS macro is fixed.
 ;;; DEFCLASS always expands into a call to LOAD-DEFCLASS.  Until the meta-
 ;;; braid is set up, LOAD-DEFCLASS has a special definition which simply
@@ -131,7 +131,7 @@
 ;;; After the metabraid has been setup, and the protocol for defining classes
 ;;; has been defined, the real definition of LOAD-DEFCLASS is installed by the
 ;;; file defclass.lisp
-;;; 
+;;;
 (defmacro DEFCLASS (name direct-superclasses direct-slots &rest options)
   (declare (indentation 2 4 3 1))
   (expand-defclass name direct-superclasses direct-slots options))
@@ -170,10 +170,10 @@
 	    (defstruct-p (and (eq *boot-state* 'complete)
 			      (let ((mclass (find-class metaclass nil)))
 				(and mclass
-				     (*subtypep mclass 
+				     (*subtypep mclass
 						*the-class-structure-class*))))))
 	(do-standard-defsetfs-for-defclass *accessors*)
-        (let ((defclass-form 
+        (let ((defclass-form
                  (make-top-level-form `(defclass ,name)
                    (if defstruct-p '(load eval) *defclass-times*)
 		   `(progn
@@ -190,7 +190,7 @@
 				       ',metaclass
 				       ',supers
 				       (list ,@canonical-slots)
-				       (list ,@(apply #'append 
+				       (list ,@(apply #'append
 						      (when defstruct-p
 							'(:from-defclass-p t))
 						      other-initargs))
@@ -231,7 +231,7 @@
   (declare (special *accessors* *readers* *writers*))
   (cond ((and (symbolp spec)
 	      (not (keywordp spec))
-	      (not (memq spec '(t nil))))		   
+	      (not (memq spec '(t nil))))
 	 `'(:name ,spec))
 	((not (consp spec))
 	 (error "~S is not a legal slot specification." spec))
@@ -270,8 +270,8 @@
 	   (if (eq initform unsupplied)
 	       `(list* ,@spec)
 	       `(list* :initfunction ,(make-initfunction initform) ,@spec))))))
-						
-(defun canonicalize-defclass-option (class-name option)  
+
+(defun canonicalize-defclass-option (class-name option)
   (declare (ignore class-name))
   (case (car option)
     (:default-initargs
@@ -295,7 +295,7 @@
 
 ;;;
 ;;; Each entry in *early-class-definitions* is an early-class-definition.
-;;; 
+;;;
 ;;;
 (defparameter *early-class-definitions* ())
 
@@ -309,7 +309,7 @@
   (list 'early-class-definition
 	name source metaclass
 	superclass-names canonical-slots other-initargs))
-  
+
 (defun ecd-class-name        (ecd) (nth 1 ecd))
 (defun ecd-source            (ecd) (nth 2 ecd))
 (defun ecd-metaclass         (ecd) (nth 3 ecd))
@@ -401,7 +401,7 @@
 ;;; One important point is that the layout of standard classes and standard
 ;;; slots must be computed the same way in this file as it is by the full
 ;;; object system later.
-;;; 
+;;;
 (defmacro bootstrap-get-slot (type object slot-name)
   `(instance-ref (get-slots ,object) (bootstrap-slot-index ,type ,slot-name)))
 
@@ -432,7 +432,7 @@
 (unless (fboundp 'class-name-of)
   (setf (symbol-function 'class-name-of)
 	(symbol-function 'early-class-name-of)))
-  
+
 (defun early-class-direct-subclasses (class)
   (bootstrap-get-slot 'class class 'direct-subclasses))
 

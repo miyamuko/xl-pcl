@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -33,18 +33,18 @@
 ;;; ***                                                               ***
 ;;;
 ;;; To get PCL working at your site you should:
-;;; 
+;;;
 ;;;  - Get all the PCL source files from Xerox.  The complete list of source
 ;;;    file names can be found in the defsystem for PCL which appears towards
 ;;;    the end of this file.
-;;; 
+;;;
 ;;;  - Edit the variable *pcl-directory* below to specify the directory at
 ;;;    your site where the pcl sources and binaries will be.  This variable
 ;;;    can be found by searching from this point for the string "***" in
 ;;;    this file.
-;;; 
+;;;
 ;;;  - Use the function (pcl::compile-pcl) to compile PCL for your site.
-;;; 
+;;;
 ;;;  - Once PCL has been compiled it can be loaded with (pcl::load-pcl).
 ;;;    Note that PCL cannot be loaded on top of itself, nor can it be
 ;;;    loaded into the same world it was compiled in.
@@ -215,7 +215,7 @@
 ;;; Sure, its weird for this to be here, but in order to follow the rules
 ;;; about order of export and all that stuff, we can't put it in PKG before
 ;;; we want to use it.
-;;; 
+;;;
 (defvar *the-pcl-package* (find-package :pcl))
 
 (defvar *pcl-system-date* "September 16 92 PCL (f)")
@@ -226,7 +226,7 @@
 
 ;;;
 ;;; Various hacks to get people's *features* into better shape.
-;;; 
+;;;
 (eval-when (compile load eval)
   #+(and Symbolics Lispm)
   (multiple-value-bind (major minor) (sct:get-release-version)
@@ -250,7 +250,7 @@
        (ecase minor
 	 ((0) (pushnew :genera-release-8-0 *features*))
 	 ((1) (pushnew :genera-release-8-1 *features*))))))
-  
+
   #+CLOE-Runtime
   (let ((version (lisp-implementation-version)))
     (when (string-equal version "2.0" :end1 (min 3 (length version)))
@@ -260,7 +260,7 @@
     (when (and (symbolp feature)                ;3600!!
                (equal (symbol-name feature) "CMU"))
       (pushnew :CMU *features*)))
-  
+
   #+TI
   (if (eq (si:local-binary-file-type) :xld)
       (pushnew ':ti-release-3 *features*)
@@ -291,7 +291,7 @@
 ;;; for details.
 ;;;
 ;;; The xkcl version of KCL has this fixed already.
-;;; 
+;;;
 
   #+xkcl(pushnew :turbo-closure *features*)
 
@@ -338,7 +338,7 @@ This defsystem should be read as follows:
   should be in the directory "/usr/me/lisp/".  There are three files
   in the system, there are named classes, methods and precom.  (The
   extension the filenames have depends on the lisp you are running in.)
-  
+
 * For the first file, classes, the (precom) in the line means that
   the file precom should be loaded before this file is loaded.  The
   first () means that no other files need to be loaded before this
@@ -368,7 +368,7 @@ and load your system with:
 
 ||#
 
-;;; 
+;;;
 (defvar *system-directory*)
 
 ;;;
@@ -376,7 +376,7 @@ and load your system with:
 ;;; Common Lisp in which we are now running.  Many of the facilities in
 ;;; defsys use the value of *port* rather than #+ and #- to conditionalize
 ;;; the way they work.
-;;; 
+;;;
 (defvar *port*
         '(#+Genera               Genera
 ;         #+Genera-Release-6     Rel-6
@@ -458,7 +458,7 @@ and load your system with:
 	 #+:gclisp                           ("LSP"   . "F2S")
 	 #+pyramid                           ("clisp" . "o")
 	 #+:coral                            ("lisp"  . "fasl")
-	 #-(or symbolics (and dec common vax) KCL IBCL Xerox 
+	 #-(or symbolics (and dec common vax) KCL IBCL Xerox
 	       lucid excl :CMU HP TI :gclisp pyramid coral)
 	                                     ("lisp"  . "lbin"))))
 
@@ -487,7 +487,7 @@ and load your system with:
 
 ;;;
 ;;; The internal datastructure used when operating on a system.
-;;; 
+;;;
 (defstruct (module (:constructor make-module (name))
                    (:print-function
                      (lambda (m s d)
@@ -659,7 +659,7 @@ and load your system with:
 	   (transformations (operation-transformations name mode arg)))
       (labels ((load-binary (name pathname)
 		 (format t "~&Loading binary of ~A...~%" name)
-		 (or print-only (load pathname)))	       
+		 (or print-only (load pathname)))
 	       (load-module (m)
 		 (let* ((name (module-name m))
 			(*load-verbose* nil)
@@ -792,7 +792,7 @@ and load your system with:
 				     (list name)))))
 	    (cons source
 		  #+genera-release-7-2       (subdir "rel-7-2")
-		  #+genera-release-7-3       (subdir "rel-7-3") 
+		  #+genera-release-7-3       (subdir "rel-7-3")
 		  #+genera-release-7-4       (subdir "rel-7-4")
 		  #+genera-release-8-0       (subdir "rel-8-0")
 		  #+genera-release-8-1       (subdir "rel-8-1")
@@ -801,14 +801,14 @@ and load your system with:
 #+Cloe-Runtime
 (defvar *pcl-directory* (pathname "/usr3/hornig/pcl/"))
 
-(defsystem pcl	   
+(defsystem pcl
            *pcl-directory*
   ;;
   ;; file         load           compile      files which       port
   ;;              environment    environment  force the of
   ;;                                          recompilation
   ;;                                          of this file
-  ;;                                          
+  ;;
   (
 ;  (rel-6-patches   t            t            ()                rel-6)
 ;  (rel-7-1-patches t            t            ()                rel-7-1)
@@ -820,15 +820,15 @@ and load your system with:
    (kcl-patches     t            t            ()                kcl)
    (ibcl-patches    t            t            ()                ibcl)
    (gcl-patches     t            t            ()                gclisp)
-   
+
    (pkg             t            t            ())
    (sys-proclaim    t            t            ()                kcl)
    (walk            (pkg)        (pkg)        ())
    (iterate         t            t            ())
    (macros          t            t            ())
    (low             (pkg macros) t            (macros))
-   
-   
+
+
    (genera-low     (low)         (low)        (low)            Genera)
    (cloe-low	   (low)	 (low)	      (low)            Cloe)
    (lucid-low      (low)         (low)        (low)            Lucid)
@@ -840,10 +840,10 @@ and load your system with:
    (excl-low       (low)         (low)        (low)            excl)
    (cmu-low        (low)         (low)        (low)            CMU)
    (hp-low         (low)         (low)        (low)            HP-HPLabs)
-   (gold-low       (low)         (low)        (low)            gclisp) 
-   (pyr-low        (low)         (low)        (low)            pyramid) 
+   (gold-low       (low)         (low)        (low)            gclisp)
+   (pyr-low        (low)         (low)        (low)            pyramid)
    (coral-low      (low)         (low)        (low)            coral)
-   
+
    (fin         t                                   t (low))
    (defclass    t                                   t (low))
    (defs        t                                   t (defclass macros iterate))
@@ -853,7 +853,7 @@ and load your system with:
    ;;(plap        t                                   t (low)    excl-sun4)
    ;;(cpatch      t                                   t (low)    excl-sun4)
    ;;(quadlap     t                                   t (low)    excl-sun4)
-   ;;(dlap        t                                   t (defs low fin cache lap) 
+   ;;(dlap        t                                   t (defs low fin cache lap)
    ;;	                                                         excl-sun4)
    ;;#-excl-sun4
    (dlisp       t                                   t (defs low fin cache))
@@ -893,7 +893,7 @@ and load your system with:
 	  ((eq m :print)   (operate-on-system 'pcl :compile () t))
 	  ((eq m :query)   (operate-on-system 'pcl :query-compile))
 	  ((eq m :confirm) (operate-on-system 'pcl :confirm-compile))
-	  ((eq m 't)       (operate-on-system 'pcl :recompile))        
+	  ((eq m 't)       (operate-on-system 'pcl :recompile))
 	  ((listp m)       (operate-on-system 'pcl :compile-from m))
 	  ((symbolp m)     (operate-on-system 'pcl :recompile-some `(,m))))))
 
@@ -938,7 +938,7 @@ and load your system with:
 ;;;;
 ;;;
 ;;; This stuff is not intended for external use.
-;;; 
+;;;
 (defun rename-pcl ()
   (dolist (f (cadr (get-system 'pcl)))
     (let ((old nil)
@@ -977,7 +977,7 @@ and load your system with:
 ;;; z30083%tansei.cc.u-tokyo.junet@utokyo-relay.csnet
 ;;; Victor@carmen.uu.se
 ;;; mcvax!harlqn.co.uk!chris@uunet.UU.NET
-;;; 
+;;;
 #+Genera
 (defun mail-pcl (to)
   (let* ((original-buffer zwei:*interval*)
@@ -1014,8 +1014,8 @@ and load your system with:
       (zwei:make-buffer-current original-buffer))))
 
 (defun reset-pcl-package ()		; Try to do this safely
-  (let* ((vars '(*pcl-directory* 
-		 *default-pathname-extensions* 
+  (let* ((vars '(*pcl-directory*
+		 *default-pathname-extensions*
 		 *pathname-extensions*
 		 *redefined-functions*))
 	 (names (mapcar #'symbol-name vars))
@@ -1033,7 +1033,7 @@ and load your system with:
 		  (let ((var (intern name pcl)))
 		    (proclaim `(special ,var))
 		    (set var value)))
-	      names values))      
+	      names values))
     (dolist (sym *redefined-functions*)
       (setf (symbol-function sym) (get sym ':definition-before-pcl)))
     nil))

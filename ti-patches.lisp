@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -31,7 +31,7 @@
 ;;; This little bit of magic keeps the dumper from dumping the lexical
 ;;; definition of call-next-method when it dumps method functions that
 ;;; come from defmethod forms.
-;;; 
+;;;
 (proclaim '(notinline nil))
 
 (eval-when (load)
@@ -101,5 +101,4 @@ eliminate by substitution."
 	    ,@doc-string ,expansion)
 	  ))))
 ))
-
 

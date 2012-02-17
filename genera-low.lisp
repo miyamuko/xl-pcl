@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -33,7 +33,7 @@
 
 #+IMach						;On the I-Machine these are
 (eval-when (compile load eval)			;faster than the versions
-						;that use :test #'eq.  
+						;that use :test #'eq.
 (defmacro memq (item list) `(member ,item ,list))
 (defmacro assq (item list) `(assoc ,item ,list))
 (defmacro rassq (item list) `(rassoc ,item ,list))
@@ -98,7 +98,7 @@ compiler::
 (compiler:defoptimizer (load-time-eval transform-load-time-eval) (form)
   (compiler-is-a-loser-internal form))
 
-(defun compiler-is-a-loser-internal (form)  
+(defun compiler-is-a-loser-internal (form)
   ;; When compiling a call to load-time-eval the compiler will call
   ;; this optimizer before the macro expansion.
   (if zl:compiler:(and (boundp '*compile-function*)	;Probably don't need
@@ -114,9 +114,9 @@ compiler::
       ;; to do magic and evaluate the form at load time.
       `',(cons compiler:eval-at-load-time-marker (cadr form))))
 
-;;   
+;;
 ;;;;;; Memory Block primitives.                ***
-  ;;   
+  ;;
 
 
 (defmacro make-memory-block (size &optional area)
@@ -135,7 +135,7 @@ compiler::
   (remprop '%%allocate-instance--class 'inline))
 
 (eval-when (compile load eval)
-  
+
 (scl:defflavor std-instance
 	((wrapper nil)
 	 (slots   nil))
@@ -183,7 +183,7 @@ compiler::
 
 ;;;
 ;;; This is hard, I am sweating.
-;;; 
+;;;
 (defun function-arglist (function) (zl:arglist function t))
 
 (defun function-pretty-arglist (function) (zl:arglist function))
@@ -219,7 +219,7 @@ compiler::
 	   (let ((tail (cddr spec)))
 	     (loop (cond ((null tail) (return nil))
 			 ((listp (car tail)) (return t))
-			 ((atom (pop tail)))			 
+			 ((atom (pop tail)))
 			 (t (return nil))))))
       (let ((table *method-htable*)
 	    (key spec))
@@ -314,7 +314,7 @@ compiler::
 ;;;
 ;;; Now, if we can't parse the defmethod form, we send it to the flavor
 ;;; defmethod parser instead.
-;;; 
+;;;
 ;;; Also now supports multi-line arglist sectionizing.
 ;;;
 zwei:
@@ -361,7 +361,7 @@ zwei:
 								ignore2
 								specializers)
 					(pcl::parse-specialized-lambda-list item))
-				      (setq spec (pcl::make-method-spec 
+				      (setq spec (pcl::make-method-spec
 						   (if setfp
 						       `(cl:setf ,generic)
 						       generic)
@@ -387,7 +387,7 @@ zwei:
       (if (bp-< here bp)
 	  (values defmethod-paren nil 2)
 	  (values defmethod-paren nil 4))))
-  
+
   (defindentation (pcl::defmethod . indent-clos-defmethod)))
 
 ;;;
@@ -419,5 +419,4 @@ zwei:
 				     (unparse-specializers
 				       (method-specializers m))))
 	       (generic-function-methods (gdefinition spec)))))
-
 

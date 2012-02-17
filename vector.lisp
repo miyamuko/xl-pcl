@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -56,7 +56,7 @@
 (defvar *initial-pv-table* (make-pv-table-internal nil nil))
 
 ; help new slot-value-using-class methods affect fast iv access
-(defvar *all-pv-table-list* nil) 
+(defvar *all-pv-table-list* nil)
 
 (defun make-pv-table (&key slot-name-lists call-list)
   (let ((pv-table (make-pv-table-internal slot-name-lists call-list)))
@@ -138,7 +138,7 @@
 (defun optimize-slot-value-by-class-p (class slot-name type)
   (or (not (eq *boot-state* 'complete))
       (let ((slotd (find-slot-definition class slot-name)))
-	(and slotd 
+	(and slotd
 	     (slot-accessor-std-p slotd type)))))
 
 (defun compute-pv-slot (slot-name wrapper class class-slots class-slot-p-cell)
@@ -155,7 +155,7 @@
 	    (return
 	      (let* ((gf-name (cadr slot-name))
 		     (gf (gdefinition gf-name))
-		     (location 
+		     (location
 		      (when (eq *boot-state* 'complete)
 			(accessor-values1 gf type class))))
 		(when (consp location)
@@ -174,7 +174,7 @@
 		       (class-slots (wrapper-class-slots wrapper)))
 		  (dolist (slot-name (cdr slot-names))
 		    (gather1
-		     (compute-pv-slot slot-name wrapper class 
+		     (compute-pv-slot slot-name wrapper class
 				      class-slots not-simple-p-cell)))))))))
     (if (car not-simple-p-cell)
 	(make-permutation-vector (cons t elements))
@@ -189,7 +189,7 @@
        #'(lambda (call)
 	   (compute-emf-from-wrappers call wrappers))
        call-list)
-  ||#  
+  ||#
   '#())
 
 #|| ; Need to finish this, then write the maintenance functions.
@@ -205,8 +205,8 @@
 			 (arg-info (arg-info-reader gf))
 			 (classes '?)
 			 (types '?)
-			 (emf (cache-miss-values-internal gf arg-info 
-							  wrappers classes types 
+			 (emf (cache-miss-values-internal gf arg-info
+							  wrappers classes types
 							  'caching)))
 		    (update-all-pv-tables call wrappers emf)
 		    #+copy-&rest-arg (setq args (copy-list args))
@@ -255,7 +255,7 @@
 
 (defvar *pv-table-cache-update-info* nil)
 
-;called by: 
+;called by:
 ;(method shared-initialize :after (structure-class t))
 ;update-slots
 (defun update-pv-table-cache-info (class)
@@ -275,8 +275,8 @@
 	 (class-slot-p-cell (list nil))
 	 (new-values (mapcar #'(lambda (slot-name)
 				 (cons slot-name
-				       (compute-pv-slot 
-					slot-name cwrapper class 
+				       (compute-pv-slot
+					slot-name cwrapper class
 					class-slots class-slot-p-cell)))
 			     slot-names))
 	 (pv-tables nil))
@@ -436,7 +436,7 @@
     (let* ((rebound? (caddr (variable-declaration 'variable-rebinding var env)))
 	   (parameter-or-nil (car (memq (or rebound? var) required-parameters))))
       (when parameter-or-nil
-	(let* ((class-name (caddr (variable-declaration 
+	(let* ((class-name (caddr (variable-declaration
 				   'class parameter-or-nil env)))
 	       (class (find-class class-name nil)))
 	  (when (or (not (eq *boot-state* 'complete))
@@ -486,7 +486,7 @@
 ;;; a required parameter to the function.  The alist is in order, so the
 ;;; position of an entry in the alist corresponds to the argument's position
 ;;; in the lambda list.
-;;; 
+;;;
 (defun optimize-instance-access (slots read/write sparameter slot-name new-value)
   (let ((class (if (consp sparameter) (cdr sparameter) *the-class-t*))
 	(parameter (if (consp sparameter) (car sparameter) sparameter)))
@@ -514,14 +514,14 @@
 	  (push pv-offset-form (cdr slot-entry))
 	  (ecase read/write
 	    (:read
-	     `(instance-read ,pv-offset-form ,parameter ,position 
+	     `(instance-read ,pv-offset-form ,parameter ,position
 		             ',slot-name ',class))
 	    (:write
-	     `(let ((.new-value. ,new-value)) 
-	        (instance-write ,pv-offset-form ,parameter ,position 
+	     `(let ((.new-value. ,new-value))
+	        (instance-write ,pv-offset-form ,parameter ,position
 		                ',slot-name ',class .new-value.)))
 	    (:boundp
-	     `(instance-boundp ,pv-offset-form ,parameter ,position 
+	     `(instance-boundp ,pv-offset-form ,parameter ,position
 		               ',slot-name ',class)))))))
 
 (defun optimize-accessor-call (slots read/write sparameter gf-name new-value)
@@ -544,7 +544,7 @@
       (:read
        `(instance-reader ,pv-offset-form ,parameter ,position ,gf-name ',class))
       (:write
-       `(let ((.new-value. ,new-value)) 
+       `(let ((.new-value. ,new-value))
 	  (instance-writer ,pv-offset-form ,parameter ,position ,gf-name ',class
 	                   .new-value.))))))
 
@@ -559,7 +559,7 @@
 							 form env)))
 		  (parameter-or-nil (car (assq (or rebound? form) slots))))
 	     (when parameter-or-nil
-	       (let* ((class-name (caddr (variable-declaration 
+	       (let* ((class-name (caddr (variable-declaration
 					  'class parameter-or-nil env))))
 		 (when (and class-name (not (eq class-name 't)))
 		   (position parameter-or-nil slots :key #'car))))))
@@ -584,9 +584,9 @@
 					required-args))))
 	   (call-entry (assoc call-spec calls :test #'equal))
 	   (pv-offset-form (list 'pv-offset ''.PV-OFFSET.)))
-      (unless (some #'integerp 
+      (unless (some #'integerp
 		    (let ((spec-args (cdr call-spec)))
-		      (if all-args-p 
+		      (if all-args-p
 			  (ldiff spec-args (nthcdr nreq spec-args))
 			  spec-args)))
 	(return-from optimize-gf-call nil))
@@ -599,7 +599,7 @@
 	  `(let ((.emf. (pv-ref .pv. ,pv-offset-form)))
 	    (invoke-effective-method-function .emf. ,restp
 	     ,@required-args ,@(when restp `((list ,@non-required-args)))))))))
-      
+
 
 (define-walker-template pv-offset) ; These forms get munged by mutate slots.
 (defmacro pv-offset (arg) arg)
@@ -662,7 +662,7 @@
 (defmacro instance-reader (pv-offset parameter position gf-name class)
   (declare (ignore class))
   `(instance-read-internal .pv. ,(slot-vector-symbol position)
-    ,pv-offset 
+    ,pv-offset
     (,gf-name (instance-accessor-parameter ,parameter))
     :instance))
 
@@ -741,7 +741,7 @@
 ;;; we have the slots in alphabetical order.  This canonicalizes the PV-TABLE's a
 ;;; bit and will hopefully lead to having fewer PV's floating around.  Even
 ;;; if the gain is only modest, it costs nothing.
-;;;  
+;;;
 (defun slot-name-lists-from-slots (slots calls)
   (multiple-value-bind (slots calls)
       (mutate-slots-and-calls slots calls)
@@ -765,7 +765,7 @@
 				      (when r+snl (incf i)))
 				  slot-name-lists)))))
 	(setq call-list (mapcar #'(lambda (call)
-				    (cons (car call) 
+				    (cons (car call)
 					  (mapcar #'(lambda (arg)
 						      (if (integerp arg)
 							  (svref cvt arg)
@@ -780,7 +780,7 @@
 	(pv-offset 0))  ; index 0 is for info
     (dolist (parameter-entry sorted-slots)
       (dolist (slot-entry (cdr parameter-entry))
-	(incf pv-offset)	
+	(incf pv-offset)
 	(dolist (form (cdr slot-entry))
 	  (setf (cadr form) pv-offset))))
     (dolist (call-entry sorted-calls)
@@ -789,7 +789,7 @@
 	(setf (cadr form) pv-offset)))
     (values sorted-slots sorted-calls)))
 
-(defun symbol-pkg-name (sym) 
+(defun symbol-pkg-name (sym)
   (let ((pkg (symbol-package sym)))
     (if pkg (package-name pkg) "")))
 
@@ -842,7 +842,7 @@
     `(pv-binding1 (.pv. .calls. ,pv-table-symbol ,pv-parameters ,slot-vars)
        ,@body)))
 
-(defmacro pv-binding1 ((pv calls pv-table-symbol pv-parameters slot-vars) 
+(defmacro pv-binding1 ((pv calls pv-table-symbol pv-parameters slot-vars)
 		       &body body)
   `(pv-env (,pv ,calls ,pv-table-symbol ,pv-parameters)
      (let (,@(mapcar #'(lambda (slot-var p) `(,slot-var (get-slots-or-nil ,p)))
@@ -947,7 +947,7 @@
 	  (make-method-initargs-form-internal1
 	   initargs (cddr lmf) args lmf-params restp)))))
 
-(defun make-method-initargs-form-internal1 
+(defun make-method-initargs-form-internal1
     (initargs body req-args lmf-params restp)
   (multiple-value-bind (outer-decls inner-decls body)
       (split-declarations body req-args)
@@ -966,7 +966,7 @@
 			    ,(make-calls-type-declaration calls))
 			   ,pv ,calls
 			   ,@forms)))
-	      (fast-lexical-method-functions 
+	      (fast-lexical-method-functions
 	       (,(car lmf-params) .next-method-call. ,req-args ,rest-arg
 		 ,@(cdddr lmf-params))
 	       ,@inner-decls
@@ -975,7 +975,7 @@
 
 ;use arrays and hash tables and the fngen stuff to make this much better.
 ;It doesn't really matter, though, because a function returned by this
-;will get called only when the user explicitly funcalls a result of method-function. 
+;will get called only when the user explicitly funcalls a result of method-function.
 ;BUT, this is needed to make early methods work.
 (defun method-function-from-fast-function (fmf)
   (declare (type function fmf))
@@ -988,7 +988,7 @@
 	      (unless pv-table
 		(setq pv-table (method-function-pv-table fmf)))
 	      (let* ((pv-cell (when pv-table
-				(get-method-function-pv-cell 
+				(get-method-function-pv-cell
 				 method-function method-args pv-table)))
 		     (nm (car next-methods))
 		     (nms (cdr next-methods))
@@ -1010,7 +1010,7 @@
 				    (intern (subseq str 5) *the-pcl-package*)
 				    (car fname)))))
 		    ,@(cdr fname))))
-      (set-function-name method-function name))      
+      (set-function-name method-function name))
     (setf (method-function-get method-function :fast-function) fmf)
     method-function))
 

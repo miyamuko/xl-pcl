@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -32,7 +32,7 @@
 ;;; LET to return FIXNUM values as values of (c) type int, hence the use
 ;;; of LOCALLY (which expands into (LET () (DECLARE ...) ...)) forces
 ;;; conversion of ints to objects.
-;;; 
+;;;
 (defmacro %logand (&rest args)
   (reduce-variadic-to-binary 'logand args 0 t 'fixnum))
 
@@ -131,12 +131,12 @@
                              ~A new;                  ~%~
                              { return ((~A)(~A->~A.~A = ~Anew)); } ~%~
                             "
-			value-type caccessor structure-type 
+			value-type caccessor structure-type
 			structure-type
 			value-type structure-type tag-name field
 			value-type csetf structure-type
-			structure-type 
-			value-type 
+			structure-type
+			value-type
 			value-type structure-type tag-name field field-type
 			))
 
@@ -148,7 +148,7 @@
 
        )))
 )
-;;; 
+;;;
 ;;; struct cfun {                   /*  compiled function header  */
 ;;;         short   t, m;
 ;;;         object  cf_name;        /*  compiled function name  */
@@ -160,7 +160,7 @@
 ;;; };
 ;;; add field-type tag-name
 (define-cstruct-accessor cfun-name  "cfun" "cf_name"  "object" "(object)" "cf")
-(define-cstruct-accessor cfun-self  "cfun" "cf_self"  "int" "(int (*)())" 
+(define-cstruct-accessor cfun-self  "cfun" "cf_self"  "int" "(int (*)())"
                          "cf")
 (define-cstruct-accessor cfun-data  "cfun" "cf_data"  "object" "(object)" "cf")
 (define-cstruct-accessor cfun-start "cfun" "cf_start" "int" "(char *)" "cf")
@@ -178,7 +178,7 @@
 
 (defentry cfunp (object) (object pcl_cfunp))
 
-;;; 
+;;;
 ;;; struct cclosure {               /*  compiled closure header  */
 ;;;         short   t, m;
 ;;;         object  cc_name;        /*  compiled closure name  */
@@ -189,14 +189,14 @@
 ;;;         char    *cc_start;      /*  start address of the code  */
 ;;;         int     cc_size;        /*  code size  */
 ;;; };
-;;; 
+;;;
 (define-cstruct-accessor cclosure-name "cclosure"  "cc_name"  "object"
-                         "(object)" "cc")          
-(define-cstruct-accessor cclosure-self "cclosure"  "cc_self"  "int" 
+                         "(object)" "cc")
+(define-cstruct-accessor cclosure-self "cclosure"  "cc_self"  "int"
                          "(int (*)())" "cc")
 (define-cstruct-accessor cclosure-data "cclosure"  "cc_data"  "object"
                           "(object)" "cc")
-(define-cstruct-accessor cclosure-start "cclosure" "cc_start" "int" 
+(define-cstruct-accessor cclosure-start "cclosure" "cc_start" "int"
                          "(char *)" "cc")
 (define-cstruct-accessor cclosure-size "cclosure"  "cc_size"  "int"
 			 "(int)" "cc")
@@ -216,22 +216,22 @@
 
 (defentry cclosurep (object) (object pcl_cclosurep))
 
-  ;;   
+  ;;
 ;;;;;; Load Time Eval
   ;;
-;;; 
+;;;
 
 ;;; This doesn't work because it looks at a global variable to see if it is
 ;;; in the compiler rather than looking at the macroexpansion environment.
-;;; 
+;;;
 ;;; The result is that if in the process of compiling a file, we evaluate a
 ;;; form that has a call to load-time-eval, we will get faked into thinking
 ;;; that we are compiling that form.
 ;;;
 ;;; THIS NEEDS TO BE DONE RIGHT!!!
-;;; 
+;;;
 ;(defmacro load-time-eval (form)
-;  ;; In KCL there is no compile-to-core case.  For things that we are 
+;  ;; In KCL there is no compile-to-core case.  For things that we are
 ;  ;; "compiling to core" we just expand the same way as if were are
 ;  ;; compiling a file since the form will be evaluated in just a little
 ;  ;; bit when gazonk.o is loaded.
@@ -246,13 +246,13 @@
 (defmacro memory-block-ref (block offset)
   `(svref (the simple-vector ,block) (the fixnum ,offset)))
 
-  ;;   
+  ;;
 ;;;;;; Generating CACHE numbers
   ;;
 ;;; This needs more work to be sure it is going as fast as possible.
 ;;;   -  The calls to si:address should be open-coded.
 ;;;   -  The logand should be open coded.
-;;;   
+;;;
 
 ;(defmacro symbol-cache-no (symbol mask)
 ;  (if (and (constantp symbol)
@@ -263,7 +263,7 @@
 (defmacro object-cache-no (object mask)
   `(logand (the fixnum (si:address ,object)) ,mask))
 
-  ;;   
+  ;;
 ;;;;;; printing-random-thing-internal
   ;;
 (defun printing-random-thing-internal (thing stream)
@@ -299,7 +299,7 @@
 	      `(load-time-eval (coffset ,symbol ,mask 2))
 	    `(coffset ,symbol ,mask 2))
 	(if (constantp symbol)
-	    `(load-time-eval 
+	    `(load-time-eval
 	       (logand (ash (the fixnum (si:address ,symbol)) -2) ,mask))
 	  `(logand (ash (the fixnum (si:address ,symbol)) -2) ,mask)))
     `(logand (ash (the fixnum (si:address ,symbol)) -2) ,mask)))

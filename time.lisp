@@ -116,7 +116,7 @@
 
 (push (cons "Macroexpand meth-structure-slot-value"
 	    '(pprint (multiple-value-bind (pgf pm)
-			 (prototypes-for-make-method-lambda 
+			 (prototypes-for-make-method-lambda
 			  'meth-structure-slot-value)
 		       (expand-defmethod
 			'meth-structure-slot-value pgf pm
@@ -151,6 +151,6 @@
 
 (defun do-tests ()
   (dolist (doc+form (reverse *tests*))
-    (format t "~&~%~A~%" (car doc+form))    
+    (format t "~&~%~A~%" (car doc+form))
     (pprint (cdr doc+form))
     (eval (cdr doc+form))))

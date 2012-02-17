@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -23,15 +23,15 @@
 ;;;
 ;;; Suggestions, comments and requests for improvements are also welcome.
 ;;; *************************************************************************
-;;; 
+;;;
 ;;; Original source {pooh/n}<pooh>vanmelle>lisp>iterate;4 created 27-Sep-88 12:35:33
 
 (in-package :iterate :use '(:lisp :walker))
-   
 
-(export '(iterate iterate* gathering gather with-gathering interval elements 
-                list-elements list-tails plist-elements eachtime while until 
-                collecting joining maximizing minimizing summing 
+
+(export '(iterate iterate* gathering gather with-gathering interval elements
+                list-elements list-tails plist-elements eachtime while until
+                collecting joining maximizing minimizing summing
                 *iterate-warnings*))
 
 (defvar *iterate-warnings* :any "Controls whether warnings are issued for iterate/gather forms that aren't optimized.
@@ -47,7 +47,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 (defun
  simple-expand-iterate-form
  (clauses body)
- 
+
  ;; Expand ITERATE.  This is the "formal semantics" expansion, which we never
  ;; use.
  (let*
@@ -72,7 +72,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                           (cons (list gvar (second clause))
                                 (copy-list var-list)))
                 generator-vars clauses bound-var-lists)
-        
+
         ;; Note bug in formal semantics: there can be declarations in the head
         ;; of BODY; they go here, rather than inside loop
         (loop
@@ -90,7 +90,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
          ,@body)))))
 
 (defparameter *iterate-temp-vars-list*
-       '(iterate-temp-1 iterate-temp-2 iterate-temp-3 iterate-temp-4 
+       '(iterate-temp-1 iterate-temp-2 iterate-temp-3 iterate-temp-4
                iterate-temp-5 iterate-temp-6 iterate-temp-7 iterate-temp-8)
        "Temp var names used by ITERATE expansions.")
 
@@ -115,7 +115,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                  (cdr tail))
         (warn "Variable appears more than once in ITERATE: ~S" (car tail))))
   (flet
-   ((get-iterate-temp nil 
+   ((get-iterate-temp nil
 
            ;; Make temporary var.  Note that it is ok to re-use these symbols
            ;; in each iterate, because they are not used within BODY.
@@ -125,18 +125,18 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
        (cond
         ((or (not (consp clause))
              (not (consp (cdr clause))))
-         (warn "Bad syntax in ITERATE: clause not of form (var iterator): ~S" 
+         (warn "Bad syntax in ITERATE: clause not of form (var iterator): ~S"
                clause))
         (t
          (unless (null (cddr clause))
-                (warn 
+                (warn
        "Probable parenthesis error in ITERATE clause--more than 2 elements: ~S"
                       clause))
          (multiple-value-bind
           (let-body binding-type let-bindings localdecls otherdecls extra-body)
           (expand-into-let (second clause)
                  'iterate iterate-env)
-          
+
           ;; We have expanded the generator clause and parsed it into its LET
           ;; pieces.
           (prog*
@@ -167,19 +167,19 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                         (t                     ; Perhaps it's just a
                                                ; misspelling?  Probably user
                                                ; error
-                           (maybe-warn :user 
+                           (maybe-warn :user
                                 "Iterate operator in clause ~S is not fboundp."
                                   generator)))
                   (setq let-body :abort)))
             (t
-             
+
              ;; We have something of the form #'(LAMBDA (finisharg) ...),
              ;; possibly with some LET bindings around it.  LET-BODY =
              ;; ((finisharg) ...).
              (setq let-body (cdr let-body))
              (setq gen-args (pop let-body))
              (when let-bindings
-                 
+
                  ;; The first transformation we want to perform is
                  ;; "LET-eversion": turn (let* ((generator (let (..bindings..)
                  ;; #'(lambda ...)))) ..body..) into (let* (..bindings..
@@ -190,14 +190,14 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                  ;; each var).  Of course, none of those vars can be special,
                  ;; but we already checked for that above.
                  (multiple-value-setq (let-bindings renamed-vars)
-                        (rename-let-bindings let-bindings binding-type 
+                        (rename-let-bindings let-bindings binding-type
                                iterate-env leftover-body #'get-iterate-temp))
                  (setq leftover-body nil)
                                                ; If there was any leftover
                                                ; from previous, it is now
                                                ; consumed
                  )
-             
+
              ;; The second transformation is substituting the body of the
              ;; generator (LAMBDA (finish-arg) . gen-body) for its appearance
              ;; in the update form (funcall generator #'(lambda ()
@@ -233,20 +233,20 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                ; Only one form left
                                (first rest))
                               (t `(progn ,@rest)))))
-             (unless (eq (setq let-body (iterate-transform-body let-body 
+             (unless (eq (setq let-body (iterate-transform-body let-body
                                                iterate-env renamed-vars
                                                (first gen-args)
                                                finish-form bound-vars clause))
                          :abort)
-                 
+
                  ;; Skip the rest if transformation failed.  Warning has
                  ;; already been issued.
-                 
+
                  ;; Note possible further optimization: if LET-BODY expanded
                  ;; into (prog1 oldvalue prepare-for-next-iteration), as so
                  ;; many do, then we could in most cases split the PROG1 into
                  ;; two pieces: do the (setq var oldvalue) here, and do the
-                 ;; prepare-for-next-iteration at the bottom of the loop. 
+                 ;; prepare-for-next-iteration at the bottom of the loop.
                  ;; This does a slight optimization of the PROG1 and also
                  ;; rearranges the code in a way that a reasonably clever
                  ;; compiler might detect how to get rid of redundant
@@ -280,12 +280,12 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                (sublis renamed-vars
                                                       (cdr decl))))))
                         localdecls)))))))
-           
+
            ;; Finished analyzing clause now.  LET-BODY is the form which, when
            ;; evaluated, returns updated values for the iteration variable(s)
            ;; VARS.
            (when (eq let-body :abort)
-               
+
                ;; Some punt case: go with the formal semantics: bind a var to
                ;; the generator, then call it in the update section
                (let
@@ -297,7 +297,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                              (cond
                               (leftover-body
                                                ; Have to use this up
-                               `(progn ,@(prog1 leftover-body (setq 
+                               `(progn ,@(prog1 leftover-body (setq
                                                                   leftover-body
                                                                     nil))
                                        generator))
@@ -328,7 +328,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                  (consp (car tail))
                  (eq (caar tail)
                      'declare)))
-       
+
        ;; TAIL now points at first non-declaration.  If there were
        ;; declarations, pop them off so they appear in the right place
        (unless (eq tail body)
@@ -343,7 +343,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                    ,@body)))))
 
 (defun expand-into-let (clause parent-name env)
-       
+
        ;; Return values: Body, LET[*], bindings, localdecls, otherdecls, extra
        ;; body, where BODY is a single form.  If multiple forms in a LET, the
        ;; preceding forms are returned as extra body.  Returns :ABORT if it
@@ -358,7 +358,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                     )
                    ((symbolp (setq binding-type (first expansion)))
                     (case binding-type
-                        ((let let*) 
+                        ((let let*)
                            (setq let-bindings (second expansion))
                                                ; List of variable bindings
                            (setq let-body (cddr expansion))
@@ -382,8 +382,8 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                           )
                     (setq binding-type 'let)
                     (go handle-let)))
-             
-             ;; Fall thru if not a LET 
+
+             ;; Fall thru if not a LET
              (cond (expandedp                  ; try expanding again
                           (go expand))
                    (t                          ; Boring--return form as the
@@ -403,23 +403,23 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                ; user proclamation
                                                      :user)
                                                     (t :definition))
-                                         
+
           "Couldn't optimize ~S because expansion of ~S binds specials ~(~S ~)"
                                          parent-name clause specials)
                                   :abort)
                                  (t (values (cond ((not (consp let-body))
-                                                   
+
                                                ; Null body of LET?  unlikely,
                                                ; but someone else will likely
                                                ; complain
                                                    nil)
                                                   ((null (cdr let-body))
-                                                   
+
                                                ; A single expression, which we
                                                ; hope is (function
                                                ; (lambda...))
                                                    (first let-body))
-                                                  (t 
+                                                  (t
 
                           ;; More than one expression.  These are forms to
                           ;; evaluate after the bindings but before the
@@ -435,7 +435,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                            otherdecls extra-body))))))))
 
 (defun variables-from-let (bindings)
-       
+
        ;; Return a list of the variables bound in the first argument to LET[*].
        (mapcar #'(lambda (binding)
                         (if (consp binding)
@@ -443,11 +443,11 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                             binding))
               bindings))
 
-(defun iterate-transform-body (let-body iterate-env renamed-vars finish-arg 
+(defun iterate-transform-body (let-body iterate-env renamed-vars finish-arg
                                      finish-form bound-vars clause)
-       
 
-;;; This is the second major transformation for a single iterate clause. 
+
+;;; This is the second major transformation for a single iterate clause.
 ;;; LET-BODY is the body of the iterator after we have extracted its local
 ;;; variables and declarations.  We have two main tasks: (1) Substitute
 ;;; internal temporaries for occurrences of the LET variables; the alist
@@ -462,31 +462,31 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
        (walk-form let-body iterate-env
               #'(lambda (form context env)
                        (declare (ignore context))
-                       
+
                        ;; Need to substitute RENAMED-VARS, as well as turn
                        ;; (FUNCALL finish-arg) into the finish form
                        (cond ((symbolp form)
                               (let (renaming)
                                    (cond ((and (eq form finish-arg)
-                                               (variable-same-p form env 
+                                               (variable-same-p form env
                                                       iterate-env))
                                                ; An occurrence of the finish
                                                ; arg outside of FUNCALL
                                                ; context--I can't handle this
                                           (maybe-warn :definition "Couldn't optimize iterate form because generator ~S does something with its FINISH arg besides FUNCALL it."
                                                  (second clause))
-                                          (return-from iterate-transform-body 
+                                          (return-from iterate-transform-body
                                                  :abort))
-                                         ((and (setq renaming (assoc form 
+                                         ((and (setq renaming (assoc form
                                                                    renamed-vars
                                                                      ))
-                                               (variable-same-p form env 
+                                               (variable-same-p form env
                                                       iterate-env))
                                                ; Reference to one of the vars
                                                ; we're renaming
                                           (cdr renaming))
                                          ((and (member form bound-vars)
-                                               (variable-same-p form env 
+                                               (variable-same-p form env
                                                       iterate-env))
                                                ; FORM is a var that is bound
                                                ; in this same ITERATE, or
@@ -495,7 +495,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                           (maybe-warn :user "Couldn't optimize iterate form because generator ~S is closed over ~S, in conflict with a subsequent iteration variable."
                                                  (second clause)
                                                  form)
-                                          (return-from iterate-transform-body 
+                                          (return-from iterate-transform-body
                                                  :abort))
                                          (t form))))
                              ((and (consp form)
@@ -508,7 +508,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                ; (FUNCALL finish-arg) =>
                                                ; finish-form
                               (unless (null (cddr form))
-                                  (maybe-warn :definition 
+                                  (maybe-warn :definition
         "Generator for ~S applied its finish arg to > 0 arguments ~S--ignored."
                                          (second clause)
                                          (cddr form)))
@@ -518,7 +518,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 (defun
  parse-declarations
  (tail locals)
- 
+
  ;; Extract the declarations from the head of TAIL and divide them into 2
  ;; classes: declares about variables in the list LOCALS, and all other
  ;; declarations.  Returns 3 values: those 2 lists plus the remainder of TAIL.
@@ -533,7 +533,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
     #'(lambda
        (decl)
        (case (first decl)
-           ((inline notinline optimize) 
+           ((inline notinline optimize)
                                                ; These don't talk about vars
               (push decl otherdecls))
            (t                                  ; Assume all other kinds are
@@ -563,7 +563,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
    (pop tail))))
 
 (defun extract-special-bindings (vars decls)
-       
+
        ;; Return the subset of VARS that are special, either globally or
        ;; because of a declaration in DECLS
        (let ((specials (remove-if-not #'variable-globally-special-p vars)))
@@ -575,7 +575,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
             specials))
 
 (defun function-lambda-p (form &optional nargs)
-       
+
        ;; If FORM is #'(LAMBDA bindings . body) and bindings is of length
        ;; NARGS, return the lambda expression
        (let (args body)
@@ -597,11 +597,11 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 (defun
  rename-let-bindings
  (let-bindings binding-type env leftover-body &optional tempvarfn)
- 
+
  ;; Perform the alpha conversion required for "LET eversion" of (LET[*]
- ;; LET-BINDINGS . body)--rename each of the variables to an internal name. 
+ ;; LET-BINDINGS . body)--rename each of the variables to an internal name.
  ;; Returns 2 values: a new set of LET bindings and the alist of old var names
- ;; to new (so caller can walk the body doing the rest of the renaming). 
+ ;; to new (so caller can walk the body doing the rest of the renaming).
  ;; BINDING-TYPE is one of LET or LET*.  LEFTOVER-BODY is optional list of
  ;; forms that must be eval'ed before the first binding happens.  ENV is the
  ;; macro expansion environment, in case we have to walk a LET*.  TEMPVARFN is
@@ -611,17 +611,17 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
   (renamed-vars)
   (values (mapcar #'(lambda (binding)
                            (let ((valueform (cond ((not (consp binding))
-                                                   
+
                                                ; No initial value
                                                    nil)
                                                   ((or (eq binding-type
                                                            'let)
                                                        (null renamed-vars))
-                                                   
+
                                                ; All bindings are in parallel,
                                                ; so none can refer to others
                                                    (second binding))
-                                                  (t 
+                                                  (t
                                                ; In a LET*, have to substitute
                                                ; vars in the 2nd and
                                                ; subsequent initialization
@@ -641,7 +641,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                ; AFTER we have walked the
                                                ; initial value form
                                 (when leftover-body
-                                    
+
 
                           ;; Previous clause had some computation to do after
                           ;; its bindings.  Here is the first opportunity to
@@ -654,7 +654,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
          renamed-vars)))
 
 (defun rename-variables (form alist env)
-       
+
        ;; Walks FORM, renaming occurrences of the key variables in ALIST with
        ;; their corresponding values.  ENV is FORM's environment, so we can
        ;; make sure we are talking about the same variables.
@@ -671,7 +671,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 (defun
  mv-setq
  (vars expr)
- 
+
  ;; Produces (MULTIPLE-VALUE-SETQ vars expr), except that I'll optimize some
  ;; of the simple cases for benefit of compilers that don't, and I don't care
  ;; what the value is, and I know that the variables need not be set in
@@ -688,7 +688,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
   ((and (listp expr)
         (eq (car expr)
             'values))
-   
+
    ;; (mv-setq (a b c) (values x y z)) can be reduced to a parallel setq
    ;; (psetq returns nil, but I don't care about returned value).  Do this
    ;; even for the single variable case so that we catch (mv-setq (a) (values
@@ -719,7 +719,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
            (variable-lexical-p var env2)))
 
 (defun maybe-warn (type &rest warn-args)
-       
+
        ;; Issue a warning about not being able to optimize this thing.  TYPE
        ;; is one of :DEFINITION, meaning the definition is at fault, and
        ;; :USER, meaning the user's code is at fault.
@@ -810,14 +810,14 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                  (sequence-accessor type)
                  'elt))
    (listp (eq type 'list)))
-  
+
   ;; If type is given via THE, we may be able to generate a good accessor here
   ;; for the benefit of implementations that aren't smart about (ELT (THE
   ;; STRING FOO)).  I'm not bothering to keep the THE inside the body,
   ;; however, since I assume any compiler that would understand (AREF (THE
   ;; SIMPLE-ARRAY S)) would also understand that (AREF S) is the same when I
   ;; bound S to (THE SIMPLE-ARRAY foo) and never modified it.
-  
+
   ;; If sequence is declared to be a list, it's better to cdr down it, so we
   ;; have some extra cases here.  Normally folks would write LIST-ELEMENTS,
   ;; but maybe they wanted to get the index for free...
@@ -850,7 +850,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                            (setq tail (cdr tail)))))))
 
 (defun sequence-accessor (type)
-       
+
        ;; returns the function with which most efficiently to make accesses to
        ;; a sequence of type TYPE.
        (case (if (consp type)
@@ -891,7 +891,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 
 (defmacro with-gathering (clauses gather-body &body use-body)
        "Binds the variables specified in CLAUSES to the result of (GATHERING clauses gather-body) and evaluates the forms in USE-BODY inside that contour."
-       
+
        ;; We may optimize this a little better later for those compilers that
        ;; don't do a good job on (m-v-bind vars (... (values ...)) ...).
        `(multiple-value-bind ,(mapcar #'car clauses)
@@ -902,7 +902,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
  simple-expand-gathering-form
  (clauses body env)
  (declare (ignore env))
- 
+
  ;; The "formal semantics" of GATHERING.  We use this only in cases that can't
  ;; be optimized.
  (let
@@ -928,7 +928,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                               realizer-names))))
     ,@(mapcar #'second clauses))))
 
-(defvar *active-gatherers* nil 
+(defvar *active-gatherers* nil
        "List of GATHERING bindings currently active during macro expansion)")
 
 (defvar *anonymous-gathering-site* nil "Variable used in formal expansion of an abbreviated GATHERING form (one with anonymous gathering site)."
@@ -959,19 +959,19 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                    (setq realizer (function-lambda-p (car let-body)
                                          0))
                    (null (cdr let-body)))
-            
+
             ;; Macro returned something of the form (VALUES #'(lambda (value)
             ;; ...) #'(lambda () ...)), a function to accumulate values and a
             ;; function to realize the result.
             (when binding-type
-                
+
                 ;; Gatherer expanded into a LET
                 (cond (otherdecls (maybe-warn :definition "Couldn't optimize GATHERING clause ~S because its expansion carries declarations about more than the bound variables: ~S"
                                          (second clause)
                                          `(declare ,@otherdecls))
                              (go punt)))
                 (when let-bindings
-                    
+
                     ;; The first transformation we want to perform is a
                     ;; variant of "LET-eversion": turn (mv-bind (acc real)
                     ;; (let (..bindings..) (values #'(lambda ...) #'(lambda
@@ -983,7 +983,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                     ;; for each var).  Of course, none of those vars can be
                     ;; special, but we already checked for that above.
                     (multiple-value-setq (let-bindings renamed-vars)
-                           (rename-let-bindings let-bindings binding-type 
+                           (rename-let-bindings let-bindings binding-type
                                   gathering-env leftover-body))
                     (setq top-bindings (nconc top-bindings let-bindings))
                     (setq leftover-body nil)
@@ -994,10 +994,10 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
             (setq leftover-body (nconc leftover-body extra-body))
                                                ; Computation to do after these
                                                ; bindings
-            (push (cons acc-var (rename-and-capture-variables accumulator 
+            (push (cons acc-var (rename-and-capture-variables accumulator
                                        renamed-vars gathering-env))
                   acc-info)
-            (setq realizer (rename-variables realizer renamed-vars 
+            (setq realizer (rename-variables realizer renamed-vars
                                   gathering-env))
             (push (cond ((null (cdddr realizer))
                                                ; Simple (LAMBDA () expr) =>
@@ -1012,7 +1012,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                ; Declarations about the LET
                                                ; variables also has to
                                                ; percolate up
-                (setq top-decls (nconc top-decls (sublis renamed-vars 
+                (setq top-decls (nconc top-decls (sublis renamed-vars
                                                         localdecls))))
             (return))
         (maybe-warn :definition "Couldn't optimize GATHERING clause ~S because its expansion is not of the form (VALUES #'(LAMBDA ...) #'(LAMBDA () ...))"
@@ -1050,9 +1050,9 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                          (t `(values ,@(reverse finish-forms)))))))))
 
 (defun rename-and-capture-variables (form alist env)
-       
+
        ;; Walks FORM, renaming occurrences of the key variables in ALIST with
-       ;; their corresponding values, and capturing any other free variables. 
+       ;; their corresponding values, and capturing any other free variables.
        ;; Returns a list of the new form and the list of other closed-over
        ;; vars.  ENV is FORM's environment, so we can make sure we are talking
        ;; about the same variables.
@@ -1063,7 +1063,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                             (declare (ignore context))
                             (let (pair)
                                  (cond ((or (not (symbolp form))
-                                            (not (variable-same-p form subenv 
+                                            (not (variable-same-p form subenv
                                                         env)))
                                                ; non-variable or one that has
                                                ; been rebound
@@ -1079,14 +1079,14 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 (defun
  walk-gathering-body
  (body gathering-env acc-info)
- 
- ;; Walk the body of (GATHERING (...) . BODY) in environment GATHERING-ENV. 
+
+ ;; Walk the body of (GATHERING (...) . BODY) in environment GATHERING-ENV.
  ;; ACC-INFO is a list of information about each of the gathering "bindings"
  ;; in the form, in the form (var gatheringfn freevars env)
  (let
   ((*active-gatherers* (nconc (mapcar #'car acc-info)
                               *active-gatherers*)))
-  
+
   ;; *ACTIVE-GATHERERS* tells us what vars are currently legal as GATHER
   ;; targets.  This is so that when we encounter a GATHER not belonging to us
   ;; we can know whether to warn about it.
@@ -1108,13 +1108,13 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                    'gather))
                                                ; Passed as functional--can't
                                                ; macroexpand
-                        (maybe-warn :user 
+                        (maybe-warn :user
                    "Can't optimize GATHERING because of reference to #'GATHER."
                                )
                         (return-from walk-gathering-body :abort))
                     form)
                    ((setq info (assoc (setq site (if (null (cddr form))
-                                                     
+
                                                      '
                                                      *anonymous-gathering-site*
                                                      (third form)))
@@ -1136,13 +1136,13 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                         ,(second form)))
                                (t              ; FN = (lambda (value) ...)
                                   (dolist (s (third info))
-                                      (unless (or (variable-same-p s env 
+                                      (unless (or (variable-same-p s env
                                                          gathering-env)
                                                   (and (variable-special-p
                                                         s env)
                                                        (variable-special-p
                                                         s gathering-env)))
-                                          
+
 
                           ;; Some var used free in the LAMBDA form has been
                           ;; rebound between here and the parent GATHERING
@@ -1151,9 +1151,9 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                           ;; because then it's not closed over.
                                           (maybe-warn :user "Can't optimize GATHERING because the expansion closes over the variable ~S, which is rebound around a GATHER for it."
                                                  s)
-                                          (return-from walk-gathering-body 
+                                          (return-from walk-gathering-body
                                                  :abort)))
-                                  
+
 
                           ;; Return ((lambda (value) ...) actual-value).  In
                           ;; many cases we could simplify this further by
@@ -1167,7 +1167,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                              (variable-same-p site env (fourth info))))
                                                ; Some other GATHERING will
                                                ; take care of this form, so
-                                               ; pass it up for now. 
+                                               ; pass it up for now.
                                                ; Environment check is to make
                                                ; sure nobody shadowed it
                                                ; between here and there
@@ -1178,9 +1178,9 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                                                ; to mention the site than
                                                ; forget to write an anonymous
                                                ; gathering.
-                          (warn "There is no gathering site specified in ~S." 
+                          (warn "There is no gathering site specified in ~S."
                                 form)
-                          (warn 
+                          (warn
              "The site ~S in ~S is not defined in an enclosing GATHERING form."
                                 site form))
                                                ; Turn it into something else

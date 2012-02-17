@@ -332,7 +332,7 @@
 ;          (t slot-definition)
 
 
-;;; 1 argument 
+;;; 1 argument
 (defgeneric accessor-method-class (method))
 ;          (standard-accessor-method)
 ;          (standard-writer-method)
@@ -470,7 +470,7 @@
 ;          (funcallable-standard-class)
 
 
-;;; 2 arguments 
+;;; 2 arguments
 (defgeneric add-dependent (metaobject dependent))
 ;          (dependent-update-mixin t)
 
@@ -623,7 +623,7 @@
 ;          (funcallable-standard-class standard-class)
 
 
-;;; 3 arguments 
+;;; 3 arguments
 (defgeneric add-boundp-method (class generic-function slot-name))
 ;          (slot-class t t)
 
@@ -678,7 +678,7 @@
 ;          (structure-class structure-object structure-effective-slot-definition)
 
 
-;;; 4 arguments 
+;;; 4 arguments
 (defgeneric make-method-lambda (proto-generic-function proto-method lambda-expression environment))
 ;          (standard-generic-function standard-method t t)
 
@@ -687,12 +687,12 @@
 ;          (t structure-class structure-object structure-effective-slot-definition)
 
 
-;;; 5 arguments 
+;;; 5 arguments
 (defgeneric make-method-initargs-form (proto-generic-function proto-method lambda-expression lambda-list environment))
 ;          (standard-generic-function standard-method t t t)
 
 
-;;; optional arguments  
+;;; optional arguments
 (defgeneric (setf documentation) (new-value slotd &optional doc-type))
 ;          (t t)
 ;          (t documentation-mixin)
@@ -713,7 +713,7 @@
 ;          (t t t t)
 
 
-;;; keyword arguments  
+;;; keyword arguments
 (defgeneric allocate-instance (class &rest initargs))
 ;          (standard-class)
 ;          (structure-class)
@@ -775,5 +775,4 @@
 
 (defgeneric writer-method-class (class direct-slot &rest initargs))
 ;          (slot-class t)
-
 

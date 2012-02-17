@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -41,9 +41,9 @@
 
 (in-package :iterate :use '(:lisp :walker))
 
-(export '(iterate iterate* gathering gather with-gathering interval elements 
-	  list-elements list-tails plist-elements eachtime while until 
-	  collecting joining maximizing minimizing summing 
+(export '(iterate iterate* gathering gather with-gathering interval elements
+	  list-elements list-tails plist-elements eachtime while until
+	  collecting joining maximizing minimizing summing
 	  *iterate-warnings*))
 
 (in-package :pcl :use '(:lisp :walker :iterate))
@@ -72,13 +72,13 @@
 #+Genera
 (shadowing-import '(zl:arglist zwei:indentation) *the-pcl-package*)
 
-#+Lucid 
+#+Lucid
 (import '(#-LCL3.0 system:arglist #+LCL3.0 lcl:arglist
 	  system:structurep system:structure-type system:structure-length)
 	*the-pcl-package*)
-  
+
 #+lucid
-(#-LCL3.0 progn #+LCL3.0 lcl:handler-bind 
+(#-LCL3.0 progn #+LCL3.0 lcl:handler-bind
     #+LCL3.0 ((lcl:warning #'(lambda (condition)
 			       (declare (ignore condition))
 			       (lcl:muffle-warning))))
@@ -87,8 +87,8 @@
 	#-LCL3.0 (let ((x (find-symbol "IMPORT-FROM-LUCID-PKG" "LUCID")))
 		   (if (and x (fboundp x))
 		       (symbol-function x)
-		       ;; Only the #'(lambda (x) ...) below is really needed, 
-		       ;;  but when available, the "internal" function 
+		       ;; Only the #'(lambda (x) ...) below is really needed,
+		       ;;  but when available, the "internal" function
 		       ;;  'import-from-lucid-pkg' provides better checking.
 		       #'(lambda (name)
 			   (import (intern name "LUCID")))))))
@@ -99,7 +99,7 @@
 
   ;;
   ;; For without-interrupts.
-  ;; 
+  ;;
   #+LCL3.0
   (mapc importer '("*SCHEDULER-WAKEUP*" "MAYBE-CALL-SCHEDULER"))
 
@@ -116,13 +116,13 @@
 		   "NEW-STRUCTURE"   	"STRUCTURE-REF"
 		   "STRUCTUREP"         "STRUCTURE-TYPE"  "STRUCTURE-LENGTH"
 		   "PROCEDUREP"     	"PROCEDURE-SYMBOL"
-		   "PROCEDURE-REF" 	"SET-PROCEDURE-REF" 
+		   "PROCEDURE-REF" 	"SET-PROCEDURE-REF"
 		   ))
 ; ;;
 ; ;;  The following is for the "patch" to the general defstruct printer.
 ; (mapc importer '(
 ; 	           "OUTPUT-STRUCTURE" 	  "DEFSTRUCT-INFO"
-;		   "OUTPUT-TERSE-OBJECT"  "DEFAULT-STRUCTURE-PRINT" 
+;		   "OUTPUT-TERSE-OBJECT"  "DEFAULT-STRUCTURE-PRINT"
 ;		   "STRUCTURE-TYPE" 	  "*PRINT-OUTPUT*"
 ;		   ))
   ;;
@@ -130,9 +130,9 @@
   ;; On APOLLO, Domain/CommonLISP 2.10 does not include %logand& whereas
   ;; Domain/CommonLISP 2.20 does; Domain/CommonLISP 2.20 includes :DOMAIN/OS
   ;; on *FEATURES*, so this conditionalizes correctly for APOLLO.
-  #-(or (and APOLLO DOMAIN/OS) LCL3.0 VAX) 
+  #-(or (and APOLLO DOMAIN/OS) LCL3.0 VAX)
   (mapc importer '("COPY-STRUCTURE"  "GET-FDESC"  "SET-FDESC"))
-  
+
   nil))
 
 #+kcl
@@ -161,12 +161,12 @@
 (shadow 'documentation)
 
 
-;;;						
+;;;
 ;;; These come from the index pages of 88-002R.
 ;;;
 ;;;
-(eval-when (compile load eval)  
-  
+(eval-when (compile load eval)
+
 (defvar *exports* '(add-method
 		    built-in-class
 		    call-method
@@ -218,7 +218,7 @@
 		    with-slots
 		    ))
 
-);eval-when 
+);eval-when
 
 #-(or KCL IBCL CMU)
 (export *exports* *the-pcl-package*)
@@ -230,8 +230,8 @@
 (mapc 'export (list *exports*) (list *the-pcl-package*))
 
 
-(eval-when (compile load eval)  
-  
+(eval-when (compile load eval)
+
 (defvar *class-exports*
         '(standard-instance
           funcallable-standard-instance
@@ -333,7 +333,7 @@
           writer-method-class
           ))
 
-);eval-when 
+);eval-when
 
 #-(or KCL IBCL)
 (export *class-exports* *the-pcl-package*)
@@ -349,7 +349,7 @@
 
 (defvar *slot-accessor-name-package*
   (or (find-package :slot-accessor-name)
-      (make-package :slot-accessor-name 
+      (make-package :slot-accessor-name
 		    :use '()
 		    :nicknames '(:s-a-n))))
 
@@ -358,7 +358,7 @@
   (import (mapcar #'(lambda (s) (intern (symbol-name s) "SI"))
 		  '(:copy-structure-header :swap-structure-contents :set-structure-def
 		    :%instance-ref :%set-instance-ref
-		    
+
 		    :cache-number-vector :cache-number-vector-length
 		    :wrapper-cache-number-adds-ok :wrapper-cache-number-length
 		    :wrapper-cache-number-mask :wrapper-cache-number-vector-length

@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -33,10 +33,10 @@
 ;;; As it happens, none of these differences are the ones reflected in
 ;;; the MOP specification; STANDARD-CLASS and FUNCALLABLE-STANDARD-CLASS
 ;;; share all their specified methods at STD-CLASS.
-;;; 
-;;; 
+;;;
+;;;
 ;;; workings of this metaclass and the standard-class metaclass.
-;;; 
+;;;
 
 (in-package :pcl)
 
@@ -95,6 +95,4 @@
 ;(eval-when (load)
 ;  (pre-make-templated-function-constructor reader-function--fsc)
 ;  (pre-make-templated-function-constructor writer-function--fsc))
-
-
 

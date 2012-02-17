@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -37,27 +37,27 @@
 		(values nil (method-fast-function method)))
 	  (let* ((pv-table (and fmf (method-function-pv-table fmf))))
 	    (if (and fmf (or (null pv-table) wrappers))
-		(let* ((pv-wrappers (when pv-table 
+		(let* ((pv-wrappers (when pv-table
 				      (pv-wrappers-from-all-wrappers
 				       pv-table wrappers)))
 		       (pv-cell (when (and pv-table pv-wrappers)
 				  (pv-table-lookup pv-table pv-wrappers))))
 		  (values mf t fmf pv-cell))
-		(values 
+		(values
 		 (or mf (if (listp method)
 			    (setf (cadr method)
 				  (method-function-from-fast-function fmf))
 			    (method-function method)))
 		 t nil nil)))))))
 
-(defun make-effective-method-function (generic-function form &optional 
+(defun make-effective-method-function (generic-function form &optional
 				       method-alist wrappers)
   (funcall (make-effective-method-function1 generic-function form
 					    (not (null method-alist))
 					    (not (null wrappers)))
 	   method-alist wrappers))
 
-(defun make-effective-method-function1 (generic-function form 
+(defun make-effective-method-function1 (generic-function form
 					method-alist-p wrappers-p)
   (if (and (listp form)
 	   (eq (car form) 'call-method))
@@ -66,7 +66,7 @@
       ;; We have some sort of `real' effective method.  Go off and get a
       ;; compiled function for it.  Most of the real hair here is done by
       ;; the GET-FUNCTION mechanism.
-      ;; 
+      ;;
       (make-effective-method-function-internal generic-function form
 					       method-alist-p wrappers-p)))
 
@@ -92,7 +92,7 @@
 			  'fast-method-call
 			  'method-call))))
 	      (if (and (consp method) (eq (car method) 'make-method))
-		  (make-effective-method-function-type 
+		  (make-effective-method-function-type
 		   generic-function (cadr method) method-alist-p wrappers-p)
 		  (type-of method)))))
       'fast-method-call))
@@ -109,7 +109,7 @@
   ;; if there are next methods, we look at whether the method function
   ;; asks about them.  If it does, we must tell it whether there are
   ;; or aren't to prevent the leaky next methods bug.
-  ;; 
+  ;;
   (let* ((cm-args (cdr form))
 	 (fmf-p (and (null no-fmf-p)
 		     (or (not (eq *boot-state* 'complete))
@@ -156,7 +156,7 @@
 
 (defun get-effective-method-gensym ()
   (or (pop *rebound-effective-method-gensyms*)
-      (let ((new (intern (format nil "EFFECTIVE-METHOD-GENSYM-~D" 
+      (let ((new (intern (format nil "EFFECTIVE-METHOD-GENSYM-~D"
 				 (length *global-effective-method-gensyms*))
 			 "PCL")))
 	(setq *global-effective-method-gensyms*
@@ -185,7 +185,7 @@
 
 (defun memf-test-converter (form generic-function method-alist-p wrappers-p)
   (cond ((and (consp form) (eq (car form) 'call-method))
-	 (case (make-effective-method-function-type 
+	 (case (make-effective-method-function-type
 		generic-function form method-alist-p wrappers-p)
 	   (fast-method-call
 	    '.fast-call-method.)
@@ -194,8 +194,8 @@
 	((and (consp form) (eq (car form) 'call-method-list))
 	 (case (if (every #'(lambda (form)
 			      (eq 'fast-method-call
-				  (make-effective-method-function-type 
-				   generic-function form 
+				  (make-effective-method-function-type
+				   generic-function form
 				   method-alist-p wrappers-p)))
 			  (cdr form))
 		   'fast-method-call
@@ -207,27 +207,27 @@
 	(t
 	 (default-test-converter form))))
 
-(defun memf-code-converter (form generic-function 
+(defun memf-code-converter (form generic-function
 				 metatypes applyp method-alist-p wrappers-p)
   (cond ((and (consp form) (eq (car form) 'call-method))
 	 (let ((gensym (get-effective-method-gensym)))
 	   (values (make-emf-call metatypes applyp gensym
-				  (make-effective-method-function-type 
+				  (make-effective-method-function-type
 				   generic-function form method-alist-p wrappers-p))
 		   (list gensym))))
 	((and (consp form) (eq (car form) 'call-method-list))
 	 (let ((gensym (get-effective-method-gensym))
 	       (type (if (every #'(lambda (form)
 				    (eq 'fast-method-call
-					(make-effective-method-function-type 
-					 generic-function form 
+					(make-effective-method-function-type
+					 generic-function form
 					 method-alist-p wrappers-p)))
 				(cdr form))
 			 'fast-method-call
 			 't)))
 	   (values `(dolist (emf ,gensym nil)
 		      ,(make-emf-call metatypes applyp 'emf type))
-		   (list gensym))))		     
+		   (list gensym))))
 	(t
 	 (default-code-converter form))))
 
@@ -269,7 +269,7 @@
 			 #'(lambda (form)
 			     (memf-constant-converter form generic-function)))
 	#'(lambda (method-alist wrappers)
-	    (let* ((constants 
+	    (let* ((constants
 		    (mapcar #'(lambda (constant)
 				(if (consp constant)
 				    (case (car constant)
@@ -305,7 +305,7 @@
     (dolist (m applicable-methods)
       (let ((qualifiers (if (listp m)
 			    (early-method-qualifiers m)
-			    (method-qualifiers m))))			    
+			    (method-qualifiers m))))
 	(cond ((member ':before qualifiers)  (push m before))
 	      ((member ':after  qualifiers)  (push m after))
 	      ((member ':around  qualifiers) (push m around))
@@ -321,7 +321,7 @@
 	   ;;
 	   ;; By returning a single call-method `form' here we enable an important
 	   ;; implementation-specific optimization.
-	   ;; 
+	   ;;
 	   `(call-method ,(first primary) ,(rest primary)))
 	  (t
 	   (let ((main-effective-method

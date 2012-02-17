@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -27,7 +27,7 @@
 ;;;
 ;;; This file defines the defconstructor and other make-instance optimization
 ;;; mechanisms.
-;;; 
+;;;
 
 (in-package :pcl)
 
@@ -40,7 +40,7 @@
 ;;; optimize them.  Specific ports of PCL could just have their compiler
 ;;; spot these calls to make-instance and then call this code.  Having the
 ;;; special defconstructor facility is the best we can do portably.
-;;; 
+;;;
 ;;;
 ;;; A call to defconstructor like:
 ;;;
@@ -79,14 +79,14 @@
 ;;; decides whether its type of code is appropriate.  This depends on things
 ;;; like whether there are any applicable methods on initialize-instance,
 ;;; whether class slots are affected by initialization etc.
-;;; 
+;;;
 ;;;
 ;;; Constructor objects are funcallable instances, the protocol followed to
 ;;; to compute the constructor code for them is quite similar to the protocol
 ;;; followed to compute the discriminator code for a generic function.  When
 ;;; the constructor is first loaded, we install as its code a function which
 ;;; will compute the actual constructor code the first time it is called.
-;;; 
+;;;
 ;;; If there is an update to the class structure which might invalidate the
 ;;; optimized constructor, the special lazy constructor installer is put back
 ;;; so that it can compute the appropriate constructor when it is called.
@@ -177,13 +177,13 @@
 
 ;;;
 ;;; The actual constructor objects.
-;;; 
-(defclass constructor ()			   
+;;;
+(defclass constructor ()
      ((class					;The class with which this
 	:initarg :class				;constructor is associated.
 	:reader constructor-class)		;The actual class object,
 						;not the class name.
-						;      
+						;
       (name					;The name of this constructor.
 	:initform nil				;This is the symbol in whose
 	:initarg :name				;function cell the constructor
@@ -246,7 +246,7 @@
 ;;;
 ;;; I am not in a hairy enough mood to make this implementation be metacircular
 ;;; enough that it can support a defconstructor for constructor objects.
-;;; 
+;;;
 (defun make-constructor (class name supplied-initarg-names code-generators)
   (make-instance 'constructor
 		 :class class
@@ -281,7 +281,7 @@
 ;;; This is called to actually load a defconstructor constructor.  It must
 ;;; install the lazy installer in the function cell of the constructor name,
 ;;; and also add this constructor to the list of constructors the class has.
-;;; 
+;;;
 (defmethod load-constructor-internal
 	   ((class slot-class) name initargs generators)
   (let ((constructor (make-constructor class name initargs generators))
@@ -309,7 +309,7 @@
 ;;; add-method and remove-method (for standard-generic-function and -method),
 ;;; promise to call maybe-update-constructors on the generic function and
 ;;; the method.
-;;; 
+;;;
 ;;; The class update code promises to call update-constructors whenever the
 ;;; class is changed.  That is, whenever the supers, slots or options change.
 ;;; If user defined classes of constructor needs to be updated in more than
@@ -319,7 +319,7 @@
 ;;; Bootstrapping concerns force the definitions of maybe-update-constructors
 ;;; and update-constructors to be in the file std-class.  For clarity, they
 ;;; also appear below.  Be sure to keep the definition here and there in sync.
-;;; 
+;;;
 ;(defvar *initialization-generic-functions*
 ;	 (list #'make-instance
 ;	       #'default-initargs
@@ -380,7 +380,7 @@
 ;;; good code.  The fallback code type appears first.  Note that redefining a
 ;;; code type does not change its position in the list.  To do that,  define
 ;;; a new type at the end with the behavior.
-;;; 
+;;;
 
 (defvar *constructor-code-types* ())
 
@@ -396,7 +396,7 @@
 
 (defun load-define-constructor-code-type (type generator)
   (let ((old-entry (assq type *constructor-code-types*)))
-    (if old-entry 
+    (if old-entry
 	(setf (cadr old-entry) generator)
 	(push (list type generator) *constructor-code-types*))
     type))
@@ -408,7 +408,7 @@
 	(gathering1 (collecting)
 	  (dolist (entry *constructor-code-types*)
 	    (let ((generator
-		    (funcall (cadr entry) class name lambda-list 
+		    (funcall (cadr entry) class name lambda-list
 					  supplied-initarg-names
 					  supplied-initargs)))
 	      (when generator
@@ -465,7 +465,7 @@
 ;;;
 ;;; The facilities are useful for debugging, and to measure the performance
 ;;; boost from constructors.
-;;; 
+;;;
 
 (defun map-constructors (fn)
   (let ((nclasses 0)
@@ -506,7 +506,7 @@
 ;;;
 ;;; Helper functions and utilities that are shared by all of the code types
 ;;; and by the main compute-constructor-code method as well.
-;;; 
+;;;
 
 (defvar *standard-initialize-instance-method*
         (get-method #'initialize-instance
@@ -539,7 +539,7 @@
 ;;;
 ;;; This returns two values.  The first is a vector which can be used as the
 ;;; initial value of the slots vector for the instance. The second is a symbol
-;;; describing the initforms this class has.  
+;;; describing the initforms this class has.
 ;;;
 ;;;  If the first value is:
 ;;;
@@ -547,7 +547,7 @@
 ;;;    :constants     all slots have either a constant initform
 ;;;                   or no initform at all
 ;;;    t              there is at least one non-constant initform
-;;; 
+;;;
 (defun compute-constant-vector (class)
   ;;(declare (values constants flag))
   (let* ((wrapper (class-wrapper class))
@@ -642,7 +642,7 @@
 ;;;   supplied initargs
 ;;;   slot-filling initargs
 ;;;   :after methods on shared-initialize and initialize-instance
-;;;   
+;;;
 (define-constructor-code-type general
         (class name arglist supplied-initarg-names supplied-initargs)
   (declare (ignore name))
@@ -674,9 +674,9 @@
 		 (let* ((.instance. (,raw-allocator .wrapper. .constants.))
 			(.slots. (,slots-fetcher .instance.))
 			(.positions. .supplied-initarg-positions.)
-			(.initargs. .constant-initargs.))		   
+			(.initargs. .constant-initargs.))
 		   .positions.
-		   
+
 		   (dolist (entry .initfns-initargs-and-positions.)
 		     (let ((val (funcall (car entry)))
 			   (initarg (cadr entry)))
@@ -700,7 +700,7 @@
 		     (apply fn .instance. t .initargs.))
 		   (dolist (fn .initfns.)
 		     (apply fn .instance. .initargs.))
-		     
+
 		   .instance.)))))))))
 
 (defun general-generator-internal
@@ -716,7 +716,7 @@
 	   (supplied-initarg-positions ())
 	   (constant-initargs ())
 	   (used-positions ()))
-					       
+
       ;;
       ;; Go through each of the supplied initargs for three reasons.
       ;;
@@ -727,7 +727,7 @@
       ;;     initarg positions already took care of that, but
       ;;     we do need to know what initforms will and won't
       ;;     be needed.
-      ;;   
+      ;;
       (doplist (initarg val) supplied-initargs
 	(let ((positions (cdr (assq initarg initarg-positions))))
 	  (cond ((memq :class positions) (bail-out))
@@ -746,7 +746,7 @@
       ;;   - If it is a constant, and it does fill a slot, put that
       ;;     into the constant vector.
       ;;   - If it isn't a constant, record its initfn and position.
-      ;;   
+      ;;
       (dolist (default defaults)
 	(let* ((name (car default))
 	       (initfn (cadr default))
@@ -840,7 +840,7 @@
 		     (let ((val (funcall (car entry))))
 		       (dolist (pos (cdr entry))
 			 (setf (%instance-ref .slots. pos) val))))
-		 
+
 		   ,@(gathering1 (collecting)
 		       (doplist (initarg value) supplied-initargs
 			 (unless (constantp value)
@@ -848,7 +848,7 @@
 			     `(let ((.value. ,value))
 				(dolist (.p. (pop .positions.))
 				  (setf (%instance-ref .slots. .p.) .value.)))))))
-		     
+
 		   .instance.))))))))
 
 (defun no-methods-generator-internal
@@ -873,7 +873,7 @@
       ;;     initarg positions already took care of that, but
       ;;     we do need to know what initforms will and won't
       ;;     be needed.
-      ;;   
+      ;;
       (doplist (initarg val) supplied-initargs
 	(let ((positions (cdr (assq initarg initarg-positions))))
 	  (cond ((memq :class positions) (bail-out))
@@ -891,7 +891,7 @@
       ;;   - If it is a constant, and it does fill a slot, put that
       ;;     into the constant vector.
       ;;   - If it isn't a constant, record its initfn and position.
-      ;;   
+      ;;
       (dolist (default defaults)
 	(let* ((name (car default))
 	       (initfn (cadr default))
@@ -969,7 +969,7 @@
 			  (.slots. (,slots-fetcher .instance.))
 			  (.positions. .supplied-initarg-positions.))
 		     .positions.
-		 
+
 		     ,@(gathering1 (collecting)
 			 (doplist (initarg value) supplied-initargs
 			   (unless (constantp value)
@@ -977,7 +977,7 @@
 			       `(let ((.value. ,value))
 				  (dolist (.p. (pop .positions.))
 				    (setf (%instance-ref .slots. .p.) .value.)))))))
-		     
+
 		     .instance.))))))))))
 
 (defun simple-slots-generator-internal
@@ -1001,7 +1001,7 @@
       ;;     initarg positions already took care of that, but
       ;;     we do need to know what initforms will and won't
       ;;     be needed.
-      ;;   
+      ;;
       (doplist (initarg val) supplied-initargs
 	(let ((positions (cdr (assq initarg initarg-positions))))
 	  (cond ((memq :class positions) (bail-out))
@@ -1014,12 +1014,12 @@
 	  (setq used-positions (append used-positions positions))))
       ;;
       ;; Go through each of the default initargs for three reasons.
-      ;; 
+      ;;
       ;;   - If it isn't a constant form, bail out.
       ;;   - If it fills a class slot, bail out.
       ;;   - If it is a constant, and it does fill a slot, put that
       ;;     into the constant vector.
-      ;;   
+      ;;
       (dolist (default defaults)
 	(let* ((name (car default))
 	       (form (caddr default))
@@ -1059,6 +1059,6 @@
 		     (null initfn)))
 		(t
 		 (bail-out)))))
-      
+
       (values constants (nreverse supplied-initarg-positions)))))
 

@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -30,7 +30,7 @@
 ;;; This file is (almost) functionally equivalent to dlap.lisp,
 ;;; but easier to read.
 
-;;; Might generate faster code, too, depending on the compiler and 
+;;; Might generate faster code, too, depending on the compiler and
 ;;; whether an implementation-specific lap assembler was used.
 
 (defun emit-one-class-reader (class-slot-p)
@@ -88,7 +88,7 @@
     (generating-lisp '(emf)
 		     dlap-lambda-list
       `(invoke-effective-method-function emf ,applyp ,@args ,@restl))))
-      
+
 (defmacro emit-default-only-macro (metatypes applyp)
   (let ((*emit-function-p* nil)
 	(*precompiling-lap* t))
@@ -179,7 +179,7 @@
 (defmacro emit-reader/writer-macro (reader/writer 1-or-2-class class-slot-p)
   (let ((*emit-function-p* nil)
 	(*precompiling-lap* t))
-    (values 
+    (values
      (emit-reader/writer reader/writer 1-or-2-class class-slot-p))))
 
 (defun emit-one-or-n-index-reader/writer (reader/writer cached-index-p class-slot-p)
@@ -334,7 +334,7 @@
 	     (loop (setq next-location (the fixnum (+ location ,cache-line-size)))
 		   (when (and ,@(mapcar
 				 #'(lambda (wrapper)
-				     `(eq ,wrapper 
+				     `(eq ,wrapper
 				       (cache-vector-ref cache-vector
 					(setq location
 					 (the fixnum (+ location 1))))))
@@ -376,7 +376,7 @@
      ,@(let ((adds 0) (len (length wrappers)))
 	 (declare (fixnum adds len))
 	 (mapcar #'(lambda (wrapper)
-		     `(let ((wrapper-cache-no (wrapper-cache-number-vector-ref 
+		     `(let ((wrapper-cache-no (wrapper-cache-number-vector-ref
 					       ,wrapper field)))
 		        (declare (fixnum wrapper-cache-no))
 		        (when (zerop wrapper-cache-no) (go ,miss-label))
@@ -391,7 +391,7 @@
 					 #+lucid form
 					 #-lucid `(the fixnum ,form))))))))
 		 wrappers))))
-     
+
 (defun emit-fetch-wrapper (metatype argument miss-label &optional slot)
   (ecase metatype
     ((standard-instance #+new-kcl-wrapper structure-instance)

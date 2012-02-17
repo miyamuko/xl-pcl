@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -29,7 +29,7 @@
 
 #|
 
-The CommonLoops evaluator is meta-circular.  
+The CommonLoops evaluator is meta-circular.
 
 Most of the code in PCL is methods on generic functions, including most of
 the code that actually implements generic functions and method lookup.
@@ -72,7 +72,7 @@ work during bootstrapping.
 |#
 
 (proclaim '(notinline make-a-method
-		      add-named-method		      
+		      add-named-method
 		      ensure-generic-function-using-class
 
 		      add-method
@@ -117,7 +117,7 @@ work during bootstrapping.
 ;;; *generic-function-fixups* is used by fix-early-generic-functions to
 ;;; convert the few functions in the bootstrap which are supposed to be
 ;;; generic functions but can't be early on.
-;;; 
+;;;
 (defvar *generic-function-fixups*
     '((add-method
 	((generic-function method)		        ;lambda-list
@@ -172,7 +172,7 @@ work during bootstrapping.
       ;; INITARG takes this screwy new argument to get around a bad
       ;; interaction between lexical macros and setf in the Lucid
       ;; compiler.
-      ;; 
+      ;;
       (macrolet ((initarg (key &optional new)
 		   (if new
 		       `(setf (getf initargs ,key) ,new)
@@ -228,7 +228,7 @@ work during bootstrapping.
 ;;;
 ;;;
 (defmacro DEFMETHOD (&rest args &environment env)
-  #+(or (not :lucid) :lcl3.0)	
+  #+(or (not :lucid) :lcl3.0)
   (declare (arglist name
 		    {method-qualifier}*
 		    specialized-lambda-list
@@ -241,7 +241,7 @@ work during bootstrapping.
 			qualifiers lambda-list body env))))
 
 (defun prototypes-for-make-method-lambda (name)
-  (if (not (eq *boot-state* 'complete))	  
+  (if (not (eq *boot-state* 'complete))
       (values nil nil)
       (let ((gf? (and (gboundp name)
 		      (gdefinition name))))
@@ -265,8 +265,8 @@ work during bootstrapping.
 ;;; until load time.
 ;;;
 ;;; NOTE that during bootstrapping, this function is allowed to return NIL.
-;;; 
-(defun method-prototype-for-gf (name)      
+;;;
+(defun method-prototype-for-gf (name)
   (let ((gf? (and (gboundp name)
 		  (gdefinition name))))
     (cond ((neq *boot-state* 'complete) nil)
@@ -294,7 +294,7 @@ work during bootstrapping.
 	(add-method-declarations name qualifiers lambda-list body env)
       (multiple-value-bind (method-function-lambda initargs)
 	  (make-method-lambda proto-gf proto-method method-lambda env)
-	(let ((initargs-form (make-method-initargs-form 
+	(let ((initargs-form (make-method-initargs-form
 			      proto-gf proto-method
 			      method-function-lambda initargs env)))
 	  `(progn
@@ -326,7 +326,7 @@ work during bootstrapping.
 	     (every #'interned-symbol-p qualifiers)
 	     (every #'(lambda (s)
 			(if (consp s)
-			    (and (eq (car s) 'eql) 
+			    (and (eq (car s) 'eql)
 				 (constantp (cadr s))
 				 (let ((sv (eval (cadr s))))
 				   (or (interned-symbol-p sv)
@@ -354,16 +354,16 @@ work during bootstrapping.
 	  `(eval-when ,*defmethod-times*
 	    (defun ,mname-sym ,(cadr fn-lambda)
 	      ,@(cddr fn-lambda))
-	    ,(make-defmethod-form-internal 
+	    ,(make-defmethod-form-internal
 	      name qualifiers `',specls
 	      unspecialized-lambda-list method-class-name
 	      `(list* ,(cadr initargs-form) #',mname-sym ,@(cdddr initargs-form))
 	      pv-table-symbol)))
-	(make-top-level-form 
+	(make-top-level-form
 	 `(defmethod ,name ,@qualifiers ,specializers)
 	 *defmethod-times*
-	 (make-defmethod-form-internal 
-	  name qualifiers 
+	 (make-defmethod-form-internal
+	  name qualifiers
 	  `(list ,@(mapcar #'(lambda (specializer)
 			       (if (consp specializer)
 				   ``(,',(car specializer) ,,(cadr specializer))
@@ -412,7 +412,7 @@ work during bootstrapping.
 		 ,@real-body)
 	      unspecialized-lambda-list specializers))))
 
-(defun real-make-method-initargs-form (proto-gf proto-method 
+(defun real-make-method-initargs-form (proto-gf proto-method
 				       method-lambda initargs env)
   (declare (ignore proto-gf proto-method))
   (unless (and (consp method-lambda) (eq (car method-lambda) 'lambda))
@@ -494,7 +494,7 @@ work during bootstrapping.
 				(return nil))))))
 	    (multiple-value-bind (walked-lambda call-next-method-p closurep
 						next-method-p-p)
-		(walk-method-lambda method-lambda required-parameters env 
+		(walk-method-lambda method-lambda required-parameters env
 				    slots calls)
 	      (multiple-value-bind (ignore walked-declarations walked-lambda-body)
 		  (extract-declarations (cddr walked-lambda))
@@ -505,8 +505,8 @@ work during bootstrapping.
 		  (multiple-value-bind (slot-name-lists call-list)
 		      (slot-name-lists-from-slots slots calls)
 		    (let ((pv-table-symbol (make-symbol "pv-table")))
-		      (setq plist 
-			    `(,@(when slot-name-lists 
+		      (setq plist
+			    `(,@(when slot-name-lists
 				  `(:slot-name-lists ,slot-name-lists))
 			      ,@(when call-list
 				  `(:call-list ,call-list))
@@ -525,23 +525,23 @@ work during bootstrapping.
 		(values `(lambda (.method-args. .next-methods.)
 			   (simple-lexical-method-functions
 			       (,lambda-list .method-args. .next-methods.
-				:call-next-method-p ,call-next-method-p 
+				:call-next-method-p ,call-next-method-p
 				:next-method-p-p ,next-method-p-p
 				:closurep ,closurep
 				:applyp ,applyp)
 			     ,@walked-declarations
 			     ,@walked-lambda-body))
-			`(,@(when plist 
+			`(,@(when plist
 			      `(:plist ,plist))
-			  ,@(when documentation 
+			  ,@(when documentation
 			      `(:documentation ,documentation)))))))))))
-		 
+
 (unless (fboundp 'make-method-lambda)
   (setf (gdefinition 'make-method-lambda)
 	(symbol-function 'real-make-method-lambda)))
 
 (defmacro simple-lexical-method-functions ((lambda-list method-args next-methods
-							&rest lmf-options) 
+							&rest lmf-options)
 					   &body body)
   `(progn
      ,method-args ,next-methods
@@ -680,7 +680,7 @@ work during bootstrapping.
 				  ,(car required-args+rest-arg))))
 		    (when .slots. ; just to avoid compiler wranings
 		      (setf (%instance-ref .slots. ,emf) .new-value.))))))
-	   #|| 
+	   #||
 	   ,@(when (and (null restp) (= 1 (length required-args+rest-arg)))
 	       `(((typep ,emf 'fast-instance-boundp)
 		  (let ((.slots. (get-slots-or-nil
@@ -714,15 +714,15 @@ work during bootstrapping.
 		    (fast-method-call-next-method-call emf)
 		    (nconc req-args (list rest-args))))
 	   (cond ((null args)
-		  (if (eql nreq 0) 
+		  (if (eql nreq 0)
 		      (invoke-fast-method-call emf)
 		      (error "wrong number of args")))
 		 ((null (cdr args))
-		  (if (eql nreq 1) 
+		  (if (eql nreq 1)
 		      (invoke-fast-method-call emf (car args))
 		      (error "wrong number of args")))
 		 ((null (cddr args))
-		  (if (eql nreq 2) 
+		  (if (eql nreq 2)
 		      (invoke-fast-method-call emf (car args) (cadr args))
 		      (error "wrong number of args")))
 		 (t
@@ -730,11 +730,11 @@ work during bootstrapping.
 			 (fast-method-call-pv-cell emf)
 			 (fast-method-call-next-method-call emf)
 			 args))))))
-    (method-call 
+    (method-call
      (apply (method-call-function emf)
 	    args
 	    (method-call-call-method-args emf)))
-    (fixnum 
+    (fixnum
      (cond ((null args) (error "1 or 2 args expected"))
 	   ((null (cdr args))
 	    (let ((value (%instance-ref (get-slots (car args)) emf)))
@@ -748,7 +748,7 @@ work during bootstrapping.
     (fast-instance-boundp
      (if (or (null args) (cdr args))
 	 (error "1 arg expected")
-	 (not (eq (%instance-ref (get-slots (car args)) 
+	 (not (eq (%instance-ref (get-slots (car args))
 				 (fast-instance-boundp-index emf))
 		  *slot-unbound*))))
     (function
@@ -792,9 +792,9 @@ work during bootstrapping.
 			    ,',next-method-call nil
 			    ,@(cdr cnm-args))
 			  (let ((call `(invoke-effective-method-function
-					,',next-method-call 
+					,',next-method-call
 					,',(not (null rest-arg))
-					,@',args 
+					,@',args
 					,@',(when rest-arg `(,rest-arg)))))
 			    `(if ,cnm-args
 				 (bind-args ((,@',args ,@',(when rest-arg
@@ -807,7 +807,7 @@ work during bootstrapping.
 	        `(not (null ,',next-method-call))))
      ,@body))
 
-(defmacro bind-lexical-method-functions 
+(defmacro bind-lexical-method-functions
     ((&key call-next-method-p next-method-p-p closurep applyp)
      &body body)
   (cond ((and (null call-next-method-p) (null next-method-p-p)
@@ -816,7 +816,7 @@ work during bootstrapping.
 	 `(let () ,@body))
 	 ((and (null closurep)
 	       (null applyp))
-	 ;; OK to use MACROLET, and all args are mandatory 
+	 ;; OK to use MACROLET, and all args are mandatory
 	 ;; (else APPLYP would be true).
 	 `(call-next-method-bind
 	    (macrolet ((call-next-method (&rest cnm-args)
@@ -954,13 +954,13 @@ work during bootstrapping.
 			 (consp (cadr form))
 			 (eq (car (cadr form)) 'function)
 			 (generic-function-name-p (cadr (cadr form))))
-		    (optimize-generic-function-call 
+		    (optimize-generic-function-call
 		     form required-parameters env slots calls))
 		   ((and (or (symbolp (car form))
 			     (and (consp (car form))
 				  (eq (caar form) 'setf)))
 			 (generic-function-name-p (car form)))
-		    (optimize-generic-function-call 
+		    (optimize-generic-function-call
 		     form required-parameters env slots calls))
 		   ((and (eq (car form) 'asv-funcall)
 			 *optimize-asv-funcall-p*)
@@ -970,7 +970,7 @@ work during bootstrapping.
 		      (boundp (push (third form) *asv-boundps*)))
 		    `(,(second form) ,@(cddddr form)))
 		   (t form))))
-	  
+
       (let ((walked-lambda (walk-form method-lambda env #'walk-function)))
 	(values walked-lambda
 		call-next-method-p closurep next-method-p-p)))))
@@ -996,7 +996,7 @@ work during bootstrapping.
 	   (dolist (decl (cdar declarations))
 	     (when (and (eq (car decl) 'ignore)
 			(memq symbol (cdr decl)))
-	       (return t)))))	   
+	       (return t)))))
     (gathering ((references (collecting)))
       (iterate ((s (list-elements specialized-lambda-list))
 		(p (list-elements required-parameters)))
@@ -1073,7 +1073,7 @@ work during bootstrapping.
     (load-defmethod-internal class name quals specls ll initargs pv-table-symbol)))
 
 (defun load-defmethod-internal
-    (method-class gf-spec qualifiers specializers lambda-list 
+    (method-class gf-spec qualifiers specializers lambda-list
 		  initargs pv-table-symbol)
   (when (listp gf-spec) (do-standard-defsetf-1 (cadr gf-spec)))
   (when pv-table-symbol
@@ -1133,11 +1133,11 @@ work during bootstrapping.
 	    (setq pv-table (intern-pv-table :slot-name-lists snl
 					    :call-list cl))
 	    (when pv-table (set pv-table-symbol pv-table))
-	    (set-mf-property :pv-table pv-table)))    
+	    (set-mf-property :pv-table pv-table)))
 	(loop (when (null plist) (return nil))
-	      (set-mf-property (pop plist) (pop plist)))      
+	      (set-mf-property (pop plist) (pop plist)))
 	(when method
-	  (set-mf-property :method method))    
+	  (set-mf-property :method method))
 	(when return-function-p
 	  (or mf (method-function-from-fast-function mff)))))))
 
@@ -1239,7 +1239,7 @@ work during bootstrapping.
 				&allow-other-keys)
   (declare (ignore environment))
   #+copy-&rest-arg (setq all-keys (copy-list all-keys))
-  (let ((existing (and (gboundp function-specifier)		       
+  (let ((existing (and (gboundp function-specifier)
 		       (gdefinition function-specifier))))
     (if (and existing
 	     (eq *boot-state* 'complete)
@@ -1283,7 +1283,7 @@ work during bootstrapping.
   (make-specializable name)
   (funcall continuation :specialize-it))
 
-(defvar *sgf-wrapper* 
+(defvar *sgf-wrapper*
   (make-wrapper (early-class-size 'standard-generic-function)))
 
 (defvar *sgf-slots-init*
@@ -1296,7 +1296,7 @@ work during bootstrapping.
 			*slot-unbound*))))
 	  (early-collect-inheritance 'standard-generic-function)))
 
-(defvar *sgf-method-class-index* 
+(defvar *sgf-method-class-index*
   (bootstrap-slot-index 'standard-generic-function 'method-class))
 
 (defun early-gf-p (x)
@@ -1304,19 +1304,19 @@ work during bootstrapping.
        (eq (instance-ref (get-slots x) *sgf-method-class-index*)
 	   *slot-unbound*)))
 
-(defvar *sgf-methods-index* 
+(defvar *sgf-methods-index*
   (bootstrap-slot-index 'standard-generic-function 'methods))
 
 (defmacro early-gf-methods (gf)
   `(instance-ref (get-slots ,gf) *sgf-methods-index*))
 
-(defvar *sgf-arg-info-index* 
+(defvar *sgf-arg-info-index*
   (bootstrap-slot-index 'standard-generic-function 'arg-info))
 
 (defmacro early-gf-arg-info (gf)
   `(instance-ref (get-slots ,gf) *sgf-arg-info-index*))
 
-(defvar *sgf-dfun-state-index* 
+(defvar *sgf-dfun-state-index*
   (bootstrap-slot-index 'standard-generic-function 'dfun-state))
 
 (defstruct (arg-info
@@ -1361,7 +1361,7 @@ work during bootstrapping.
 		      (early-gf-methods gf)))
 	 (was-valid-p (integerp (arg-info-number-optional arg-info)))
 	 (first-p (and new-method (null (cdr methods)))))
-    (when (and (not lambda-list-p) methods)      
+    (when (and (not lambda-list-p) methods)
       (setq lambda-list (gf-lambda-list gf)))
     (when (or lambda-list-p
 	      (and first-p (eq (arg-info-lambda-list arg-info) ':no-lambda-list)))
@@ -1386,7 +1386,7 @@ work during bootstrapping.
 	(setf (arg-info-metatypes arg-info) (make-list nreq))
 	(setf (arg-info-number-optional arg-info) nopt)
 	(setf (arg-info-key/rest-p arg-info) (not (null (or keysp restp))))
-	(setf (arg-info-keywords arg-info) 
+	(setf (arg-info-keywords arg-info)
 	      (if lambda-list-p
 		  (if allow-other-keys-p t keywords)
 		  (arg-info-key/rest-p arg-info)))))
@@ -1425,7 +1425,7 @@ work during bootstrapping.
 	    (lose "the method does not accept each of the keyword arguments~%~
                  ~S." gf-keywords)))))))
 
-(defun set-arg-info1 (gf arg-info new-method methods was-valid-p first-p)  
+(defun set-arg-info1 (gf arg-info new-method methods was-valid-p first-p)
   (let* ((existing-p (and methods (cdr methods) new-method))
 	 (nreq (length (arg-info-metatypes arg-info)))
 	 (metatypes (if existing-p
@@ -1472,9 +1472,9 @@ work during bootstrapping.
     (let ((name (if (eq *boot-state* 'complete)
 		    (generic-function-name gf)
 		    (early-gf-name gf))))
-      (setf (gf-precompute-dfun-and-emf-p arg-info) 
+      (setf (gf-precompute-dfun-and-emf-p arg-info)
 	    (let* ((sym (if (atom name) name (cadr name)))
-		   (pkg-list (cons *the-pcl-package* 
+		   (pkg-list (cons *the-pcl-package*
 				   (package-use-list *the-pcl-package*))))
 	      (and sym (symbolp sym)
 		   (not (null (memq (symbol-package sym) pkg-list)))
@@ -1482,7 +1482,7 @@ work during bootstrapping.
   (setf (gf-info-fast-mf-p arg-info)
 	(or (not (eq *boot-state* 'complete))
 	    (let* ((method-class (generic-function-method-class gf))
-		   (methods (compute-applicable-methods 
+		   (methods (compute-applicable-methods
 			     #'make-method-lambda
 			     (list gf (class-prototype method-class)
 				   '(lambda) nil))))
@@ -1496,14 +1496,14 @@ work during bootstrapping.
 
 ;;;
 ;;; This is the early definition of ensure-generic-function-using-class.
-;;; 
+;;;
 ;;; The static-slots field of the funcallable instances used as early generic
 ;;; functions is used to store the early methods and early discriminator code
 ;;; for the early generic function.  The static slots field of the fins
 ;;; contains a list whose:
 ;;;    CAR    -   a list of the early methods on this early gf
 ;;;    CADR   -   the early discriminator code for this method
-;;;    
+;;;
 (defun ensure-generic-function-using-class (existing spec &rest keys
 					    &key (lambda-list nil lambda-list-p)
 					    &allow-other-keys)
@@ -1512,7 +1512,7 @@ work during bootstrapping.
 	 existing)
 	((assoc spec *generic-function-fixups* :test #'equal)
 	 (if existing
-	     (make-early-gf spec lambda-list lambda-list-p existing)	       
+	     (make-early-gf spec lambda-list lambda-list-p existing)
 	     (error "The function ~S is not already defined" spec)))
 	(existing
 	 (error "~S should be on the list ~S" spec '*generic-function-fixups*))
@@ -1522,8 +1522,8 @@ work during bootstrapping.
 
 (defun make-early-gf (spec &optional lambda-list lambda-list-p function)
   (let ((fin (allocate-funcallable-instance *sgf-wrapper* *sgf-slots-init*)))
-    (set-funcallable-instance-function 
-     fin 
+    (set-funcallable-instance-function
+     fin
      (or function
 	 (if (eq spec 'print-object)
 	     #'(lambda (instance stream)
@@ -1571,7 +1571,7 @@ work during bootstrapping.
       (function nil)
       (cons (cddr state)))))
 
-(defvar *sgf-name-index* 
+(defvar *sgf-name-index*
   (bootstrap-slot-index 'standard-generic-function 'name))
 
 (defun early-gf-name (gf)
@@ -1594,7 +1594,7 @@ work during bootstrapping.
 			     (early-method-lambda-list method)
 			     (method-lambda-list method)))
 		     (k (member '&key ll)))
-		(if k 
+		(if k
 		    (append (ldiff ll (cdr k)) '(&allow-other-keys))
 		    ll))))
 	(arg-info-lambda-list arg-info))))
@@ -1617,7 +1617,7 @@ work during bootstrapping.
 					(car combin)
 					(cdr combin)))))
      ))
-     
+
 (defun real-ensure-gf-using-class--generic-function
        (existing
 	function-specifier
@@ -1647,7 +1647,7 @@ work during bootstrapping.
   (real-ensure-gf-internal generic-function-class all-keys environment)
   (prog1
       (setf (gdefinition function-specifier)
-	    (apply #'make-instance generic-function-class 
+	    (apply #'make-instance generic-function-class
 		   :name function-specifier all-keys))
     (when lambda-list-p
       (proclaim-defgeneric function-specifier lambda-list))))
@@ -1677,7 +1677,7 @@ work during bootstrapping.
     ;; specializers and set parsed and unparsed appropriately.  If we
     ;; got class objects, then we can compute unparsed, but if we got
     ;; class names we don't try to compute parsed.
-    ;; 
+    ;;
     ;; Note that the use of not symbolp in this call to every should be
     ;; read as 'classp' we can't use classp itself because it doesn't
     ;; exist yet.
@@ -1689,16 +1689,16 @@ work during bootstrapping.
 	(setq unparsed specializers
 	      parsed ()))
     (list :early-method		  ;This is an early method dammit!
-	  
+
 	  (getf initargs ':function)
 	  (getf initargs ':fast-function)
-	  
+
 	  parsed                  ;The parsed specializers.  This is used
 				  ;by early-method-specializers to cache
 				  ;the parse.  Note that this only comes
 				  ;into play when there is more than one
 				  ;early method on an early gf.
-	  
+
 	  (list class             ;A list to which real-make-a-method
 		qualifiers        ;can be applied to make a real method
 		arglist           ;corresponding to this early one.
@@ -1712,7 +1712,7 @@ work during bootstrapping.
        (class qualifiers lambda-list specializers initargs doc
 	&optional slot-name)
   (setq specializers (parse-specializers specializers))
-  (apply #'make-instance class 
+  (apply #'make-instance class
 	 :qualifiers qualifiers
 	 :lambda-list lambda-list
 	 :specializers specializers
@@ -1749,7 +1749,7 @@ work during bootstrapping.
 ;;;  to class objects done.
 ;;;  the corresponds to the fact that we are only allowed to have one method
 ;;;  on any generic function up until the time classes exist.
-;;;  
+;;;
 (defun early-method-specializers (early-method &optional objectsp)
   (if (and (listp early-method)
 	   (eq (car early-method) :early-method))
@@ -1866,7 +1866,7 @@ work during bootstrapping.
 			   standard-class-p
 			   funcallable-standard-class-p
 			   specializerp)))
-      (setq *early-generic-functions* 
+      (setq *early-generic-functions*
 	    (cons spec (delete spec *early-generic-functions* :test #'equal))))
 
     (dolist (early-gf-spec *early-generic-functions*)
@@ -1881,10 +1881,10 @@ work during bootstrapping.
 	(setf (generic-function-method-class gf) *the-class-standard-method*)
 	(setf (generic-function-method-combination gf) *standard-method-combination*)
 	(set-methods gf methods)))
-	  
+
     (dolist (fns *early-functions*)
       (setf (gdefinition (car fns)) (symbol-function (caddr fns))))
-      
+
     (dolist (fixup *generic-function-fixups*)
       (let* ((fspec (car fixup))
 	     (gf (gdefinition fspec))
@@ -1894,7 +1894,7 @@ work during bootstrapping.
 					 (method-fn-name (third method))
 					 (fn-name (or method-fn-name fspec))
 					 (fn (symbol-function fn-name))
-					 (initargs 
+					 (initargs
 					  (list :function
 						(set-function-name
 						 #'(lambda (args next-methods)
@@ -1918,7 +1918,7 @@ work during bootstrapping.
 ;;; parse-defmethod is used by defmethod to parse the &rest argument into
 ;;; the 'real' arguments.  This is where the syntax of defmethod is really
 ;;; implemented.
-;;; 
+;;;
 (defun parse-defmethod (cdr-of-form)
   ;;(declare (values name qualifiers specialized-lambda-list body))
   (let ((name (pop cdr-of-form))
@@ -1962,7 +1962,7 @@ work during bootstrapping.
 (defun parse-method-or-spec (spec &optional (errorp t))
   ;;(declare (values generic-function method method-name))
   (let (gf method name temp)
-    (if (method-p spec)	
+    (if (method-p spec)
 	(setq method spec
 	      gf (method-generic-function method)
 	      temp (and gf (generic-function-name gf))
@@ -1982,7 +1982,7 @@ work during bootstrapping.
 				      (make-list (- nreq (length specls))
 						 :initial-element
 						 *the-class-t*)))
-		 (and 
+		 (and
 		   (setq method (get-method gf quals specls errorp))
 		   (setq name
 			 (intern-function-name (make-method-spec gf-spec
@@ -2045,7 +2045,7 @@ work during bootstrapping.
 	  (post-keyword
 	   ;; After a lambda-list-keyword there can be no specializers.
 	   (multiple-value-bind (parameters lambda-list)
-	       (parse-specialized-lambda-list (cdr arglist) t)	       
+	       (parse-specialized-lambda-list (cdr arglist) t)
 	     (values (cons (if (listp arg) (car arg) arg) parameters)
 		     (cons arg lambda-list)
 		     ()
@@ -2112,7 +2112,7 @@ work during bootstrapping.
 	   (let* ((vars (cadr form))
 		  (gensyms (mapcar #'(lambda (i) (declare (ignore i)) (gensym))
 				   vars)))
-	     `(multiple-value-bind ,gensyms 
+	     `(multiple-value-bind ,gensyms
 		  ,(caddr form)
 		.,(reverse (mapcar #'(lambda (v g) `(setf ,v ,g))
 				   vars
@@ -2131,7 +2131,7 @@ work during bootstrapping.
                 `((declare (variable-rebinding ,in ,instance)))))
        ,in
        (symbol-macrolet ,(mapcar #'(lambda (slot-entry)
-				     (let ((variable-name 
+				     (let ((variable-name
 					    (if (symbolp slot-entry)
 						slot-entry
 						(car slot-entry)))
@@ -2161,6 +2161,4 @@ work during bootstrapping.
 				        (,accessor-name ,in))))
 			       slots)
           ,@body))))
-
-
 

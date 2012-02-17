@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -39,7 +39,7 @@
     (progn
       (pushnew :turbo-closure *features*)
       (pushnew :turbo-closure-env-size *features*))
-    (when (fboundp 'si::allocate-growth) 
+    (when (fboundp 'si::allocate-growth)
       (pushnew :turbo-closure *features*)))
 
 ;; patch around compiler bug.
@@ -59,7 +59,7 @@
 (when (get 'si::basic-wrapper 'si::s-data)
   (pushnew :new-kcl-wrapper *features*)
   (pushnew :structure-wrapper *features*))
-  
+
 )
 
 
@@ -173,7 +173,7 @@
 					  (si:structure-ref x name i))
 				   (return nil)))))))))))))
 
-(defun si::apply-display-fun (display-fun  n lis)  
+(defun si::apply-display-fun (display-fun  n lis)
   (let ((*print-length* si::*debug-print-level*)
 	(*print-level* si::*debug-print-level*)
 	(*print-pretty* nil)
@@ -207,7 +207,7 @@
 			   ((<= j i) nil)
 			 (setq form (si::ihs-fun j))
 			 (cond ((setq li (si::get-line-of-form form line-info))
-				(return-from si::next-stack-frame 
+				(return-from si::next-stack-frame
 				  (si::mv-values
 				   i fun li
 				   ;; filename
@@ -304,18 +304,18 @@
   (multiple-value-bind (vars vals stores store-form access-form)
       (get-setf-method-multiple-value form)
     (unless (listp vars)
-	    (error 
- "The temporary variables component, ~s, 
+	    (error
+ "The temporary variables component, ~s,
   of the setf-method for ~s is not a list."
              vars form))
     (unless (listp vals)
-	    (error 
- "The values forms component, ~s, 
+	    (error
+ "The values forms component, ~s,
   of the setf-method for ~s is not a list."
              vals form))
     (unless (listp stores)
-	    (error 
- "The store variables component, ~s,  
+	    (error
+ "The store variables component, ~s,
   of the setf-method for ~s is not a list."
              stores form))
     (unless (= (list-length stores) 1)
@@ -347,7 +347,7 @@
 	                      (cdr form)))
 		(store (gensym))
 		(l (get (car form) 'setf-lambda))
-		(f `(lambda ,(car l) 
+		(f `(lambda ,(car l)
 		      (funcall #'(lambda ,(cadr l) ,@(cddr l))
 			       ',store))))
 	   (values vars (cdr form) (list store)

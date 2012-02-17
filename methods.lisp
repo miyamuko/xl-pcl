@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -43,7 +43,7 @@
 (defun named-object-print-function (instance stream
 				    &optional (extra nil extra-p))
   (printing-random-thing (instance stream)
-    (if extra-p					
+    (if extra-p
 	(format stream "~A ~S ~:S"
 		(capitalize-words (class-name (class-of instance)))
 		(slot-value-or-default instance 'name)
@@ -69,7 +69,7 @@
     slotd
     (setq allocation (if (eq allocation :class) class allocation))))
 
-(defmethod shared-initialize :after ((slotd structure-slot-definition) slot-names 
+(defmethod shared-initialize :after ((slotd structure-slot-definition) slot-names
 				     &key (allocation :instance))
   (declare (ignore slot-names))
   (unless (eq allocation :instance)
@@ -86,7 +86,7 @@
 ;;; properties of methods can be changed:
 ;;;   METHOD-GENERIC-FUNCTION
 ;;;   METHOD-FUNCTION            ??
-;;;   
+;;;
 ;;;
 
 (defmethod method-function ((method standard-method))
@@ -134,7 +134,7 @@
 ;;; standard method objects the standard primary method can fill the slots.
 ;;;
 ;;; Methods are not reinitializable.
-;;; 
+;;;
 
 (defmethod reinitialize-instance ((method standard-method) &rest initargs)
   (declare (ignore initargs))
@@ -245,7 +245,7 @@
   (initialize-method-function initargs nil method)
   (setf (plist-value method 'qualifiers) qualifiers)
   #+ignore
-  (setf (slot-value method 'closure-generator) 
+  (setf (slot-value method 'closure-generator)
 	(method-function-closure-generator (slot-value method 'function))))
 
 (defmethod shared-initialize :after ((method standard-accessor-method)
@@ -296,7 +296,7 @@
 
   (when namep
     (set-function-name generic-function name))
-		   
+
   (flet ((initarg-error (initarg value string)
 	   (error "When initializing the generic-function ~S:~%~
                    The ~S initialization argument was: ~A.~%~
@@ -360,7 +360,7 @@
 
 ;;;
 ;;; These three are scheduled for demolition.
-;;; 
+;;;
 (defmethod remove-named-method (generic-function-name argument-specifiers
 						      &optional extra)
   (let ((generic-function ())
@@ -405,7 +405,7 @@
 ;   (when existing (remove-method generic-function existing))
     (add-method generic-function new)))
 
-	
+
 (defun make-specializable (function-name &key (arglist nil arglistp))
   (cond ((not (null arglistp)))
 	((not (fboundp function-name)))
@@ -552,7 +552,7 @@
   (with-slots (arg-info)
     gf
     (if lambda-list-p
-	(set-arg-info gf 
+	(set-arg-info gf
 		      :lambda-list lambda-list
 		      :argument-precedence-order argument-precedence-order)
 	(set-arg-info gf))
@@ -562,16 +562,16 @@
 (defmethod reinitialize-instance :after ((gf standard-generic-function)
 					 &rest args
 					 &key (lambda-list nil lambda-list-p)
-					 (argument-precedence-order 
+					 (argument-precedence-order
 					  nil argument-precedence-order-p))
   (with-slots (arg-info)
     gf
     (if lambda-list-p
 	(if argument-precedence-order-p
-	    (set-arg-info gf 
+	    (set-arg-info gf
 			  :lambda-list lambda-list
 			  :argument-precedence-order argument-precedence-order)
-	    (set-arg-info gf 
+	    (set-arg-info gf
 			  :lambda-list lambda-list))
 	(set-arg-info gf))
     (when (and (arg-info-valid-p arg-info)
@@ -606,7 +606,7 @@
 	;; get rid of it before proceeding.  Note that we call the
 	;; generic function remove-method to remove it rather than
 	;; doing it in some internal way.
-	;; 
+	;;
 	(when existing (remove-method generic-function existing))
 	;;
 	(setf (method-generic-function method) generic-function)
@@ -615,13 +615,13 @@
 	  (add-direct-method specializer method))
 	(set-arg-info generic-function :new-method method)
 	(unless skip-dfun-update-p
-	  (when (member name 
+	  (when (member name
 			'(make-instance default-initargs
 			  allocate-instance shared-initialize initialize-instance))
 	    (update-make-instance-function-table (type-class (car specializers))))
 	  (update-dfun generic-function))
 	method)))
-  
+
 (defun real-remove-method (generic-function method)
   (if  (neq generic-function (method-generic-function method))
        (error "The method ~S is attached to the generic function~@
@@ -631,7 +631,7 @@
        (let* ((name         (generic-function-name generic-function))
 	      (specializers (method-specializers method))
 	      (methods      (generic-function-methods generic-function))
-	      (new-methods  (remove method methods)))	      
+	      (new-methods  (remove method methods)))
 	 (setf (method-generic-function method) nil)
 	 (setf (generic-function-methods generic-function) new-methods)
 	 (dolist (specializer (method-specializers method))
@@ -645,19 +645,19 @@
 
 
 (defun compute-applicable-methods-function (generic-function arguments)
-  (values (compute-applicable-methods-using-types 
-	   generic-function
-	   (types-from-arguments generic-function arguments 'eql))))
-  
-(defmethod compute-applicable-methods 
-    ((generic-function generic-function) arguments)
-  (values (compute-applicable-methods-using-types 
+  (values (compute-applicable-methods-using-types
 	   generic-function
 	   (types-from-arguments generic-function arguments 'eql))))
 
-(defmethod compute-applicable-methods-using-classes 
+(defmethod compute-applicable-methods
+    ((generic-function generic-function) arguments)
+  (values (compute-applicable-methods-using-types
+	   generic-function
+	   (types-from-arguments generic-function arguments 'eql))))
+
+(defmethod compute-applicable-methods-using-classes
     ((generic-function generic-function) classes)
-  (compute-applicable-methods-using-types 
+  (compute-applicable-methods-using-types
    generic-function
    (types-from-arguments generic-function classes 'class-eq)))
 
@@ -763,12 +763,12 @@
   (let ((types (mapcar #'class-eq-type classes)))
     (multiple-value-bind (methods all-applicable-and-sorted-p)
 	(compute-applicable-methods-using-types gf types)
-      (function-funcall (get-secondary-dispatch-function1 
+      (function-funcall (get-secondary-dispatch-function1
 			 gf methods types nil t all-applicable-and-sorted-p)
 			nil (mapcar #'class-wrapper classes)))))
 
 (defun value-for-caching (gf classes)
-  (let ((methods (compute-applicable-methods-using-types 
+  (let ((methods (compute-applicable-methods-using-types
 		   gf (mapcar #'class-eq-type classes))))
     (method-function-get (or (method-fast-function (car methods))
 			     (method-function (car methods)))
@@ -791,13 +791,13 @@
 
 (defvar *std-cam-methods* nil)
 
-(defun compute-applicable-methods-emf (generic-function)  
+(defun compute-applicable-methods-emf (generic-function)
   (if (eq *boot-state* 'complete)
       (let* ((cam (gdefinition 'compute-applicable-methods))
 	     (cam-methods (compute-applicable-methods-using-types
 			   cam (list `(eql ,generic-function) t))))
 	(values (get-effective-method-function cam cam-methods)
-		(list-eq cam-methods 
+		(list-eq cam-methods
 			 (or *std-cam-methods*
 			     (setq *std-cam-methods*
 				   (compute-applicable-methods-using-types
@@ -823,7 +823,7 @@
 		(if (eql-specializer-p specl)
 		    (pushnew (specializer-object specl) gfs-to-do)
 		    (pushnew (specializer-class specl) gf-classes-to-do)))))
-	  (map-all-generic-functions 
+	  (map-all-generic-functions
 	   #'(lambda (gf)
 	       (when (or (member gf gfs-to-do)
 			 (dolist (class gf-classes-to-do nil)
@@ -863,7 +863,7 @@
 			   *standard-method-combination*))
 	      type)))))
 
-(defun get-accessor-method-function (gf type class slotd)  
+(defun get-accessor-method-function (gf type class slotd)
   (let* ((std-method (standard-svuc-method type))
 	 (str-method (structure-svuc-method type))
 	 (types1 `((eql ,class) (class-eq ,class) (eql ,slotd)))
@@ -875,7 +875,7 @@
 	 (get-optimized-std-accessor-method-function class slotd type)
 	 (get-accessor-from-svuc-method-function
 	  class slotd
-	  (get-secondary-dispatch-function 
+	  (get-secondary-dispatch-function
 	   gf methods types
 	   `((,(car (or (member std-method methods)
 			(member str-method methods)
@@ -948,16 +948,16 @@
 		 (every #'classp specls))
 	(cond ((and (eq (class-name (car specls))
 			'std-class)
-		    (eq (class-name (cadr specls)) 
+		    (eq (class-name (cadr specls))
 			'standard-object)
-		    (eq (class-name (caddr specls)) 
+		    (eq (class-name (caddr specls))
 			'standard-effective-slot-definition))
 	       (set-standard-svuc-method type method))
 	      ((and (eq (class-name (car specls))
 			'structure-class)
 		    (eq (class-name (cadr specls))
 			'structure-object)
-		    (eq (class-name (caddr specls)) 
+		    (eq (class-name (caddr specls))
 			'structure-effective-slot-definition))
 	       (set-structure-svuc-method type method)))))))
 
@@ -1008,7 +1008,7 @@
 	 (default '(default)))
     (flet ((add-class-list (classes)
 	     (when (or (null new-class) (memq new-class classes))
-	       (let ((wrappers (get-wrappers-from-classes 
+	       (let ((wrappers (get-wrappers-from-classes
 				nkeys wrappers classes metatypes)))
 		 (when (and wrappers
 			    (eq default (probe-cache cache wrappers default)))
@@ -1032,7 +1032,7 @@
 	 `(or (std-instance-p ,arg)
 	      (fsc-instance-p ,arg))
 	 #-new-kcl-wrapper
-	 `(not (eq *the-class-built-in-class* 
+	 `(not (eq *the-class-built-in-class*
 		   (wrapper-class (std-instance-wrapper (class-of ,arg))))))
 	#-new-kcl-wrapper
 	((eq class *the-class-standard-object*)
@@ -1076,13 +1076,13 @@
 (defun generate-discrimination-net (generic-function methods types sorted-p)
   (let* ((arg-info (gf-arg-info generic-function))
 	 (precedence (arg-info-precedence arg-info)))
-    (generate-discrimination-net-internal 
+    (generate-discrimination-net-internal
      generic-function methods types
      #'(lambda (methods known-types)
 	 (if (or sorted-p
 		 (block one-order-p
 		   (let ((sorted-methods nil))
-		     (map-all-orders 
+		     (map-all-orders
 		      (copy-list methods) precedence
 		      #'(lambda (methods)
 			  (when sorted-methods (return-from one-order-p nil))
@@ -1137,17 +1137,17 @@
 	 (precedence (arg-info-precedence arg-info))
 	 (*in-precompute-effective-methods-p* t)
 	 (classes-list nil))
-    (generate-discrimination-net-internal 
+    (generate-discrimination-net-internal
      gf methods nil
      #'(lambda (methods known-types)
 	 (when methods
 	   (when classes-list-p
 	     (push (mapcar #'class-from-type known-types) classes-list))
 	   (let ((no-eql-specls-p (not (methods-contain-eql-specializer-p methods))))
-	     (map-all-orders 
+	     (map-all-orders
 	      methods precedence
 	      #'(lambda (methods)
-		  (get-secondary-dispatch-function1 
+		  (get-secondary-dispatch-function1
 		   gf methods known-types
 		   nil caching-p no-eql-specls-p))))))
      #'(lambda (position type true-value false-value)
@@ -1159,7 +1159,7 @@
 	     type)))
     classes-list))
 
-; we know that known-type implies neither new-type nor `(not ,new-type) 
+; we know that known-type implies neither new-type nor `(not ,new-type)
 (defun augment-type (new-type known-type)
   (if (or (eq known-type 't)
 	  (eq (car new-type) 'eql))
@@ -1179,7 +1179,7 @@
 
 #+lcl3.0 (dont-use-production-compiler)
 
-(defun generate-discrimination-net-internal 
+(defun generate-discrimination-net-internal
     (gf methods types methods-function test-function type-function)
   (let* ((arg-info (gf-arg-info gf))
 	 (precedence (arg-info-precedence arg-info))
@@ -1192,9 +1192,9 @@
 		     (if (eq (nth position metatypes) 't)
 			 (do-column (cdr p-tail) contenders
 				    (cons (cons position known-type) known-types))
-			 (do-methods p-tail contenders 
+			 (do-methods p-tail contenders
 				     known-type () known-types)))
-		   (funcall methods-function contenders 
+		   (funcall methods-function contenders
 			    (let ((k-t (make-list nreq)))
 			      (dolist (index+type known-types)
 				(setf (nth (car index+type) k-t) (cdr index+type)))
@@ -1208,7 +1208,7 @@
                ;; <winners>
 	       ;;   is a (sorted) list of methods that are potentially applicable
 	       ;;   after the discrimination has been made.
-	       ;;   
+	       ;;
                (if (null contenders)
 		   (do-column (cdr p-tail) winners
 			      (cons (cons (car p-tail) known-type) known-types))
@@ -1233,13 +1233,13 @@
 				    known-types))))
 			 (cond ((determined-to-be nil) (do-if nil t))
 			       ((determined-to-be t)   (do-if t   t))
-			       (t (funcall test-function position type 
+			       (t (funcall test-function position type
 					   (do-if t) (do-if nil))))))))))
       (do-column precedence methods ()))))
 
 #+lcl3.0 (use-previous-compiler)
 
-(defun compute-secondary-dispatch-function (generic-function net &optional 
+(defun compute-secondary-dispatch-function (generic-function net &optional
 					    method-alist wrappers)
   (function-funcall (compute-secondary-dispatch-function1 generic-function net)
 		    method-alist wrappers))
@@ -1418,7 +1418,7 @@
 
 (defun make-unordered-methods-emf (generic-function methods)
   (when *show-make-unordered-methods-emf-calls*
-    (format t "~&make-unordered-methods-emf ~s~%" 
+    (format t "~&make-unordered-methods-emf ~s~%"
 	    (generic-function-name generic-function)))
   #'(lambda (&rest args)
       #+copy-&rest-arg (setq args (copy-list args))
@@ -1434,7 +1434,7 @@
 ;;; when the generic function is called and its role is to discriminate
 ;;; on the arguments to the generic function and then call appropriate
 ;;; method functions.
-;;; 
+;;;
 ;;; A discriminating function can only be called when it is installed as
 ;;; the funcallable instance function of the generic function for which
 ;;; it was computed.
@@ -1450,7 +1450,7 @@
 ;;; permitted to return a function which itself ends up calling the value
 ;;; returned by a more specific method.  This kind of `encapsulation' of
 ;;; discriminating function is critical to many uses of the MOP.
-;;; 
+;;;
 ;;; As an example, the following canonical case is legal:
 ;;;
 ;;;   (defmethod compute-discriminating-function ((gf my-generic-function))
@@ -1588,11 +1588,11 @@
 ;;; the spec.  The lambda list it constructs is the pretty union of the
 ;;; lambda lists of all the methods.  It doesn't take method applicability
 ;;; into account at all yet.
-;;; 
+;;;
 (defmethod generic-function-pretty-arglist
 	   ((generic-function standard-generic-function))
   (let ((methods (generic-function-methods generic-function))
-	(arglist ()))      
+	(arglist ()))
     (when methods
       (multiple-value-bind (required optional rest key allow-other-keys)
 	  (method-pretty-arglist (car methods))
@@ -1616,7 +1616,7 @@
 	(when optional
 	  (setq arglist (nconc (list '&optional) optional arglist)))
 	(nconc required arglist)))))
-  
+
 
 (defmethod method-pretty-arglist ((method standard-method))
   (let ((required ())

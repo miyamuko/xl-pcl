@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -37,7 +37,7 @@
 ;;; this prevents instance creation from spending a lot of time incrementing
 ;;; the large refcount of the class-wrapper.  This is safe because there will
 ;;; always be some other pointer to the wrapper to keep it around.
-;;; 
+;;;
 #+Xerox-Medley
 (defstruct (std-instance (:predicate std-instance-p)
 			 (:conc-name %std-instance-)
@@ -55,20 +55,20 @@
 
   (xcl:definline std-instance-p (x)
     (typep x 'std-instance))
-  
+
   (xcl:definline %%allocate-instance--class ()
     (il:create std-instance))
 
-  (xcl:definline %std-instance-wrapper (x) 
+  (xcl:definline %std-instance-wrapper (x)
     (il:fetch (std-instance wrapper) il:of x))
 
-  (xcl:definline %std-instance-slots (x) 
+  (xcl:definline %std-instance-slots (x)
     (il:fetch (std-instance slots) il:of x))
 
-  (xcl:definline set-%std-instance-wrapper (x value) 
+  (xcl:definline set-%std-instance-wrapper (x value)
     (il:replace (std-instance wrapper) il:of x il:with value))
 
-  (xcl:definline set-%std-instance-slots (x value) 
+  (xcl:definline set-%std-instance-slots (x value)
     (il:replace (std-instance slots) il:of x il:with value))
 
   (defsetf %std-instance-wrapper set-%std-instance-wrapper)
@@ -79,7 +79,7 @@
 
   )
 
-(defun %print-std-instance (instance &optional stream depth)  
+(defun %print-std-instance (instance &optional stream depth)
   ;; See the IRM, section 25.3.3.  Unfortunatly, that documentation is
   ;; not correct.  In particular, it makes no mention of the third argument.
   (cond ((streamp stream)
@@ -87,15 +87,15 @@
 	 ;; the printer that we have done the printing ourselves.
 	 (print-std-instance instance stream depth)
 	 t)
-	(t 
-	 ;; Internal printing (again, see the IRM section 25.3.3). 
+	(t
+	 ;; Internal printing (again, see the IRM section 25.3.3).
 	 ;; Return a list containing the string of characters that
 	 ;; would be printed, if the object were being printed for
 	 ;; real.
 	 (list (with-output-to-string (stream)
 		 (print-std-instance instance stream depth))))))
 
-  ;;   
+  ;;
 ;;;;;; FUNCTION-ARGLIST
   ;;
 
@@ -108,7 +108,7 @@
       ;; function (though why that should be hard is beyond me).  On the other
       ;; hand, if the function is compiled, it helps to ask for the "smart"
       ;; arglist.
-      (setq arglist 
+      (setq arglist
 	    (if (consp (symbol-function x))
 		(second (symbol-function x))
 		(il:arglist x t))))
@@ -137,7 +137,7 @@
 (eval-when (compile load eval)
   (il:datatype il:compiled-closure (il:fnheader il:environment))
 
-  (il:blockrecord closure-overlay ((funcallable-instance-p il:flag)))  
+  (il:blockrecord closure-overlay ((funcallable-instance-p il:flag)))
 
   )
 
@@ -152,7 +152,7 @@
 ;;;
 ;;; In Lyric, and until the format of FNHEADER changes, getting the name from
 ;;; a compiled closure looks like this:
-;;; 
+;;;
 ;;; (fetchfield '(nil 4 pointer)
 ;;;             (fetch (compiled-closure fnheader) closure))
 ;;;
@@ -160,7 +160,7 @@
 ;;; is not the place to go into a long tyrade about what is wrong with having
 ;;; record package definitions go away when you ship the sysout; there isn't
 ;;; enough diskspace.
-;;;             
+;;;
 (defun set-function-name-1 (fn new-name uninterned-name)
   (cond ((typep fn 'il:compiled-closure)
 	 (il:\\rplptr (compiled-closure-fnheader fn) 4 new-name)

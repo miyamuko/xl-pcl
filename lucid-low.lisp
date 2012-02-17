@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -23,11 +23,11 @@
 ;;;
 ;;; Suggestions, comments and requests for improvements are also welcome.
 ;;; *************************************************************************
-;;; 
+;;;
 ;;; This is the Lucid lisp version of the file portable-low.
 ;;;
 ;;; Lucid:               (415)329-8400
-;;; 
+;;;
 
 (in-package 'pcl)
 
@@ -35,7 +35,7 @@
 
 (eval-when (eval compile load)
 
-(#-LCL3.0 progn #+LCL3.0 lcl:handler-bind 
+(#-LCL3.0 progn #+LCL3.0 lcl:handler-bind
     #+LCL3.0 ((lcl:warning #'(lambda (condition)
 			       (declare (ignore condition))
 			       (lcl:muffle-warning))))
@@ -44,8 +44,8 @@
 	#-LCL3.0 (let ((x (find-symbol "IMPORT-FROM-LUCID-PKG" "LUCID")))
 		   (if (and x (fboundp x))
 		       (symbol-function x)
-		       ;; Only the #'(lambda (x) ...) below is really needed, 
-		       ;;  but when available, the "internal" function 
+		       ;; Only the #'(lambda (x) ...) below is really needed,
+		       ;;  but when available, the "internal" function
 		       ;;  'import-from-lucid-pkg' provides better checking.
 		       #'(lambda (name)
 			   (import (intern name "LUCID")))))))
@@ -56,7 +56,7 @@
 
   ;;
   ;; For without-interrupts.
-  ;; 
+  ;;
   #+LCL3.0
   (mapc importer '("*SCHEDULER-WAKEUP*" "MAYBE-CALL-SCHEDULER"))
 
@@ -73,13 +73,13 @@
 		   "NEW-STRUCTURE"   	"STRUCTURE-REF"
 		   "STRUCTUREP"         "STRUCTURE-TYPE"  "STRUCTURE-LENGTH"
 		   "PROCEDUREP"     	"PROCEDURE-SYMBOL"
-		   "PROCEDURE-REF" 	"SET-PROCEDURE-REF" 
+		   "PROCEDURE-REF" 	"SET-PROCEDURE-REF"
 		   ))
 ; ;;
 ; ;;  The following is for the "patch" to the general defstruct printer.
 ; (mapc importer '(
 ; 	           "OUTPUT-STRUCTURE" 	  "DEFSTRUCT-INFO"
-;		   "OUTPUT-TERSE-OBJECT"  "DEFAULT-STRUCTURE-PRINT" 
+;		   "OUTPUT-TERSE-OBJECT"  "DEFAULT-STRUCTURE-PRINT"
 ;		   "STRUCTURE-TYPE" 	  "*PRINT-OUTPUT*"
 ;		   ))
   ;;
@@ -87,15 +87,15 @@
   ;; On APOLLO, Domain/CommonLISP 2.10 does not include %logand& whereas
   ;; Domain/CommonLISP 2.20 does; Domain/CommonLISP 2.20 includes :DOMAIN/OS
   ;; on *FEATURES*, so this conditionalizes correctly for APOLLO.
-  #-(or (and APOLLO DOMAIN/OS) LCL3.0 VAX) 
+  #-(or (and APOLLO DOMAIN/OS) LCL3.0 VAX)
   (mapc importer '("COPY-STRUCTURE"  "GET-FDESC"  "SET-FDESC"))
-  
+
   nil))
 
 ;; end of eval-when
 
 )
-	
+
 
 ;;;
 ;;; Patch up for the fact that the PCL package creation in defsys.lisp
@@ -156,20 +156,20 @@
 ;;;
 ;;; From: JonL
 ;;; Date: November 28th, 1988
-;;; 
+;;;
 ;;;  Here's a better attempt to do the without-interrupts macro for LCL3.0.
-;;;  For the 2.1  release, maybe you should just ignore it (i.e, turn it 
+;;;  For the 2.1  release, maybe you should just ignore it (i.e, turn it
 ;;;  into a PROGN and "take your chances") since there isn't a uniform way
 ;;;  to do inhibition.  2.1 has interrupts, but no multiprocessing.
 ;;;
 ;;;  The best bet for protecting the cache is merely to inhibit the
 ;;;  scheduler, since asynchronous interrupts are only run when "scheduled".
-;;;  Of course, there may be other interrupts, which can cons and which 
+;;;  Of course, there may be other interrupts, which can cons and which
 ;;;  could cause a GC; but at least they wouldn't be running PCL type code.
 ;;;
 ;;;  Note that INTERRUPTS-ON shouldn't arbitrarily enable scheduling again,
 ;;;  but rather simply restore it to the state outside the scope of the call
-;;;  to WITHOUT-INTERRUPTS.  Note also that an explicit call to 
+;;;  to WITHOUT-INTERRUPTS.  Note also that an explicit call to
 ;;;  MAYBE-CALL-SHEDULER must be done when "turning interrupts back on", if
 ;;;  there are any interrupts/schedulings pending; at least the test to see
 ;;;  if any are pending is very fast.
@@ -180,7 +180,7 @@
 		`(when (null outer-scheduling-state)
 		   (setq lcl:*inhibit-scheduling* nil)
 		   (when *scheduler-wakeup* (maybe-call-scheduler))))
-	      (interrupts-off () 
+	      (interrupts-off ()
 		'(setq lcl:*inhibit-scheduling* t)))
      (let ((outer-scheduling-state lcl:*inhibit-scheduling*))
        (prog1 (let ((lcl:*inhibit-scheduling* t)) . ,body)
@@ -225,13 +225,13 @@
 		   (setf (car symbol) 'named-lambda
 			 (cdr symbol) (cons new-name (cdr symbol))))
 		  ((eq (car symbol) 'named-lambda)
-		   (setf (cadr symbol) new-name))))))		  
+		   (setf (cadr symbol) new-name))))))
   fn)
 
 (defun function-arglist (fn)
   (arglist fn))
 
-  ;;   
+  ;;
 ;;;;;; printing-random-thing-internal
   ;;
 (defun printing-random-thing-internal (thing stream)
@@ -269,25 +269,25 @@
   :TYPE  'LISP
   :PREDS 'NIL
   :EFFECTS 'T
-  :OPTIMIZER  #'(lambda (form &optional environment) 
+  :OPTIMIZER  #'(lambda (form &optional environment)
 		  (declare (ignore form environment))
 		  (let* ((fun (second form))
-			 (lambdap (and (consp fun) 
+			 (lambdap (and (consp fun)
 				       (eq (car fun) 'function)
 				       (consp (second fun))
 				       (memq (car (second fun))
 					     '(lambda internal-lambda)))))
-		    (if (not lambdap) 
+		    (if (not lambdap)
 			form
-			(alphatize 
+			(alphatize
 			  (cons (second fun) (cddr form)) environment))))
   :FUNCTIONTYPE '(function (function &rest t) (values &rest t))
   :TYPE-DISPATCH `(((PROCEDURE &REST T) (VALUES &REST T)
-		    ,#'(lambda (anode fun &rest args) 
+		    ,#'(lambda (anode fun &rest args)
 			 (declare (ignore anode fun args))
 			 `(FAST-FUNCALL ,fun ,@args)))
 		   ((COMPILED-FUNCTION &REST T)  (VALUES &REST T)
-		    ,#'(lambda (anode fun &rest args) 
+		    ,#'(lambda (anode fun &rest args)
 			 (declare (ignore anode fun args))
 			 `(FAST-FUNCALL ,fun ,@args))))
   :LAMBDALIST '(FN &REST ARGUMENTS)
@@ -326,7 +326,7 @@
 (defun structure-type-p (type)
   (declare (special lucid::*defstructs*))
   (let ((s-data (gethash type lucid::*defstructs*)))
-    (or (and s-data 
+    (or (and s-data
 	     (eq 'structure (structure-ref s-data 1 'defstruct))) ; type - Fix this
 	(and type (eq *structure-type* type)))))
 

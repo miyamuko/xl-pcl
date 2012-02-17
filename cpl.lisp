@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -31,16 +31,16 @@
 ;;; compute-class-precedence-list
 ;;;
 ;;; Knuth section 2.2.3 has some interesting notes on this.
-;;; 
+;;;
 ;;; What appears here is basically the algorithm presented there.
 ;;;
 ;;; The key idea is that we use class-precedence-description (CPD) structures
 ;;; to store the precedence information as we proceed.  The CPD structure for
 ;;; a class stores two critical pieces of information:
-;;; 
+;;;
 ;;;  - a count of the number of "reasons" why the class can't go
 ;;;    into the class precedence list yet.
-;;;    
+;;;
 ;;;  - a list of the "reasons" this class prevents others from
 ;;;    going in until after it
 ;;
@@ -50,7 +50,7 @@
 ;;; as long as we make sure to keep track of each instance of a "reason".
 ;;;
 ;;; This code is divided into three phases.
-;;; 
+;;;
 ;;;  - the first phase simply generates the CPD's for each of the class
 ;;;    and its superclasses.  The remainder of the code will manipulate
 ;;;    these CPDs rather than the class objects themselves.  At the end
@@ -78,7 +78,7 @@
 ;;;    In the usual case, there is only one candidate for insertion at
 ;;;    any point.  If there is more than one, the specified tiebreaker
 ;;;    rule is used to choose among them.
-;;;    
+;;;
 
 (defmethod compute-class-precedence-list ((root slot-class))
   (compute-std-cpl root (class-direct-superclasses root)))
@@ -156,11 +156,11 @@
     ;; We have to bootstrap the collection of those CPD's that
     ;; have a zero count.  Once we get going, we will maintain
     ;; this list incrementally.
-    ;; 
+    ;;
     (dolist (cpd all-cpds)
       (when (zerop (cpd-count cpd)) (push cpd candidates)))
 
-    
+
     (loop
       (when (null candidates)
 	;;
@@ -176,12 +176,12 @@
       ;; famous RPG tiebreaker rule.  There is some hair here to avoid
       ;; having to call DELETE on the list of candidates.  I dunno if
       ;; its worth it but what the hell.
-      ;; 
+      ;;
       (setq next-cpd
 	    (if (null (cdr candidates))
 		(prog1 (car candidates)
 		       (setq candidates ()))
-		(block tie-breaker		      
+		(block tie-breaker
 		  (dolist (c rcpl)
 		    (let ((supers (class-direct-superclasses c)))
 		      (if (memq (cpd-class (car candidates)) supers)
@@ -208,7 +208,7 @@
 	      (format nil "named ~S" (class-name class))
 	      class)
 	  (apply #'format nil format-string format-args)))
-	  
+
 
 (defun cpl-forward-referenced-class-error (class forward-class)
   (flet ((class-or-name (class)
@@ -276,13 +276,13 @@
 		"the class ~A follows the class ~A in the supers of the class ~A"
 		(class-or-name (cadr reason))
 		(class-or-name (car reason))
-		(class-or-name (cadddr reason))))))      
+		(class-or-name (cadddr reason))))))
       reasons)))
 
 (defun find-cycle-reasons (all-cpds)
   (let ((been-here ())           ;List of classes we have visited.
 	(cycle-reasons ()))
-    
+
     (labels ((chase (path)
 	       (if (memq (car path) (cdr path))
 		   (record-cycle (memq (car path) (nreverse path)))
@@ -304,7 +304,7 @@
 			     (return
 			       (push (list c1 c2 :in-supers cpd) reasons)))))))
 		 (push (nreverse reasons) cycle-reasons))))
-      
+
       (dolist (cpd all-cpds)
 	(unless (zerop (cpd-count cpd))
 	  (chase (list cpd))))

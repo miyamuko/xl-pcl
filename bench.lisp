@@ -1,4 +1,4 @@
-;;;-*- Mode: Lisp; Syntax: Common-lisp; Package: user -*- 
+;;;-*- Mode: Lisp; Syntax: Common-lisp; Package: user -*-
 
 (in-package :bench :use '(:lisp :pcl))
 
@@ -13,7 +13,7 @@
 ;;;  between one and five percent.
 ;;;
 ;;;Elapsed time is measured using get-internal-run-time.  Because the accuracy of
-;;;  this number is fairly crude, it is important to use a large number of 
+;;;  this number is fairly crude, it is important to use a large number of
 ;;;  iterations to get an accurate benchmark.  The function median-time may
 ;;;  complain to you if you didn't pick enough iterations.
 ;;;
@@ -82,7 +82,7 @@
   ;; Minimal loop
   (let ((count (gensym)) (result (gensym)))
     `(let ((,count ,N) ,result)
-       (loop 
+       (loop
 	 ;; If you don't use the setq, the compiler may decide that since the
 	 ;; result is ignored, FORM can be "compiled out" of the loop.
 	 (setq ,result ,form)
@@ -129,7 +129,7 @@
 
 (defun Nadd (N)
   (let ((a 2.1))
-    (operations-per-second (+ a a) N))) 
+    (operations-per-second (+ a a) N)))
 
 (defun square (x) (* x x))
 
@@ -141,7 +141,7 @@
 (defun f1 (n) n)
 
 (defun funcall-2 (N)
-  (let ((f #'f1) 
+  (let ((f #'f1)
 	(x 2.1))
     (operations-per-second (funcall f x) N)))
 
@@ -156,7 +156,7 @@
 (defun funcall-5 (N)
   (let ((x 2.1)
 	(f #'square))
-    (let ((g #'(lambda (x) 
+    (let ((g #'(lambda (x)
 		 (operations-per-second (funcall f x) N))))
       (funcall g x))))
 
@@ -173,18 +173,18 @@
 (defvar *object* t)
 (Defun nspecial (N) (operations-per-second (null *object*) N))
 
-(defun nlexical (N) 
+(defun nlexical (N)
   (let ((o t))
     (operations-per-second (null o) N)))
 
-(defun nfree (N) 
+(defun nfree (N)
   (let ((o t))
     (let ((g #'(lambda ()
 		 #+genera (declare (sys:downward-function))
 		 (operations-per-second (null o) N))))
       (funcall g))))
 
-(defun nfree2 (N) 
+(defun nfree2 (N)
   (let ((o t))
     (let ((g #'(lambda ()
 		 (let ((f #'(lambda ()
@@ -208,7 +208,7 @@
     ;;  (bench "ivar reference" n-ivar-ref N)
     (bench "(setf (aref array 5) t)" nsetf N)
     (bench "(funcall lexical-f x)" funcall-2 N)
-    (bench "(f x)" funcall-3 N) 
+    (bench "(f x)" funcall-3 N)
     ;;  (Bench "(eval t)" nsymeval 10000)
     ;;  (bench "(eval '(* 2.1 2.1))" repeatuations 10000)
     ;;  (bench "(cons 1 2)" n-cons 100000)
@@ -221,7 +221,7 @@
 
 #+genera
 (progn
-  
+
 (scl:defflavor bar (a b) ()
   :initable-instance-variables
   :writable-instance-variables)
@@ -280,7 +280,7 @@
   (bench "slot symbol in method (access)" n-hop 100000)
   (bench "slot symbol in method (modify)" n-hop 100000)
   (bench "slot accessor bar" n-bar-b 100000)
-  (bench "slot accessor frob" n-frob-bar-b 100000) 
+  (bench "slot accessor frob" n-frob-bar-b 100000)
   (bench "instance-flavor" n-type-of 500000))
 
 ) ; end of #+genera
@@ -316,7 +316,7 @@
 
 (defmethod area ((thing box)) 0)
 (defmethod move-to ((box box) (point point)) 0)
-(defmethod address :around ((thing box)) (call-next-method))	
+(defmethod address :around ((thing box)) (call-next-method))
 
 (defvar p (make-instance 'point))
 (defvar b (make-instance 'box))
@@ -428,7 +428,7 @@
 	   #+allegro 100000
 	   #+(and Genera (not pcl)) 100000
 	   #+(and Lucid (not pcl)) 10000)
-    
+
     (bench "make-instance (2 slots)" n-make1
 	   #+pcl 5000
 	   #+allegro 100000

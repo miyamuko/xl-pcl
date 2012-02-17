@@ -1,5 +1,5 @@
 ;;; -*- Mode: Lisp; Base: 10; Syntax: Common-Lisp; Package: DSYS -*-
-;;; File: sysdef.lisp 
+;;; File: sysdef.lisp
 ;;; Author: Richard Harris
 
 (in-package "DSYS")
@@ -33,7 +33,7 @@
     (let ((b-s 'pcl::*boot-state*))
       (when (and (boundp b-s) (symbol-value b-s))
 	#+ignore (reset-pcl-package)))
-    (load-file defsys)))  
+    (load-file defsys)))
 
 (defun maybe-load-pcl (&optional force-p)
   (unless (and (null force-p)
@@ -51,18 +51,18 @@
 (defsystem pcl
     (:pretty-name "PCL")
   #+akcl
-  (:forms 
+  (:forms
    :compile (let ((cfn (subfile '("pcl") :name "collectfn" :type "lisp")))
 	      (unless (probe-file cfn)
-		(run-unix-command 
+		(run-unix-command
 		 (format nil "ln -s ~A ~A"
-			 (namestring (merge-pathnames "../cmpnew/collectfn.lsp" 
+			 (namestring (merge-pathnames "../cmpnew/collectfn.lsp"
 						      si::*system-directory*))
 			 (namestring cfn))))))
-				     
+
   #+akcl
   "collectfn"
-  (:forms 
+  (:forms
    :compile
    (progn
      (maybe-load-defsys t)
@@ -76,10 +76,10 @@
 	   (when (and (boundp b-s) (symbol-value b-s))
 	     (reset-pcl-package))
 	   #+akcl (compiler::emit-fn t)
-	   #+akcl (load (merge-pathnames "../lsp/sys-proclaim.lisp" 
+	   #+akcl (load (merge-pathnames "../lsp/sys-proclaim.lisp"
 					 si::*system-directory*))
 	   (#+cmu with-compilation-unit #-cmu progn
-	    #+cmu (:optimize 
+	    #+cmu (:optimize
 		   '(optimize (user::debug-info #+(and small (not testing)) .5
 			                        #-(and small (not testing)) 2)
 		              (speed #+testing 1 #-testing 2)
@@ -87,16 +87,16 @@
 		              #+ignore (user::inhibit-warnings 2))
 		   :context-declarations
 		   '(#+ignore
-		     (:external (declare (user::optimize-interface 
+		     (:external (declare (user::optimize-interface
 					  (safety 2) (debug-info 1))))))
-	     (proclaim #+testing *testing-declaration* 
+	     (proclaim #+testing *testing-declaration*
 		       #-testing *fast-declaration*)
 	     (pcl::compile-pcl))
 	   (reset-pcl-package)
 	   (maybe-load-pcl t)))
      #+cmu (purify))
    :load
-   (progn 
+   (progn
      (maybe-load-pcl)
      #+cmu (purify))))
 

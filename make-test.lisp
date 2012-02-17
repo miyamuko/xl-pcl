@@ -40,7 +40,7 @@
 	    (dolist (form (cdr f))
 	      (let ((name (intern (format nil "DFUN-CONSTR-~D" (incf i))))
 		    (form (top-level-form-form form)))
-		(format out "~S~%" `(defun ,name () 
+		(format out "~S~%" `(defun ,name ()
 				      (list ,(second form)
 				            ,(third form)
 				            ,(fixup (macroexpand (fifth form))))))))))))))

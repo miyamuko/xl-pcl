@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -23,13 +23,13 @@
 ;;;
 ;;; Suggestions, comments and requests for improvements are also welcome.
 ;;; *************************************************************************
-;;; 
+;;;
 ;;; This is the EXCL (Franz) lisp version of the file portable-low.
-;;; 
+;;;
 ;;; This is for version 1.1.2.  Many of the special symbols now in the lisp
 ;;; package (e.g. lisp::pointer-to-fixnum) will be in some other package in
 ;;; a later release so this will need to be changed.
-;;; 
+;;;
 
 (in-package 'pcl)
 
@@ -108,8 +108,8 @@
    ;; It insures that all created symbols are of one case and that
    ;; case is the current prefered case.
    ;; This special version of symbol-append is not necessary if all you
-   ;; want to do is compile and run pcl in a case-insensitive-upper 
-   ;; version of cl.  
+   ;; want to do is compile and run pcl in a case-insensitive-upper
+   ;; version of cl.
    ;;
    (let ((string (string-append sym1 sym2)))
       (case excl::*current-case-mode*

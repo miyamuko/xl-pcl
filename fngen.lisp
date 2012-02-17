@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -29,19 +29,19 @@
 
 ;;;
 ;;; GET-FUNCTION is the main user interface to this code. It is like
-;;; COMPILE-LAMBDA, only more efficient. It achieves this efficiency by 
-;;; reducing the number of times that the compiler needs to be called.  
-;;; Calls to GET-FUNCTION in which the lambda forms differ only by constants 
-;;; can use the same piece of compiled code.  (For example, dispatch dfuns and 
-;;; combined method functions can often be shared, if they differ only 
+;;; COMPILE-LAMBDA, only more efficient. It achieves this efficiency by
+;;; reducing the number of times that the compiler needs to be called.
+;;; Calls to GET-FUNCTION in which the lambda forms differ only by constants
+;;; can use the same piece of compiled code.  (For example, dispatch dfuns and
+;;; combined method functions can often be shared, if they differ only
 ;;; by referring to different methods.)
 ;;;
-;;; If GET-FUNCTION is called with a lambda expression only, it will return 
+;;; If GET-FUNCTION is called with a lambda expression only, it will return
 ;;; a corresponding function. The optional constant-converter argument
 ;;; can be a function which will be called to convert each constant appearing
 ;;; in the lambda to whatever value should appear in the function.
 ;;;
-;;; There are three internal functions which operate on the lambda argument 
+;;; There are three internal functions which operate on the lambda argument
 ;;; to GET-FUNCTION:
 ;;;   compute-test converts the lambda into a key to be used for lookup,
 ;;;   compute-code is used by get-new-function-generator-internal to
@@ -52,7 +52,7 @@
 ;;; Whether the returned function is actually compiled depends on whether
 ;;; the compiler is present (see COMPILE-LAMBDA) and whether this shape of
 ;;; code was precompiled.
-;;; 
+;;;
 (defun get-function (lambda
 		      &optional (test-converter     #'default-test-converter)
 		                (code-converter     #'default-code-converter)
@@ -88,7 +88,7 @@
 
 
 ;;;
-;;; *fgens* is a list of all the function generators we have so far.  Each 
+;;; *fgens* is a list of all the function generators we have so far.  Each
 ;;; element is a FGEN structure as implemented below.  Don't ever touch this
 ;;; list by hand, use STORE-FGEN.
 ;;;

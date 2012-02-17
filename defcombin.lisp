@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -86,7 +86,7 @@
 	   (getf (cddr whole) :documentation ""))
 	 (identity-with-one-arg
 	   (getf (cddr whole) :identity-with-one-argument nil))
-	 (operator 
+	 (operator
 	   (getf (cddr whole) :operator type)))
     (make-top-level-form `(define-method-combination ,type)
 			 '(load eval)
@@ -259,7 +259,7 @@
 						  real-body)))
       (when gf-var
 	(push `(,gf-var .generic-function.) (cadr wrapped-body)))
-      
+
       (when arguments-option
 	(setq wrapped-body (deal-with-arguments-option wrapped-body
 						       arguments-option)))
@@ -328,12 +328,12 @@
       ,@required-checks
       ,@order-cleanups
       ,@real-body)))
-   
+
 (defun parse-method-group-specifier (method-group-specifier)
   ;;(declare (values name tests description order required))
   (let* ((name (pop method-group-specifier))
 	 (patterns ())
-	 (tests 
+	 (tests
 	   (gathering1 (collecting)
 	     (block collect-tests
 	       (loop
@@ -366,7 +366,7 @@
 	      ((eq pattern '*) (return t))
 	      ((and pattern qualifiers (eq (car pattern) (car qualifiers)))
 	       (pop pattern)
-	       (pop qualifiers))	      
+	       (pop qualifiers))
 	      (t (return nil)))))
 
 (defun make-default-method-group-description (patterns)
@@ -386,7 +386,7 @@
 ;;;
 ;;; At runtime (when the effective-method is run), we bind an intercept
 ;;; lambda-list to the arguments to the generic function.
-;;; 
+;;;
 ;;; At compute-effective-method time, the symbols in the :arguments
 ;;; option are bound to the symbols in the intercept lambda list.
 ;;;
@@ -410,7 +410,7 @@
     ;;
     ;; Be sure to fill out the intercept lambda list so that it can
     ;; be too short if it wants to.
-    ;; 
+    ;;
     (cond ((memq '&rest intercept-lambda-list))
 	  ((memq '&allow-other-keys intercept-lambda-list))
 	  ((memq '&key intercept-lambda-list)
@@ -426,5 +426,4 @@
 		       ''(declare (ignore .ignore.)))
 		   ,inner-result.)
 	       .combined-method-args.))))
-
 

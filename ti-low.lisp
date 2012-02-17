@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -42,7 +42,7 @@
 (si:defsubst std-instance-p (x)
   (si:typep-structure-or-flavor x 'std-instance))
 
-  ;;   
+  ;;
 ;;;;;; printing-random-thing-internal
   ;;
 (defun printing-random-thing-internal (thing stream)
@@ -78,6 +78,4 @@
     (setf (si:get-debug-info-field (si:get-debug-info-struct function) :name)
 	  new-name))
   function)
-
-
 

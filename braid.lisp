@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -32,7 +32,7 @@
 ;;; class of all metaclasses in the braid is built into this code pretty
 ;;; deeply.
 ;;;
-;;; 
+;;;
 
 (in-package :pcl)
 
@@ -42,7 +42,7 @@
   (let ((instance (%%allocate-instance--class))
 	(no-of-slots (wrapper-no-of-instance-slots wrapper)))
     (setf (%std-instance-wrapper instance) wrapper)
-    (setf (%std-instance-slots instance) 
+    (setf (%std-instance-slots instance)
 	  (if slots-init-p
 	      (make-array no-of-slots :initial-contents slots-init)
 	      (make-array no-of-slots :initial-element *slot-unbound*)))
@@ -56,7 +56,7 @@
 		   (aref *init-vector* no-of-slots)
 		   (get-init-list no-of-slots))))))
 
-(defmacro allocate-funcallable-instance-slots (wrapper &optional 
+(defmacro allocate-funcallable-instance-slots (wrapper &optional
 						       slots-init-p slots-init)
   #-new-kcl-wrapper
   `(let ((no-of-slots (wrapper-no-of-instance-slots ,wrapper)))
@@ -105,11 +105,11 @@
 ;;; bootstrap-meta-braid
 ;;;
 ;;; This function builds the base metabraid from the early class definitions.
-;;;   
+;;;
 (defmacro initial-classes-and-wrappers (&rest classes)
   `(progn
      ,@(mapcar #'(lambda (class)
-		   (let ((wr (intern (format nil "~A-WRAPPER" class) 
+		   (let ((wr (intern (format nil "~A-WRAPPER" class)
 				     *the-pcl-package*)))
 		     `(setf ,wr ,(if (eq class 'standard-generic-function)
 				     '*sgf-wrapper*
@@ -122,14 +122,14 @@
 		            #+new-kcl-wrapper (si::s-data-name ,wr)
 		                   #+new-kcl-wrapper ',class
 		            (find-class ',class) ,class)))
-	      classes)))		        
+	      classes)))
 
 (defun bootstrap-meta-braid ()
   (let* ((name 'class)
 	 (predicate-name (make-type-predicate-name name)))
     (setf (gdefinition predicate-name)
 	  #'(lambda (x) (declare (ignore x)) t))
-    (do-satisfies-deftype name predicate-name))  
+    (do-satisfies-deftype name predicate-name))
   (let* ((*create-classes-from-internal-structure-definitions-p* nil)
 	 standard-class-wrapper standard-class
 	 funcallable-standard-class-wrapper funcallable-standard-class
@@ -140,16 +140,16 @@
 	 standard-effective-slot-definition-wrapper standard-effective-slot-definition
 	 class-eq-specializer-wrapper class-eq-specializer
 	 standard-generic-function-wrapper standard-generic-function)
-    (initial-classes-and-wrappers 
+    (initial-classes-and-wrappers
      standard-class funcallable-standard-class
      slot-class built-in-class structure-class
-     standard-direct-slot-definition standard-effective-slot-definition 
+     standard-direct-slot-definition standard-effective-slot-definition
      class-eq-specializer standard-generic-function)
     ;;
     ;; First, make a class metaobject for each of the early classes.  For
     ;; each metaobject we also set its wrapper.  Except for the class T,
     ;; the wrapper is always that of STANDARD-CLASS.
-    ;; 
+    ;;
     (dolist (definition *early-class-definitions*)
       (let* ((name (ecd-class-name definition))
 	     (meta (ecd-metaclass definition))
@@ -181,15 +181,15 @@
 	    (let* ((class (find-class name))
 		   (wrapper (cond ((eq class slot-class)
 				   slot-class-wrapper)
-				  ((eq class standard-class) 
+				  ((eq class standard-class)
 				   standard-class-wrapper)
-				  ((eq class funcallable-standard-class) 
+				  ((eq class funcallable-standard-class)
 				   funcallable-standard-class-wrapper)
-				  ((eq class standard-direct-slot-definition) 
+				  ((eq class standard-direct-slot-definition)
 				   standard-direct-slot-definition-wrapper)
-				  ((eq class standard-effective-slot-definition) 
+				  ((eq class standard-effective-slot-definition)
 				   standard-effective-slot-definition-wrapper)
-				  ((eq class built-in-class)  
+				  ((eq class built-in-class)
 				   built-in-class-wrapper)
 				  ((eq class structure-class)
 				   structure-class-wrapper)
@@ -206,44 +206,44 @@
 	      (dolist (slot slots)
 		(unless (eq (getf slot :allocation :instance) :instance)
 		  (error "Slot allocation ~S not supported in bootstrap.")))
-	      
+
 	      (setf (wrapper-instance-slots-layout wrapper)
 		    (mapcar #'canonical-slot-name slots))
 	      (setf (wrapper-class-slots wrapper)
 		    ())
-	      
+
 	      (setq proto (if (eq meta 'funcallable-standard-class)
 			      (allocate-funcallable-instance wrapper)
 			      (allocate-standard-instance wrapper)))
-	    
+
 	      (setq direct-slots
-		    (bootstrap-make-slot-definitions 
+		    (bootstrap-make-slot-definitions
 		     name class direct-slots
 		     standard-direct-slot-definition-wrapper nil))
 	      (setq slots
-		    (bootstrap-make-slot-definitions 
+		    (bootstrap-make-slot-definitions
 		     name class slots
 		     standard-effective-slot-definition-wrapper t))
-	      
+
 	      (case meta
 		((standard-class funcallable-standard-class)
-		 (bootstrap-initialize-class 
+		 (bootstrap-initialize-class
 		  meta
 		  class name class-eq-specializer-wrapper source
 		  direct-supers direct-subclasses cpl wrapper proto
 		  direct-slots slots direct-default-initargs default-initargs))
 		(built-in-class		; *the-class-t*
-		 (bootstrap-initialize-class 
+		 (bootstrap-initialize-class
 		  meta
 		  class name class-eq-specializer-wrapper source
 		  direct-supers direct-subclasses cpl wrapper proto))
 		(slot-class		; *the-class-slot-object*
-		 (bootstrap-initialize-class 
+		 (bootstrap-initialize-class
 		  meta
 		  class name class-eq-specializer-wrapper source
 		  direct-supers direct-subclasses cpl wrapper proto))
 		(structure-class	; *the-class-structure-object*
-		 (bootstrap-initialize-class 
+		 (bootstrap-initialize-class
 		  meta
 		  class name class-eq-specializer-wrapper source
 		  direct-supers direct-subclasses cpl wrapper))))))))
@@ -274,9 +274,9 @@
     (set-slot 'type (if (eq class (find-class 't))
 			t
 			`(class ,class)))
-    (set-slot 'class-eq-specializer 
+    (set-slot 'class-eq-specializer
 	      (let ((spec (allocate-standard-instance class-eq-wrapper)))
-		(bootstrap-set-slot 'class-eq-specializer spec 'type 
+		(bootstrap-set-slot 'class-eq-specializer spec 'type
 				    `(class-eq ,class))
 		(bootstrap-set-slot 'class-eq-specializer spec 'object
 				    class)
@@ -306,10 +306,10 @@
 	(let ((constructor-sym '|STRUCTURE-OBJECT class constructor|))
 	  (set-slot 'predicate-name (or (cadr (assoc name *early-class-predicates*))
 					(make-class-predicate-name name)))
-	  (set-slot 'defstruct-form 
+	  (set-slot 'defstruct-form
 		    `(defstruct (structure-object (:constructor ,constructor-sym))))
 	  (set-slot 'defstruct-constructor constructor-sym)
-	  (set-slot 'from-defclass-p t)    
+	  (set-slot 'from-defclass-p t)
 	  (set-slot 'plist nil)
 	  (set-slot 'prototype (funcall constructor-sym)))
 	(set-slot 'prototype (or proto (allocate-standard-instance wrapper))))
@@ -323,7 +323,7 @@
 		  name class slot wrapper effective-p index))
 	    slots)))
 
-(defun bootstrap-make-slot-definition (name class slot wrapper effective-p index)  
+(defun bootstrap-make-slot-definition (name class slot wrapper effective-p index)
   (let* ((slotd-class-name (if effective-p
 			       'standard-effective-slot-definition
 			       'standard-direct-slot-definition))
@@ -333,7 +333,7 @@
 	   (set-val (name val) (bootstrap-set-slot slotd-class-name slotd name val)))
       (set-val 'name         slot-name)
       (set-val 'initform     (get-val :initform))
-      (set-val 'initfunction (get-val :initfunction))      
+      (set-val 'initfunction (get-val :initfunction))
       (set-val 'initargs     (get-val :initargs))
       (set-val 'readers      (get-val :readers))
       (set-val 'writers      (get-val :writers))
@@ -344,11 +344,11 @@
       (when effective-p
 	(set-val 'location index)
 	(let ((fsc-p nil))
-	  (set-val 'reader-function (make-optimized-std-reader-method-function 
+	  (set-val 'reader-function (make-optimized-std-reader-method-function
 				     fsc-p slot-name index))
-	  (set-val 'writer-function (make-optimized-std-writer-method-function 
+	  (set-val 'writer-function (make-optimized-std-writer-method-function
 				     fsc-p slot-name index))
-	  (set-val 'boundp-function (make-optimized-std-boundp-method-function 
+	  (set-val 'boundp-function (make-optimized-std-boundp-method-function
 				     fsc-p slot-name index)))
 	(set-val 'accessor-flags 7)
 	(let ((table (or (gethash slot-name *name->class->slotd-table*)
@@ -375,7 +375,7 @@
 		    (readers (getf slotd :readers))
 		    (writers (getf slotd :writers)))
 		(bootstrap-accessor-definitions1 name slot-name readers writers nil)
-		(bootstrap-accessor-definitions1 
+		(bootstrap-accessor-definitions1
 		 'slot-object
 		 slot-name
 		 (list (slot-reader-symbol slot-name))
@@ -395,7 +395,7 @@
 			(list class-name) (list class-name)
 			"automatically generated boundp method")))
     (let ((gf (ensure-generic-function accessor-name)))
-      (if (find specls (early-gf-methods gf) 
+      (if (find specls (early-gf-methods gf)
 		:key #'early-method-specializers
 		:test #'equal)
 	  (unless (assoc accessor-name *generic-function-fixups*
@@ -434,7 +434,7 @@
   ;; First make sure that all the supers listed in *built-in-class-lattice*
   ;; are themselves defined by *built-in-class-lattice*.  This is just to
   ;; check for typos and other sorts of brainos.
-  ;; 
+  ;;
   (dolist (e *built-in-classes*)
     (dolist (super (cadr e))
       (unless (or (eq super 't)
@@ -472,7 +472,7 @@
 				      supers subs
 				      (cons name cpl)
 				      wrapper prototype)))))
-  
+
   (dolist (e *built-in-classes*)
     (let* ((name (car e))
 	   (class (find-class name)))
@@ -496,14 +496,14 @@
 (defun wrapper-for-structure (x)
   (let ((type (structure-type x)))
     (when (symbolp type)
-      (cond ((eq type 'std-instance) 
+      (cond ((eq type 'std-instance)
 	     (return-from wrapper-for-structure (std-instance-wrapper x)))
 	    ((eq type wft-type1) (return-from wrapper-for-structure wft-wrapper1))
 	    ((eq type wft-type2) (return-from wrapper-for-structure wft-wrapper2))
 	    (t (setq wft-type2 wft-type1  wft-wrapper2 wft-wrapper1))))
     (let* ((cell (find-class-cell type))
 	   (class (or (find-class-cell-class cell)
-		      (let* (#+lucid 
+		      (let* (#+lucid
 			     (*structure-type* type)
 			     #+lucid
 			     (*structure-length* (structure-length x type)))
@@ -518,7 +518,7 @@
     (or (and (eq biw *the-wrapper-of-t*)
 	     (structurep x)
 	     (let* ((type (type-of x))
-		    #+lucid 
+		    #+lucid
 		    (*structure-type* type)
 		    #+lucid
 		    (*structure-length* (structure-length x type))
@@ -545,7 +545,7 @@
   `(cond ((std-instance-p ,x)
 	  (std-instance-wrapper ,x))
          ((fsc-instance-p ,x)
-	  (fsc-instance-wrapper ,x))	      
+	  (fsc-instance-wrapper ,x))
          (t
 	  (#+new-kcl-wrapper built-in-wrapper-of
 	   #-new-kcl-wrapper built-in-or-structure-wrapper

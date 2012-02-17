@@ -18,9 +18,9 @@
 (defvar *debug-sparc* nil)
 
 (defmacro pcl-make-lambda (&key required)
-  `(list 'lambda nil :unknown-type 0 compiler::.function-level. 
-	,required nil nil nil nil nil nil nil nil nil 
-	nil 'compiler::none nil nil nil 
+  `(list 'lambda nil :unknown-type 0 compiler::.function-level.
+	,required nil nil nil nil nil nil nil nil nil
+	nil 'compiler::none nil nil nil
 	nil nil nil nil nil nil 0 nil))
 
 (defmacro pcl-make-varrec (&key name loc contour-level)
@@ -30,7 +30,7 @@
   `(list nil ,constants ,lap nil nil ,cframe-size ,locals nil nil nil))
 
 
-(defstruct preg 
+(defstruct preg
   ;; pseudo reg descritpor
   treg		; associated treg
   index 	; :index if this is an index type reg
@@ -82,10 +82,10 @@
 	*bvl-used-bvs*
 	*bvl-index*
 	(*inhibit-call-count* t)
-	
+
 	; this fcn
 	*arg-to-treg*
-	*cvar-to-index* 
+	*cvar-to-index*
 	*reg-array*
 	minargs
 	maxargs
@@ -93,22 +93,22 @@
 
 	node
 	otherargregs
-	
+
 	*nargs-treg*
 	)
 
-    (if* *debug-sparc* 
+    (if* *debug-sparc*
        then (format t ">>** << Generating sparc lap code~%"))
-    
-    (setq *nil-treg* 
+
+    (setq *nil-treg*
       #+allegro-v4.0 (new-reg :global t)
       #-allegro-v4.0 (new-reg)
       *mv-treg* (new-reg)
       *mv-treg-target* (list *mv-treg*)
       *zero-treg* (comp::new-reg))
-    
+
     ; examine given args
-    
+
     (setq minargs 0  maxargs 0)
     (let (requireds)
       (dolist (arg arg-names)
@@ -120,44 +120,44 @@
 		(incf minargs)
 		(incf maxargs)
 		(push (cons arg (new-reg)) *arg-to-treg*)
-		(push (pcl-make-varrec :name arg 
+		(push (pcl-make-varrec :name arg
 				   :loc (cdr (car *arg-to-treg*))
 				   :contour-level 0)
 		      requireds)
 		))
       (setq node (pcl-make-lambda :required  (nreverse requireds))))
     (setq *arg-to-treg* (nreverse *arg-to-treg*))
-    
+
     ; build closure vector list
     (let ((index -1))
       (dolist (cvar closure-vars-names)
 	(push (cons cvar (incf index)) *cvar-to-index*)))
-    
+
     (let ((maxreg (max (apply #'max (cons -1 index-regs))
 		       (apply #'max (cons -1 vector-regs))
 		       (apply #'max (cons -1 t-regs)))))
       (setq *reg-array* (make-array (1+ maxreg))))
-    
+
     (dolist (index index-regs)
       (setf (svref *reg-array* index)
 	(make-preg :treg (new-reg)
 		   :index :index)))
-    
+
     (dolist (vector vector-regs)
-      (setf (svref *reg-array* vector) 
+      (setf (svref *reg-array* vector)
 	(make-preg :treg (new-reg)
 		   :index :vector)))
-    
+
     (dolist (tr t-regs)
       (setf (svref *reg-array* tr) (make-preg :treg (new-reg))))
-    
+
 
     (if* closure-vars-names
        then (setq *closure-treg* (new-reg)))
     (setq *nargs-treg* (new-reg))
-        
+
     ;; (md-allocate-global-tregs)
-    
+
     ; function entry
     (qe nop :arg :first-block)
     (qe entry)
@@ -170,7 +170,7 @@
 	    (qe extract-closure-vec :d (list *closure-treg*))
 	    (let ((offsetreg (new-reg)))
 	      (qe const :arg (mdparam 'md-cons-car-adj) :d (list offsetreg))
-	      (qe ref :u (list *closure-treg* offsetreg) 
+	      (qe ref :u (list *closure-treg* offsetreg)
 		  :d (list *closure-treg*)
 		  :arg :long))
 	    )
@@ -182,18 +182,18 @@
 	      (format t "~a~%" quad))
 
 	    (format t "basic blocks~%"))
-    
+
     (setq *bbs* (qc-compute-basic-blocks *quads*))
-    
+
     (excl::target-class-case
      ((:r :m) (setq *actuals* (qc-compute-actuals *bbs*))))
-    
+
     (qc-live-variable-analysis *bbs*)
-    
+
     (setq *treg-bv-size* (* 16 (truncate (+ *treg-num* 15) 16)))
-      
+
     (qc-build-treg-vector)
-    
+
 
     (let ((*dump-bbs* nil)
 	  (r::*local-regs*
@@ -207,14 +207,14 @@
 	    (multiple-value-bind (lap-code literals size-struct locals)
 		#+(target-class r m e)
 		(progn
-		  #+allegro-v4.0 
+		  #+allegro-v4.0
 		  (md-codegen node *bbs*
 			      nil otherargregs)
-		  #-allegro-v4.0 
+		  #-allegro-v4.0
 		  (md-codegen node *bbs*
 			      *nil-treg* *mv-treg* *zero-treg*
 			      nil otherargregs))
-		  
+
 		#-(target-class r m e) (md-codegen node *bbs*)
 		(setq lap
 		  (pcl-make-lap :lap lap-code
@@ -222,11 +222,11 @@
 			    :cframe-size size-struct
 			    :locals  locals)))
 
-	     
+
 	    lap)
 	(giveback-bvs)))
-    
-    #+ignore 
+
+    #+ignore
     (progn (format t "sparc code pre optimization~%")
 	   (dolist (instr (lap-lap lap))
 	     (format t "> ~a~%" instr)))
@@ -237,14 +237,14 @@
 	      (format t "> ~a~%" instr)))
     (md-assemble lap)
     (setq last-lap lap)
- 
+
     (nl-runtime-make-a-fcnobj lap)))
 
 (defun qe-slot-access (operand offset dest)
   ;; access a slot in a structure
   (let ((temp (new-reg)))
     (qe const :arg offset :d (list temp))
-    (qe ref :u (list (get-treg-of operand) temp) 
+    (qe ref :u (list (get-treg-of operand) temp)
 	:d (list (get-treg-of dest))
 	:arg :long)))
 
@@ -258,9 +258,9 @@
 	      treg)
      elseif (consp operand)
        then (ecase (car operand)
-	      (:reg 
+	      (:reg
 	       (preg-treg (svref *reg-array* (cadr operand))))
-	      (:arg 
+	      (:arg
 	       (let ((x (cdr (assoc (cadr operand) *arg-to-treg* :test #'eq))))
 		 (if* (null x)
 		    then (error "where is arg ~s" operand)
@@ -295,21 +295,21 @@
        else (error "bad operand: ~s" operand))))
 
 (defun simple-get-treg-of (operand)
-  ;; get the treg if it is so simple that we don't have to 
+  ;; get the treg if it is so simple that we don't have to
   ;; emit any instructions to access it.
   ;; return nil if we can't do it.
   (if* (numberp operand)
      then nil
    elseif (consp operand)
      then (case (car operand)
-	    (:reg 
+	    (:reg
 	     (preg-treg (svref *reg-array* (cadr operand))))
-	    (:arg 
+	    (:arg
 	     (let ((x (cdr (assoc (cadr operand) *arg-to-treg* :test #'eq))))
 	       (if* (null x)
 		  then nil
 		  else x))))
-	      
+
      else nil))
 
 (defun index-p (operand)
@@ -336,17 +336,17 @@
 	    (qe lsr :u (list treg shift-reg) :d (list new-reg))
 	    new-reg)))
 
-		
-	    
-  
-  
+
+
+
+
 (defun vector-preg-p (operand)
   (and (consp operand)
        (eq :reg (car operand))
        (eq :vector (preg-index (svref *reg-array* (cadr operand))))))
-       
-	    
-	  
+
+
+
 (defun excl-gen-quads (laps)
   ;; generate quads from the lap
   (dolist (lap laps)
@@ -368,9 +368,9 @@
 		   then ; must offset before store
 			(error "must use vector register in ~s" lap)
 		   else (setq op1-treg (get-treg-of (cadr op2))))
-				       
-				      
-		
+
+
+
 		(qe set :u (list op1-treg
 				 (get-treg-of (caddr op2))
 				 (get-treg-of op1))
@@ -381,45 +381,45 @@
 	      (let (op1-treg const-reg)
 		(setq op1-treg (get-treg-of (cadr op2)))
 	        (setq const-reg (new-reg))
-		(qe const :arg (mdparam 'md-cons-cdr-adj) 
+		(qe const :arg (mdparam 'md-cons-cdr-adj)
 		    :d (list const-reg))
-				       
-				      
-		
+
+
+
 		(qe set :u (list op1-treg
 				 const-reg
 				 (get-treg-of op1))
 		    :arg :lisp)
 		(return-from again))))
-	 
+
 	   ; the 'to'address is simple, the from address may not be
-	 
+
 	   (let ((index1 (index-p op1))
 		 (index2 (index-p op2))
 		 (vector1 (vector-preg-p op1))
 		 (vector2 (vector-preg-p op2)))
 	     (ecase (car op1)
 	       ((:reg :cvar :arg :constant :lisp-symbol)
-		(qe move 
+		(qe move
 		    :u (list (get-treg-of op1 op2))
 		    :d (list (get-treg-of op2))))
 	       (:std-wrapper
-		(qe-slot-access (cadr op1) 
+		(qe-slot-access (cadr op1)
 				(+ (* 1 4)
 				   (comp::mdparam 'md-svector-data0-adj))
 				op2))
 	       (:std-slots
-		(qe-slot-access (cadr op1) 
+		(qe-slot-access (cadr op1)
 				(+ (* 2 4)
 				   (comp::mdparam 'md-svector-data0-adj))
 				op2))
 	       (:fsc-wrapper
-		(qe-slot-access (cadr op1) 
+		(qe-slot-access (cadr op1)
 				(+ (* (- 15 1) 4)
 				   (comp::mdparam 'md-function-const0-adj))
 				op2))
 	       (:fsc-slots
-		(qe-slot-access (cadr op1) 
+		(qe-slot-access (cadr op1)
 				(+ (* (- 15 2) 4)
 				   (comp::mdparam 'md-function-const0-adj))
 				op2))
@@ -430,7 +430,7 @@
 	       (:other-wrapper
 		(warn "do other-wrapper"))
 	       ((:i+ :i- :ilogand :ilogxor)
-		(qe arith :arg (cdr (assoc (car op1) 
+		(qe arith :arg (cdr (assoc (car op1)
 					   '((:i+ . :+)
 					     (:i- . :-)
 					     (:ilogand . :logand)
@@ -447,14 +447,14 @@
 		      :u (list const-reg
 			       (get-treg-of (cadr op1)))
 		      :d (list (get-treg-of op2)))))
-		      
+
 	       ((:iref :cref :instance-ref)
 		(let (op1-treg)
 		  (if* (not (vector-preg-p (cadr op1)))
 		     then ; must offset before store
 			  (error "must use vector register in ~s" lap)
 		     else (setq op1-treg (get-treg-of (cadr op1))))
-				       
+
 		  (qe ref :u (list op1-treg
 				   (get-treg-of (caddr op1) op2))
 		      :d (list (get-treg-of op2))
@@ -499,9 +499,9 @@
 		     (setq tr2 (get-treg-of op2))
 		else (setq tr1 (get-treg-of op1)
 			   tr2 (get-treg-of op2)))
-	   
-		   
-		   
+
+
+
 	     (qe bcc :u (list tr1 tr2)
 		 :arg (cadddr lap)
 		 :arg2 :eq )))
@@ -514,7 +514,7 @@
 	       :arg2 (cdr (assoc opcode '((:eq . :eq)
 					  (:neq . :ne))
 				 :test #'eq))))
-	  (:izerop 
+	  (:izerop
 	   (qe bcc :u (list (get-treg-of op1)
 			    *zero-treg*)
 	       :arg (caddr lap)
@@ -529,15 +529,15 @@
 		 :arg nope
 		 :arg2 '(not structure))
 	     (qe const :arg 'pcl::std-instance :d (list tempreg))
-	     (qe const :arg (mdparam 'md-svector-data0-adj) 
+	     (qe const :arg (mdparam 'md-svector-data0-adj)
 		 :d (list offsetreg))
-	     (qe ref :u (list treg offsetreg) 
+	     (qe ref :u (list treg offsetreg)
 		 :d (list temp2reg)
 		 :arg :long)
 	     (qe bcc :arg2 :eq :u (list tempreg temp2reg)
 		 :arg (caddr lap))
 	     (qe label :arg nope)))
-	  
+
 	  (:fsc-instance-p
 	   (let ((treg (get-treg-of op1))
 		 (nope (pc-genlab))
@@ -565,7 +565,7 @@
 	  (:structure-instance-p
 	   ; always true
 	   (qe bra :arg (caddr lap)))
-	  
+
 	  (:return
 	    (let (op-treg)
 	      (if* (index-p op1)
@@ -582,23 +582,23 @@
 
 	  (:go
 	   (qe bra :arg (cadr lap)))
-	   
-	  (:label 
+
+	  (:label
 	   (qe label :arg (cadr lap)))
-	     
-	   
-	   
+
+
+
 	  (t (warn "ignoring ~s" lap)))))))
 
 
 (defun insert-closure-vals (function closure-vals)
-  ;;  build a fucntion from the lap and insert 
+  ;;  build a fucntion from the lap and insert
   (let ((newfun (sys::copy-function function)))
     (setf (excl::fn_closure newfun) (list (apply 'vector closure-vals)))
     newfun))
 
-  
-	     
+
+
 ; test case:
 ; (pcl::defclass foo () (a b c))
 ; (pcl::defmethod barx ((a foo) b c)  a )
@@ -608,12 +608,6 @@
 
 (if* (not (and (boundp 'user::noquad)
 	       (symbol-value 'user::noquad)))
-   then (setq pcl::*make-lap-closure-generator* 
+   then (setq pcl::*make-lap-closure-generator*
 	  'pcl::excl-lap-closure-generator))
-
-
-
-
-
-  
 

@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -28,7 +28,7 @@
 (in-package :pcl)
 
 (eval-when (compile load eval)
-  
+
 (defvar *defclass-times*   '(load eval))	;Probably have to change this
 						;if you use defconstructor.
 (defvar *defmethod-times*  '(load eval))
@@ -61,7 +61,7 @@
 ;;; This is like fdefinition on the Lispm.  If Common Lisp had something like
 ;;; function specs I wouldn't need this.  On the other hand, I don't like the
 ;;; way this really works so maybe function specs aren't really right either?
-;;; 
+;;;
 ;;; I also don't understand the real implications of a Lisp-1 on this sort of
 ;;; thing.  Certainly some of the lossage in all of this is because these
 ;;; SPECs name global definitions.
@@ -133,7 +133,7 @@
             (when brokenp (xcl:rebreak-function name))
             (when advisedp (xcl:readvise-function name)))
   #+(and setf (not cmu)) (setf (fdefinition name) new-definition)
-  #+kcl (setf (symbol-function 
+  #+kcl (setf (symbol-function
 	       (let ((sym (get name 'si::traced)) first-form)
 		 (if (and sym
 			  (consp (symbol-function name))
@@ -172,7 +172,7 @@
     (name (fdefine-carefully (get-setf-function-name name) new-value))))
 
 
-(proclaim '(special *the-class-t* 
+(proclaim '(special *the-class-t*
 	            *the-class-vector* *the-class-symbol*
                     *the-class-string* *the-class-sequence*
                     *the-class-rational* *the-class-ratio*
@@ -289,7 +289,7 @@
 (defun make-eql-predicate (eql-object)
   #'(lambda (object) (eql eql-object object)))
 
-#|| ; The argument to satisfies must be a symbol.  
+#|| ; The argument to satisfies must be a symbol.
 (deftype class (&optional class)
   (if class
       `(satisfies ,(class-predicate class))
@@ -308,7 +308,7 @@
 ;;;
 ;;; These functions are a pale imitiation of their namesake.  They accept
 ;;; class objects or types where they should.
-;;; 
+;;;
 (defun *normalize-type (type)
   (cond ((consp type)
          (if (member (car type) '(not and or))
@@ -370,7 +370,7 @@
       (values t t)
       (if (eq *boot-state* 'early)
 	  (values (eq type1 type2) t)
-	  (let ((*in-precompute-effective-methods-p* t)) 
+	  (let ((*in-precompute-effective-methods-p* t))
 	    (declare (special *in-precompute-effective-methods-p*))
             ;; *in-precompute-effective-methods-p* is not a good name.
 	    ;; It changes the way class-applicable-using-class-p works.
@@ -465,7 +465,7 @@
 ;;; This is used by combined methods to communicate the next methods to
 ;;; the methods they call.  This variable is captured by a lexical variable
 ;;; of the methods to give it the proper lexical scope.
-;;; 
+;;;
 (defvar *next-methods* nil)
 
 (defvar *not-an-eql-specializer* '(not-an-eql-specializer))
@@ -484,7 +484,7 @@
 
 
 (defmacro define-gf-predicate (predicate-name &rest classes)
-  `(progn 
+  `(progn
      (defmethod ,predicate-name ((x t)) nil)
      ,@(mapcar #'(lambda (c) `(defmethod ,predicate-name ((x ,c)) t))
 	       classes)))
@@ -527,7 +527,7 @@
     (list       (sequence) (cons null)              (sequence t))
     (cons       (list)     ()                       (list sequence t)
      (nil))
-    
+
 
     (array      (t)        (vector)                 (t)
      #2A((NIL)))
@@ -540,10 +540,10 @@
      #*1)
     (character  (t)        ()                       (t)
      #\c)
-   
+
     (symbol     (t)        (null)                   (t)
      symbol)
-    (null       (symbol 
+    (null       (symbol
 		 list)     ()                       (symbol list sequence t)
      nil)))
 
@@ -567,7 +567,7 @@
 
 (defclass metaobject (standard-object) ())
 
-(defclass specializer (metaobject) 
+(defclass specializer (metaobject)
      ((type
         :initform nil
         :reader specializer-type)))
@@ -593,7 +593,7 @@
 ;;; The class CLASS is a specified basic class.  It is the common superclass
 ;;; of any kind of class.  That is any class that can be a metaclass must
 ;;; have the class CLASS in its class precedence list.
-;;; 
+;;;
 (defclass class (documentation-mixin dependent-update-mixin definition-source-mixin
 		 specializer)
      ((name
@@ -618,7 +618,7 @@
 ;;;
 ;;; The class PCL-CLASS is an implementation-specific common superclass of
 ;;; all specified subclasses of the class CLASS.
-;;; 
+;;;
 (defclass pcl-class (class)
      ((class-precedence-list
 	:reader class-precedence-list)
@@ -649,7 +649,7 @@
 ;;;
 ;;; The class STD-CLASS is an implementation-specific common superclass of
 ;;; the classes STANDARD-CLASS and FUNCALLABLE-STANDARD-CLASS.
-;;; 
+;;;
 (defclass std-class (slot-class)
      ())
 
@@ -658,7 +658,7 @@
 
 (defclass funcallable-standard-class (std-class)
      ())
-    
+
 (defclass forward-referenced-class (pcl-class) ())
 
 (defclass built-in-class (pcl-class) ())
@@ -673,7 +673,7 @@
       (from-defclass-p
         :initform nil
 	:initarg :from-defclass-p)))
-     
+
 
 (defclass specializer-with-object (specializer) ())
 
@@ -686,7 +686,7 @@
   ((object :initarg :class :reader specializer-class :reader specializer-object)))
 
 (defclass eql-specializer (exact-class-specializer specializer-with-object)
-  ((object :initarg :object :reader specializer-object 
+  ((object :initarg :object :reader specializer-object
 	   :reader eql-specializer-object)))
 
 (defvar *eql-specializer-table* (make-hash-table :test 'eql))
@@ -700,7 +700,7 @@
 ;;;
 ;;; Slot definitions.
 ;;;
-(defclass slot-definition (metaobject) 
+(defclass slot-definition (metaobject)
      ((name
 	:initform nil
 	:initarg :name
@@ -744,15 +744,15 @@
     :accessor slot-definition-allocation)))
 
 (defclass structure-slot-definition (slot-definition)
-  ((defstruct-accessor-symbol 
+  ((defstruct-accessor-symbol
      :initform nil
      :initarg :defstruct-accessor-symbol
      :accessor slot-definition-defstruct-accessor-symbol)
-   (internal-reader-function 
+   (internal-reader-function
      :initform nil
      :initarg :internal-reader-function
      :accessor slot-definition-internal-reader-function)
-   (internal-writer-function 
+   (internal-writer-function
      :initform nil
      :initarg :internal-writer-function
      :accessor slot-definition-internal-writer-function)))
@@ -792,7 +792,7 @@
 
 (defclass standard-method (definition-source-mixin plist-mixin method)
      ((generic-function
-	:initform nil	
+	:initform nil
 	:accessor method-generic-function)
 ;     (qualifiers
 ;	:initform ()
@@ -839,7 +839,7 @@
 			    metaobject)
      ()
   (:metaclass funcallable-standard-class))
-    
+
 (defclass standard-generic-function (generic-function)
      ((name
 	:initform nil

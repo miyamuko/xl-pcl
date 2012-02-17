@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -33,12 +33,12 @@
 			       (reader 'reader-symbol)
 			       (writer 'writer-symbol)
 			       (boundp 'boundp-symbol)))
-	   (intern (format nil "~A ~A slot ~a" 
+	   (intern (format nil "~A ~A slot ~a"
 			   (package-name (symbol-package ,slot-name))
 			   (symbol-name ,slot-name)
 			   ,(symbol-name type))
 	           *slot-accessor-name-package*))
-       (progn 
+       (progn
 	 (error "non-symbol and non-interned symbol slot name accessors~
                  are not yet implemented")
 	 ;;(make-symbol (format nil "~a ~a" ,slot-name ,type))
@@ -67,7 +67,7 @@
 
 (defmacro accessor-slot-value (object slot-name)
   (unless (constantp slot-name)
-    (error "~s requires its slot-name argument to be a constant" 
+    (error "~s requires its slot-name argument to be a constant"
 	   'accessor-slot-value))
   (let* ((slot-name (eval slot-name))
 	 (sym (slot-reader-symbol slot-name)))
@@ -75,7 +75,7 @@
 
 (defmacro accessor-set-slot-value (object slot-name new-value &environment env)
   (unless (constantp slot-name)
-    (error "~s requires its slot-name argument to be a constant" 
+    (error "~s requires its slot-name argument to be a constant"
 	   'accessor-set-slot-value))
   (setq object (macroexpand object env))
   (setq slot-name (macroexpand slot-name env))
@@ -94,7 +94,7 @@
 
 (defmacro accessor-slot-boundp (object slot-name)
   (unless (constantp slot-name)
-    (error "~s requires its slot-name argument to be a constant" 
+    (error "~s requires its slot-name argument to be a constant"
 	   'accessor-slot-boundp))
   (let* ((slot-name (eval slot-name))
 	 (sym (slot-boundp-symbol slot-name)))
@@ -113,7 +113,7 @@
 		  (not (eq (funcall reader object) *slot-unbound*)))))
     (declare (type function reader))
     #+(and kcl turbo-closure) (si:turbo-closure fun)
-    fun))		    
+    fun))
 
 (defun get-optimized-std-accessor-method-function (class slotd name)
   (if (structure-class-p class)
@@ -179,7 +179,7 @@
 		     (not (eq *slot-unbound*
 			      (%instance-ref (fsc-instance-slots instance) index))))
 		 #'(lambda (instance)
-		     (not (eq *slot-unbound* 
+		     (not (eq *slot-unbound*
 			      (%instance-ref (std-instance-slots instance) index))))))
      (cons   #'(lambda (instance)
 		 (declare (ignore instance))
@@ -192,7 +192,7 @@
       (let ((value (funcall function object)))
 	(if (eq value *slot-unbound*)
 	    (slot-unbound class object (slot-definition-name slotd))
-	    value))))	    
+	    value))))
 
 (defun make-optimized-structure-setf-slot-value-using-class-method-function (function)
   #+cmu (declare (type function function))
@@ -220,13 +220,13 @@
 			  (t (error "~S is not a standard-class" class))))
 	     (slot-name (slot-definition-name slotd))
 	     (index (slot-definition-location slotd))
-	     (function 
+	     (function
 	      (ecase name
-		(reader 
+		(reader
 		 #'make-optimized-std-slot-value-using-class-method-function)
-		(writer 
+		(writer
 		 #'make-optimized-std-setf-slot-value-using-class-method-function)
-		(boundp 
+		(boundp
 		 #'make-optimized-std-slot-boundp-using-class-method-function))))
 	#+cmu (declare (type function function))
 	(values (funcall function fsc-p slot-name index) index))))
@@ -281,11 +281,11 @@
     (fixnum (if fsc-p
 		#'(lambda (class instance slotd)
 		    (declare (ignore class slotd))
-		    (not (eq *slot-unbound* 
+		    (not (eq *slot-unbound*
 			     (%instance-ref (fsc-instance-slots instance) index))))
 		#'(lambda (class instance slotd)
 		    (declare (ignore class slotd))
-		    (not (eq *slot-unbound* 
+		    (not (eq *slot-unbound*
 			     (%instance-ref (std-instance-slots instance) index))))))
     (cons   #'(lambda (class instance slotd)
 		(declare (ignore class instance slotd))
@@ -305,16 +305,16 @@
   (list* ':method-spec `(internal-reader-method ,class-name ,slot-name)
 	 (make-method-function
 	  (lambda (instance)
-	    (let ((wrapper (cond ((std-instance-p instance) 
+	    (let ((wrapper (cond ((std-instance-p instance)
 				  (std-instance-wrapper instance))
-				 ((fsc-instance-p instance) 
+				 ((fsc-instance-p instance)
 				  (fsc-instance-wrapper instance)))))
 	      (if wrapper
 		  (let* ((class (wrapper-class* wrapper))
 			 (index (or (instance-slot-index wrapper slot-name)
 				    (assq slot-name (wrapper-class-slots wrapper)))))
 		    (typecase index
-		      (fixnum 	
+		      (fixnum
 		       (let ((value (%instance-ref (get-slots instance) index)))
 			 (if (eq value *slot-unbound*)
 			     (slot-unbound (class-of instance) instance slot-name)
@@ -338,7 +338,7 @@
 		       (pv-binding1 (.pv. .calls.
 					  (symbol-value pv-table-symbol)
 					  (instance) (instance-slots))
-			 (instance-read-internal 
+			 (instance-read-internal
 			  .pv. instance-slots 1
 			  (slot-value instance slot-name))))))))
     (setf (getf (getf initargs ':plist) ':slot-name-lists)
@@ -355,7 +355,7 @@
 		       (pv-binding1 (.pv. .calls.
 					  (symbol-value pv-table-symbol)
 					  (instance) (instance-slots))
-			 (instance-write-internal 
+			 (instance-write-internal
 			  .pv. instance-slots 1 nv
 			  (setf (slot-value instance slot-name) nv))))))))
     (setf (getf (getf initargs ':plist) ':slot-name-lists)
@@ -372,7 +372,7 @@
 		       (pv-binding1 (.pv. .calls.
 					  (symbol-value pv-table-symbol)
 					  (instance) (instance-slots))
-			  (instance-boundp-internal 
+			  (instance-boundp-internal
 			   .pv. instance-slots 1
 			   (slot-boundp instance slot-name))))))))
     (setf (getf (getf initargs ':plist) ':slot-name-lists)

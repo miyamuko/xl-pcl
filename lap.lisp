@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -47,15 +47,15 @@
 (defvar *precompile-lap-closure-generator*)
 (defvar *lap-in-lisp*)
 
-(defun make-lap-closure-generator 
+(defun make-lap-closure-generator
     (closure-variables arguments iregs vregs fvregs tregs lap-code)
   (funcall *make-lap-closure-generator*
-	   closure-variables arguments iregs 
+	   closure-variables arguments iregs
 	   vregs fvregs tregs lap-code))
 
-(defmacro precompile-lap-closure-generator 
+(defmacro precompile-lap-closure-generator
     (cvars args i-regs v-regs fv-regs t-regs lap)
-  (funcall *precompile-lap-closure-generator* cvars args i-regs 
+  (funcall *precompile-lap-closure-generator* cvars args i-regs
 	   v-regs fv-regs t-regs lap))
 
 (defmacro lap-in-lisp (cvars args iregs vregs fvregs tregs lap)
@@ -76,7 +76,7 @@
 ;;;  LAP-FLATTEN
 ;;;  OPCODE
 ;;;  OPERAND
-;;; 
+;;;
 (proclaim '(special *generating-lap*))		;CAR   - alist of free registers
 						;CADR  - alist of allocated registers
 						;CADDR - max reg number allocated
@@ -89,7 +89,7 @@
 ;;; This goes around the generation of any lap code.  <body> should return a lap
 ;;; code sequence, this macro will take care of converting that to a lap closure
 ;;; generator.
-;;; 
+;;;
 (defmacro generating-lap (closure-variables arguments &body body)
   `(let* ((*generating-lap* (list () () -1)))
      (finalize-lap-generation nil ,closure-variables ,arguments (progn ,@body))))
@@ -102,7 +102,7 @@
 ;;; Each register specification looks like:
 ;;;
 ;;;  (<var> <type> &key :reuse <other-reg>)
-;;;  
+;;;
 (defmacro with-lap-registers (register-specifications &body body)
   ;;
   ;; Given that, for now, there is only one keyword argument and
@@ -156,15 +156,15 @@
 	(fixnum-vector (push (caddr entry) fvregs))
 	((t)    (push (caddr entry) tregs))))
     (cond (in-lisp-p
-	   `(lap-in-lisp ,closure-variables ,arguments ,iregs 
+	   `(lap-in-lisp ,closure-variables ,arguments ,iregs
 	                 ,vregs ,fvregs ,tregs ,lap-code))
 	  (*precompiling-lap*
-	   `(precompile-lap-closure-generator 
+	   `(precompile-lap-closure-generator
 	     ,closure-variables ,arguments ,iregs
 	     ,vregs ,fvregs ,tregs ,lap))
 	  (t
 	   (make-lap-closure-generator
-	     closure-variables arguments iregs 
+	     closure-variables arguments iregs
 	     vregs fvregs tregs lap-code)))))
 
 (defun flatten-lap (&rest opcodes-or-sequences)
@@ -185,8 +185,8 @@
 
 ;;;
 ;;; This code deals with the syntax of the individual opcodes and operands.
-;;; 
-  
+;;;
+
 ;;;
 ;;; The first two of these variables are documented to all ports.  They are
 ;;; lists of the symbols which name the lap opcodes and operands.  They can
@@ -194,7 +194,7 @@
 ;;; opcodes and operands.
 ;;;
 ;;; The third of these variables is for use of the emitter only.
-;;; 
+;;;
 (defvar *lap-operands* ())
 (defvar *lap-opcodes*  ())
 (defvar *lap-emitters* (make-hash-table :test #'eq :size 30))
@@ -259,7 +259,7 @@
   (labels ((usual (x)
 	     (and (consp arg) (eq (car arg) x)))
 	   (check (x)
-	     (ecase x	       
+	     (ecase x
 	       ((:reg :cdr :constant :iref :instance-ref :cvar :arg :lisp :lisp-variable)
 		(usual x))
 	       (:label (symbolp arg))
@@ -271,7 +271,7 @@
 		(check type))
       (error "The argument ~S to the opcode ~A is not of type ~S." arg name type))))
 
-(defun check-operand-arg (name arg type)  
+(defun check-operand-arg (name arg type)
   (flet ((check (x)
 	   (ecase x
 	     (:symbol           (symbolp arg))
@@ -392,12 +392,12 @@
 	       (with-lap-registers ((i0 index)
 				    (v0 vector)
 				    (t0 t))
-		 (flatten-lap 
+		 (flatten-lap
 		   (opcode :move (operand :cvar 'cache) v0)
 		   (opcode :move (operand :arg 'arg) i0)
 		   (opcode :move (operand :iref v0 i0) t0)
 		   (opcode :jmp t0)))))
-	 
+
 	 (cache (make-array 32))
 	 (closure (funcall cg cache))
 	 (fn0 (make-lap-test-closure-1 'fn0))
@@ -406,18 +406,18 @@
 	 (in0 (index-value->index 2))
 	 (in1 (index-value->index 10))
 	 (in2 (index-value->index 27)))
-    
+
     (setf (svref cache (index->index-value in0)) fn0
 	  (svref cache (index->index-value in1)) fn1
 	  (svref cache (index->index-value in2)) fn2)
-    
+
     (unless (and (eq (funcall closure in0) 'fn0)
 		 (eq (funcall closure in1) 'fn1)
 		 (eq (funcall closure in2) 'fn2))
       (error "LAP TEST 1 failed."))))
 
-(defun lap-test-2 ()            
-  (let* ((cg (generating-lap '(cache mask) 
+(defun lap-test-2 ()
+  (let* ((cg (generating-lap '(cache mask)
 			     '(arg)
 	       (with-lap-registers ((i0 index)
 				    (i1 index)
@@ -425,7 +425,7 @@
 				    (v0 vector)
 				    (t0 t))
 
-		 (flatten-lap		  
+		 (flatten-lap
 		   (opcode :move (operand :cvar 'cache) v0)
 		   (opcode :move (operand :arg 'arg) i0)
 		   (opcode :move (operand :cvar 'mask) i1)
@@ -440,30 +440,30 @@
 	 (in2 (index-value->index #b10011)))
     (fill cache lap-lose)
     (setf (svref cache (index->index-value in0)) lap-win)
-    
+
     (unless (and (eq (funcall closure in0) 'win)
 		 (eq (funcall closure in1) 'win)
 		 (eq (funcall closure in2) 'win))
       (error "LAP TEST 2 failed."))))
 
-(defun lap-test-3 ()            
+(defun lap-test-3 ()
   (let* ((cg (generating-lap '(addend) '(arg)
 	       (with-lap-registers
 		 ((i0 index)
 		  (i1 index)
 		  (i2 index))
 
-		 (flatten-lap		  
+		 (flatten-lap
 		   (opcode :move (operand :cvar 'addend) i0)
 		   (opcode :move (operand :arg 'arg) i1)
 		   (opcode :move (operand :i+ i0 i1) i2)
 		   (opcode :return i2)))))
 	 (closure (funcall cg (index-value->index 5))))
-    
+
     (unless (= (index->index-value (funcall closure (index-value->index 2))) 7)
       (error "LAP TEST 3 failed."))))
 
-(defun lap-test-4 ()            
+(defun lap-test-4 ()
   (let* ((cg (generating-lap '(winner loser) '(arg)
 	       (with-lap-registers ((t0 t))
 		 (flatten-lap
@@ -479,7 +479,7 @@
 		 (eq (funcall closure 'bar) 'nil))
       (error "LAP TEST 4 failed."))))
 
-(defun lap-test-5 ()            
+(defun lap-test-5 ()
   (let* ((cg (generating-lap '(array) '(arg)
 	       (with-lap-registers ((r0 vector)
 				    (r1 t)

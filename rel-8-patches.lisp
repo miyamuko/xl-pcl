@@ -56,7 +56,7 @@
 ;;; times just like eval when does.  It also takes a name which it uses
 ;;; to construct a function spec for the top-level-form function it has
 ;;; to create.
-;;; 
+;;;
 ;
 ;si::
 ;(defvar *top-level-form-fdefinitions* (cl:make-hash-table :test #'equal))
@@ -72,8 +72,8 @@
 ;      (fdefine
 ;       (setf (gethash name *top-level-form-fdefinitions*) arg1))
 ;      ((fdefinition fdefinedp)
-;       (gethash name *top-level-form-fdefinitions*)) 
-;      (fdefinition-location 
+;       (gethash name *top-level-form-fdefinitions*))
+;      (fdefinition-location
 ;       (ferror "It is not possible to get the fdefinition-location of ~s."
 ;	       fspec))
 ;      (fundefine (remhash name *top-level-form-fdefinitions*))
@@ -81,7 +81,7 @@
 ;
 ;;;
 ;;; This is basically stolen from PROGN (surprised?)
-;;; 
+;;;
 ;(si:define-special-form pcl::top-level-form (name times
 ;						  &body body
 ;						  &environment env)
@@ -251,5 +251,4 @@ dw::
 		    frob
 		  (values nil nil deftype typep atomic-subtype-parent non-atomic-deftype)))
 	  (symbol (values nil nil nil nil frob)))))))
-
 

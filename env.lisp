@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -118,7 +118,7 @@
 	  (describe-slot (slot-definition-name slotd)
 			 (slot-value-or-default object (slot-definition-name slotd)))))
 
-      (when other-slotds 
+      (when other-slotds
 	(format stream "~% The following slots have allocation as shown:")
 	(dolist (slotd (nreverse other-slotds))
 	  (describe-slot (slot-definition-name slotd)
@@ -176,7 +176,7 @@
   (let ((nick (package-nicknames object)))
     (when nick
       (format stream "You can also call it~@[ ~{~S~^, ~} or~] ~S.~%"
-	      (butlast nick) (first (last nick)))))  
+	      (butlast nick) (first (last nick)))))
   (let* (#+cmu (internal (lisp::package-internal-symbols object))
 	 (internal-count #+cmu (- (lisp::package-hashtable-size internal)
 				  (lisp::package-hashtable-free internal))
@@ -281,7 +281,7 @@
       (pushnew tmethod *traced-methods*)
       tmethod)))
 
-(defun untrace-method (&optional spec)  
+(defun untrace-method (&optional spec)
   (flet ((untrace-1 (m)
 	   (let ((gf (method-generic-function m)))
 	     (when gf
@@ -289,7 +289,7 @@
 	       (add-method gf (slot-value m 'method))
 	       (setq *traced-methods* (remove m *traced-methods*))))))
     (if (not (null spec))
-	(multiple-value-bind (gf method)	    
+	(multiple-value-bind (gf method)
 	    (parse-method-or-spec spec)
 	  (declare (ignore gf))
 	  (if (memq method *traced-methods*)

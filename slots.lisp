@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -148,7 +148,7 @@
 	 (slot-definition (find-slot-definition class slot-name)))
     (if (null slot-definition)
 	(slot-missing class object slot-name 'setf)
-	(setf (slot-value-using-class class object slot-definition) 
+	(setf (slot-value-using-class class object slot-definition)
 	      new-value))))
 
 (setf (gdefinition 'set-slot-value-normal) #'set-slot-value)
@@ -192,7 +192,7 @@
 ;;;
 ;;; This isn't documented, but is used within PCL in a number of print
 ;;; object methods (see named-object-print-function).
-;;; 
+;;;
 (defun slot-value-or-default (object slot-name &optional (default "unbound"))
   (if (slot-boundp object slot-name)
       (slot-value object slot-name)
@@ -200,8 +200,8 @@
 
 
 ;;;
-;;; 
-;;; 
+;;;
+;;;
 (defun standard-instance-access (instance location)
   (%instance-ref (std-instance-slots instance) location))
 
@@ -213,7 +213,7 @@
                                    (slotd standard-effective-slot-definition))
   (let* ((location (slot-definition-location slotd))
 	 (value (typecase location
-		  (fixnum 
+		  (fixnum
 		   (cond ((std-instance-p object)
 			  (unless (eq 't (wrapper-state (std-instance-wrapper object)))
 			    (check-wrapper-validity object))
@@ -239,7 +239,7 @@
 		      (slotd standard-effective-slot-definition))
   (let ((location (slot-definition-location slotd)))
     (typecase location
-      (fixnum 
+      (fixnum
        (cond ((std-instance-p object)
 	      (unless (eq 't (wrapper-state (std-instance-wrapper object)))
 		(check-wrapper-validity object))
@@ -257,12 +257,12 @@
 	      slotd '(setf slot-value-using-class))))))
 
 (defmethod slot-boundp-using-class
-	   ((class std-class) 
-	    (object standard-object) 
+	   ((class std-class)
+	    (object standard-object)
 	    (slotd standard-effective-slot-definition))
   (let* ((location (slot-definition-location slotd))
 	 (value (typecase location
-		  (fixnum 
+		  (fixnum
 		   (cond ((std-instance-p object)
 			  (unless (eq 't (wrapper-state (std-instance-wrapper object)))
 			    (check-wrapper-validity object))
@@ -282,11 +282,11 @@
 
 (defmethod slot-makunbound-using-class
 	   ((class std-class)
-	    (object standard-object) 
+	    (object standard-object)
 	    (slotd standard-effective-slot-definition))
   (let ((location (slot-definition-location slotd)))
     (typecase location
-      (fixnum 
+      (fixnum
        (cond ((std-instance-p object)
 	      (unless (eq 't (wrapper-state (std-instance-wrapper object)))
 		(check-wrapper-validity object))
@@ -324,7 +324,7 @@
     (funcall function new-value object)))
 
 (defmethod slot-boundp-using-class
-	   ((class structure-class) 
+	   ((class structure-class)
 	    (object structure-object)
 	    (slotd structure-effective-slot-definition))
   #-new-kcl-wrapper t
@@ -358,10 +358,10 @@
   (error "The slot ~S is unbound in the object ~S." slot-name instance))
 
 (defun slot-unbound-internal (instance position)
-  (slot-unbound (class-of instance) instance 
+  (slot-unbound (class-of instance) instance
 		(etypecase position
-		  (fixnum 
-		   (nth position 
+		  (fixnum
+		   (nth position
 			(wrapper-instance-slots-layout (wrapper-of instance))))
 		  (cons
 		   (car position)))))
@@ -381,5 +381,4 @@
 	(error "Can't allocate an instance of class ~S" (class-name class))))
   #+new-kcl-wrapper
   (allocate-standard-instance (class-wrapper class)))
-
 

@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -57,7 +57,7 @@
 (defun assq (item list) (assoc item list :test #'eq))
 (defun posq (item list) (position item list :test #'eq))
 
-(si:define-compiler-macro memq (item list) 
+(si:define-compiler-macro memq (item list)
   (let ((var (gensym)))
     (once-only (item)
       `(let ((,var ,list))
@@ -66,14 +66,14 @@
                  (return ,var))
                (setq ,var (cdr ,var)))))))
 
-(si:define-compiler-macro assq (item list) 
+(si:define-compiler-macro assq (item list)
   (let ((var (gensym)))
     (once-only (item)
       `(dolist (,var ,list nil)
          (when (eq ,item (car ,var))
            (return ,var))))))
 
-(si:define-compiler-macro posq (item list) 
+(si:define-compiler-macro posq (item list)
   (let ((var (gensym)) (index (gensym)))
     (once-only (item)
       `(let ((,var ,list) (,index 0))
@@ -113,7 +113,7 @@
 (si::freeze-defstruct 'method-call)
 (si::freeze-defstruct 'fast-method-call)
 
-(defvar *pcl-funcall* 
+(defvar *pcl-funcall*
   `(lambda (loc)
      (compiler::wt-nl
       "{object _funobj = " loc ";"
@@ -204,9 +204,9 @@ int n; object cc;
     (%set-cclosure-env (t t) t t nil "((#0)->cc.cc_env)=(#1)")
     #+turbo-closure
     (%cclosure-env-nthcdr (fixnum t) t nil nil "(#1)->cc.cc_turbo[#0]")
-    
+
     (logxor (fixnum fixnum) fixnum nil nil "((#0) ^ (#1))")))
-  
+
 (defun make-function-inline (inline)
   (setf (get (car inline) 'compiler::inline-always)
         (list (if (fboundp 'compiler::flags)
@@ -264,7 +264,7 @@ int n; object cc;
   fn)
 
 
-#+akcl (clines "#define AKCL206") 
+#+akcl (clines "#define AKCL206")
 
 (clines "
 #ifdef AKCL206
@@ -348,7 +348,7 @@ object set_cclosure (result_cc,value_cc,available_size)
                                         (si:structure-set x type offset v))))
                         #+turbo-closure (si:turbo-closure reader)
                         #+turbo-closure (si:turbo-closure writer)
-                        (let* ((reader-sym 
+                        (let* ((reader-sym
 				(let ((*package* *the-pcl-package*))
 				  (intern (format nil "~s SLOT~D" type offset))))
 			       (writer-sym (get-setf-function-name reader-sym))
@@ -369,12 +369,12 @@ object set_cclosure (result_cc,value_cc,available_size)
                     (nthcdr (length (structure-type-internal-slotds inc))
                             slotds)
                     slotds)))))
-            
+
 #+new-kcl-wrapper
 (defun si::slot-reader-function (slot)
   (let ((offset (si::slot-offset slot)))
     (si:turbo-closure #'(lambda (x)
-			  (si::structure-ref1 x offset)))))				
+			  (si::structure-ref1 x offset)))))
 
 #+new-kcl-wrapper
 (defun si::slot-writer-function (slot)
@@ -393,7 +393,7 @@ object set_cclosure (result_cc,value_cc,available_size)
 	#-new-kcl-wrapper
 	'(first second third fourth function-returning-nil function-returning-nil)
 	#+new-kcl-wrapper
-	'(si::slot-name si::slot-accessor-name 
+	'(si::slot-name si::slot-accessor-name
 	  si::slot-reader-function si::slot-writer-function
 	  si::slot-type si::slot-default-init))
 
@@ -426,7 +426,7 @@ object set_cclosure (result_cc,value_cc,available_size)
     ;;(format st "~%(IN-PACKAGE \"PCL\")~%")
     (print
      `(dolist (v ',
-     
+
 	       (sloop::sloop for v in-package "PCL"
 			     when (get v 'compiler::proclaimed-closure)
 			     collect v))
@@ -435,4 +435,3 @@ object set_cclosure (result_cc,value_cc,available_size)
     (format st "~%")
     )))
 
-	

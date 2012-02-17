@@ -20,18 +20,18 @@
 		   (let (when print-p (print form)))
 		   (defun (push (list (cadr form) (caddr form))
 				*defun-list*))
-		   (defmethod (push (list (cadr form) (caddr form)) 
+		   (defmethod (push (list (cadr form) (caddr form))
 				    *defmethod-list*))
-		   (defmacro (push (list (cadr form) (caddr form)) 
+		   (defmacro (push (list (cadr form) (caddr form))
 				   *defmacro-list*))
-		   (defgeneric (push (list (cadr form) (caddr form)) 
+		   (defgeneric (push (list (cadr form) (caddr form))
 				     *defgeneric-list*))
 		   (eval-when (mapc #'process-form (cddr form)))
 		   (progn (mapc #'process-form (cdr form)))
-		   ((defvar defparameter defconstant proclaim 
+		   ((defvar defparameter defconstant proclaim
 		     defsetf defstruct deftype define-compiler-macro))
-		   ((define-walker-template defopcode defoperand 
-		     define-method-combination define-constructor-code-type 
+		   ((define-walker-template defopcode defoperand
+		     define-method-combination define-constructor-code-type
 		     defclass))
 		   (t (when print-p (print form)))))))
       (dolist (file (system-source-files 'pcl))
@@ -54,7 +54,7 @@
 	(lisp-sans (mapcar #'slot-reader-symbol '(function type))))
     ;; This one has no predefined methods.
     (defgeneric update-dependent (metaobject dependent &rest initargs))
-    (map-all-generic-functions 
+    (map-all-generic-functions
      #'(lambda (gf)
 	 (when (or all-p
 		   (let ((name (generic-function-name gf)))
@@ -67,7 +67,7 @@
 					(string= "PCL " (symbol-name name)
 						 :end2 4)))))))
 	   (let ((ll (generic-function-lambda-list gf)))
-	     (multiple-value-bind (nrequired noptional 
+	     (multiple-value-bind (nrequired noptional
 					     keysp restp allow-other-keys-p keywords)
 		 (analyze-lambda-list ll)
 	       (cond ((use-constant-value-dfun-p gf t)
@@ -115,7 +115,7 @@
 		   (when show-methods-p
 		     (dolist (m (generic-function-methods gf))
 		       (let* ((q (method-qualifiers m))
-			      (qs (if (null q) 
+			      (qs (if (null q)
 				      ""
 				      (format nil "~{~S~^ ~}" q)))
 			      (s (unparse-specializers m)))

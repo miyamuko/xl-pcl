@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -73,18 +73,18 @@
   (multiple-value-bind (vars vals stores store-form access-form)
       (get-setf-method-multiple-value form)
     (unless (listp vars)
-	    (error 
- "The temporary variables component, ~s, 
+	    (error
+ "The temporary variables component, ~s,
   of the setf-method for ~s is not a list."
              vars form))
     (unless (listp vals)
-	    (error 
- "The values forms component, ~s, 
+	    (error
+ "The values forms component, ~s,
   of the setf-method for ~s is not a list."
              vals form))
     (unless (listp stores)
-	    (error 
- "The store variables component, ~s,  
+	    (error
+ "The store variables component, ~s,
   of the setf-method for ~s is not a list."
              stores form))
     (unless (= (list-length stores) 1)
@@ -116,7 +116,7 @@
 	                      (cdr form)))
 		(store (gensym))
 		(l (get (car form) 'setf-lambda))
-		(f `(lambda ,(car l) 
+		(f `(lambda ,(car l)
 		      (funcall #'(lambda ,(cadr l) ,@(cddr l))
 			       ',store))))
 	   (values vars (cdr form) (list store)

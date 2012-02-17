@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -52,7 +52,7 @@
 ;;; of these caches, that count is incremented whenever data is written to
 ;;; the cache.  But, the actual lookup code (see make-dlap) doesn't need to
 ;;; do locking when reading the cache.
-;;; 
+;;;
 ;;;
 ;;; NKEYS = 1, VALUEP = T
 ;;;
@@ -60,7 +60,7 @@
 ;;; be done to ensure the synchronization of cache reads.  Line 0 of the
 ;;; cache (location 0) is reserved for the cache lock count.  Location 1
 ;;; of the cache is unused (in effect wasted).
-;;; 
+;;;
 ;;; NKEYS > 1
 ;;;
 ;;; In this kind of cache, the 0 word of the cache holds the lock count.
@@ -102,7 +102,7 @@
   `(cache-vector-ref ,cache-vector 0))
 
 (defun flush-cache-vector-internal (cache-vector)
-  (without-interrupts  
+  (without-interrupts
     (fill (the simple-vector cache-vector) nil)
     (setf (cache-vector-lock-count cache-vector) 0))
   cache-vector)
@@ -150,7 +150,7 @@
 (defun print-cache (cache stream depth)
   (declare (ignore depth))
   (printing-random-thing (cache stream)
-    (format stream "cache ~D ~S ~D" 
+    (format stream "cache ~D ~S ~D"
 	    (cache-nkeys cache) (cache-valuep cache) (cache-nlines cache))))
 
 #+akcl
@@ -165,14 +165,14 @@
 ;;; This is done on the assumption that a better port of PCL will arrange
 ;;; to cons these all the same static area.  Given that, the fact that
 ;;; PCL tries to reuse them should be a win.
-;;; 
+;;;
 (defvar *free-cache-vectors* (make-hash-table :size 16 :test 'eql))
 
 ;;;
 ;;; Return a cache that has had flush-cache-vector-internal called on it.  This
 ;;; returns a cache of exactly the size requested, it won't ever return a
 ;;; larger cache.
-;;; 
+;;;
 (defun get-cache-vector (size)
   (let ((entry (gethash size *free-cache-vectors*)))
     (without-interrupts
@@ -195,7 +195,7 @@
 	  (let ((thread (cdr entry)))
 	    (loop (unless thread (return))
 		  (when (eq thread cache-vector) (error "Freeing a cache twice."))
-		  (setq thread (cache-vector-ref thread 0)))	  
+		  (setq thread (cache-vector-ref thread 0)))
 	    (flush-cache-vector-internal cache-vector)		;Help the GC
 	    (setf (cache-vector-ref cache-vector 0) (cdr entry))
 	    (setf (cdr entry) cache-vector)
@@ -204,7 +204,7 @@
 ;;;
 ;;; This is just for debugging and analysis.  It shows the state of the free
 ;;; cache resource.
-;;; 
+;;;
 (defun show-free-cache-vectors ()
   (let ((elements ()))
     (maphash #'(lambda (s e) (push (list s e) elements)) *free-cache-vectors*)
@@ -228,7 +228,7 @@
 
 ;;;
 ;;; Wrapper cache numbers
-;;; 
+;;;
 
 ;;;
 ;;; The constant WRAPPER-CACHE-NUMBER-ADDS-OK controls the number of non-zero
@@ -242,7 +242,7 @@
 ;;; The value of this constant is used to derive the next two which are the
 ;;; forms of this constant which it is more convenient for the runtime code
 ;;; to use.
-;;; 
+;;;
 (eval-when (compile load eval)
 
 (defconstant wrapper-cache-number-adds-ok 4)
@@ -296,7 +296,7 @@
 ;;; also set up to allow port specific modifications to `pack' the wrapper
 ;;; cache numbers on machines where the addressing modes make that a good
 ;;; idea.
-;;; 
+;;;
 #-structure-wrapper
 (progn
 (eval-when (compile load eval)
@@ -369,7 +369,7 @@
 	      (gather1 `(setf (wrapper-ref wrapper ,i)
 			      (get-wrapper-cache-number))))
 	     ((state instance-slots-layout class-slots class no-of-instance-slots)))))
-     (setf (wrapper-state wrapper) 't)     
+     (setf (wrapper-state wrapper) 't)
      wrapper))
 
 (defun make-wrapper (no-of-instance-slots &optional class)
@@ -416,7 +416,7 @@
   (cache-number-vector (make-wrapper-cache-number-vector)
 		       :type cache-number-vector)
   #-new-kcl-wrapper
-  (state t :type (or (member t) cons)) 
+  (state t :type (or (member t) cons))
   ;;  either t or a list (state-sym new-wrapper)
   ;;           where state-sym is either :flush or :obsolete
   (instance-slots-layout nil :type list)
@@ -493,7 +493,7 @@
 ;;; it means that any attempt to do a wrapper cache lookup using the wrapper
 ;;; should trap.  Also, methods on slot-value-using-class check the wrapper
 ;;; validity as well.  This is done by calling check-wrapper-validity.
-;;; 
+;;;
 
 (defmacro invalid-wrapper-p (wrapper)
   `(neq (wrapper-state ,wrapper) 't))
@@ -512,20 +512,20 @@
        ;; We go back and change the previously invalidated wrappers so that
        ;; they will now update directly to nwrapper.  This corresponds to a
        ;; kind of transitivity of wrapper updates.
-       ;; 
+       ;;
        (dolist (previous (gethash owrapper *previous-nwrappers*))
 	 (when (eq state ':obsolete)
 	   (setf (car previous) ':obsolete))
 	 (setf (cadr previous) nwrapper)
 	 (push previous new-previous))
-       
+
        (let ((ocnv (wrapper-cache-number-vector owrapper)))
 	 (iterate ((type (list-elements wrapper-layout))
 		   (i (interval :from 0)))
            (when (eq type 'number) (setf (cache-number-vector-ref ocnv i) 0))))
        (push (setf (wrapper-state owrapper) (list state nwrapper))
 	     new-previous)
-       
+
        (setf (gethash owrapper *previous-nwrappers*) ()
 	     (gethash nwrapper *previous-nwrappers*) new-previous)))))
 
@@ -548,7 +548,7 @@
 	  ;; since this directly slows down instance update and generic
 	  ;; function cache refilling, feel free to take it out sometime
 	  ;; soon.
-	  ;; 
+	  ;;
 	  (cond ((neq nwrapper (wrapper-of instance))
 		 (error "Wrapper returned from trap not wrapper of instance."))
 		((invalid-wrapper-p nwrapper)
@@ -593,7 +593,7 @@
 	    (cache-overflow cache) nil)
       cache)))
 
-(defun get-cache-from-cache (old-cache new-nlines 
+(defun get-cache-from-cache (old-cache new-nlines
 			     &optional (new-field (first-wrapper-cache-number-index)))
   (let ((nkeys (cache-nkeys old-cache))
 	(valuep (cache-valuep old-cache))
@@ -601,7 +601,7 @@
     (declare (type cache cache))
     (multiple-value-bind (cache-mask actual-size line-size nlines)
 	(if (= new-nlines (cache-nlines old-cache))
-	    (values (cache-mask old-cache) (cache-size old-cache) 
+	    (values (cache-mask old-cache) (cache-size old-cache)
 		    (cache-line-size old-cache) (cache-nlines old-cache))
 	    (compute-cache-parameters nkeys valuep new-nlines))
       (setf (cache-owner cache) (cache-owner old-cache)
@@ -648,10 +648,10 @@
   (if (= nkeys 1)
       (let* ((line-size (if valuep 2 1))
 	     (cache-size (if (typep nlines-or-cache-vector 'fixnum)
-			     (the fixnum 
+			     (the fixnum
 				  (* line-size
-				     (the fixnum 
-					  (power-of-two-ceiling 
+				     (the fixnum
+					  (power-of-two-ceiling
 					    nlines-or-cache-vector))))
 			     (cache-vector-size nlines-or-cache-vector))))
 	(declare (fixnum line-size cache-size))
@@ -664,7 +664,7 @@
 			     (the fixnum
 				  (* line-size
 				     (the fixnum
-					  (power-of-two-ceiling 
+					  (power-of-two-ceiling
 					    nlines-or-cache-vector))))
 			     (1- (cache-vector-size nlines-or-cache-vector)))))
 	(declare (fixnum line-size cache-size))
@@ -690,9 +690,9 @@
 
 ;;;
 ;;; COMPUTE-PRIMARY-CACHE-LOCATION
-;;; 
+;;;
 ;;; The basic functional version.  This is used by the cache miss code to
-;;; compute the primary location of an entry.  
+;;; compute the primary location of an entry.
 ;;;
 (defun compute-primary-cache-location (field mask wrappers)
   (declare (type field-type field) (fixnum mask))
@@ -703,7 +703,7 @@
 	(dolist (wrapper wrappers)
 	  ;;
 	  ;; First add the cache number of this wrapper to location.
-	  ;; 
+	  ;;
 	  (let ((wrapper-cache-number (wrapper-cache-number-vector-ref wrapper field)))
 	    (declare (fixnum wrapper-cache-number))
 	    (if (zerop wrapper-cache-number)
@@ -712,7 +712,7 @@
 	  ;;
 	  ;; Then, if we are working with lots of wrappers, deal with
 	  ;; the wrapper-cache-number-mask stuff.
-	  ;; 
+	  ;;
 	  (when (and (not (zerop i))
 		     (zerop (mod i wrapper-cache-number-adds-ok)))
 	    (setq location
@@ -727,12 +727,12 @@
 ;;; the cache line and determines the primary location.  Various parts of
 ;;; the cache filling code call this to determine whether it is appropriate
 ;;; to displace a given cache entry.
-;;; 
+;;;
 ;;; If this comes across a wrapper whose cache-no is 0, it returns the symbol
 ;;; invalid to suggest to its caller that it would be provident to blow away
 ;;; the cache line in question.
 ;;;
-(defun compute-primary-cache-location-from-location (to-cache from-location 
+(defun compute-primary-cache-location-from-location (to-cache from-location
 						     &optional (from-cache to-cache))
   (declare (type cache to-cache from-cache) (fixnum from-location))
   (let ((result 0)
@@ -749,7 +749,7 @@
 	(setq result (+ result wcn)))
       (when (and (not (zerop i))
 		 (zerop (mod i wrapper-cache-number-adds-ok)))
-	(setq result (logand result wrapper-cache-number-mask))))    
+	(setq result (logand result wrapper-cache-number-mask))))
     (if (= nkeys 1)
 	(logand mask result)
 	(the fixnum (1+ (logand mask result))))))
@@ -764,7 +764,7 @@
 ;;;  STANDARD-CLASS   seen only standard classes
 ;;;  BUILT-IN-CLASS   seen only built in classes
 ;;;  STRUCTURE-CLASS  seen only structure classes
-;;;  
+;;;
 (defun raise-metatype (metatype new-specializer)
   (let ((slot      (find-class 'slot-class))
 	(standard  (find-class 'standard-class))
@@ -772,7 +772,7 @@
 	(structure (find-class 'structure-class))
 	(built-in  (find-class 'built-in-class)))
     (flet ((specializer->metatype (x)
-	     (let ((meta-specializer 
+	     (let ((meta-specializer
 		     (if (eq *boot-state* 'complete)
 			 (class-of (specializer-class x))
 			 (class-of x))))
@@ -787,11 +787,11 @@
       ;;
       ;; We implement the following table.  The notation is
       ;; that X and Y are distinct meta specializer names.
-      ;; 
+      ;;
       ;;   NIL    <anything>    ===>  <anything>
       ;;    X      X            ===>      X
       ;;    X      Y            ===>    CLASS
-      ;;    
+      ;;
       (let ((new-metatype (specializer->metatype new-specializer)))
 	(cond ((eq new-metatype 'slot-instance) 'class)
 	      ((null metatype) new-metatype)
@@ -799,7 +799,7 @@
 	      (t 'class))))))
 
 (defmacro with-dfun-wrappers ((args metatypes)
-			      (dfun-wrappers invalid-wrapper-p 
+			      (dfun-wrappers invalid-wrapper-p
 					     &optional wrappers classes types)
 			      invalid-arguments-form
 			      &body body)
@@ -853,7 +853,7 @@
 ;;; building the discriminator codes.  Its ok for these to be interned
 ;;; symbols because we don't capture any user code in the scope in which
 ;;; these symbols are bound.
-;;; 
+;;;
 
 (defvar *dfun-arg-symbols* '(.ARG0. .ARG1. .ARG2. .ARG3.))
 
@@ -938,7 +938,7 @@
 ;;; easier to read and work with.
 ;;;
 ;;; Ahh Scheme...
-;;; 
+;;;
 ;;; In the absence of that, the following little macro makes the code that
 ;;; follows a little bit more reasonable.  I would like to add that having
 ;;; to practically write my own compiler in order to get just this simple
@@ -964,7 +964,7 @@
 
     ;;
     ;; Return T IFF this cache location is reserved.  The only time
-    ;; this is true is for line number 0 of an nkeys=1 cache.  
+    ;; this is true is for line number 0 of an nkeys=1 cache.
     ;;
     (line-reserved-p (line)
       (declare (fixnum line))
@@ -979,8 +979,8 @@
     ;; Given a line number, return the cache location.  This is the
     ;; value that is the second argument to cache-vector-ref.  Basically,
     ;; this deals with the offset of nkeys>1 caches and multiplies
-    ;; by line size.  
-    ;; 	  
+    ;; by line size.
+    ;;
     (line-location (line)
       (declare (fixnum line))
       (when (line-reserved-p line)
@@ -991,7 +991,7 @@
     ;;
     ;; Given a cache location, return the line.  This is the inverse
     ;; of LINE-LOCATION.
-    ;; 	  
+    ;;
     (location-line (location)
       (declare (fixnum location))
       (if (= (nkeys) 1)
@@ -1039,7 +1039,7 @@
     ;; Given a line number, return the value stored at that line.
     ;; If valuep is NIL, this returns NIL.  As with line-wrappers,
     ;; an error is signalled if the line is reserved.
-    ;; 
+    ;;
     (line-value (line)
       (declare (fixnum line))
       (when (line-reserved-p line) (error "Line is reserved."))
@@ -1096,7 +1096,7 @@
     ;;
     ;; Given a cache line, get the next cache line.  This will not
     ;; return a reserved line.
-    ;; 
+    ;;
     (next-line (line)
      (declare (fixnum line))
      (if (= line (the fixnum (1- (nlines))))
@@ -1115,7 +1115,7 @@
     ;; the primary cache line of the wrappers in that line.  We just
     ;; call COMPUTE-PRIMARY-CACHE-LOCATION-FROM-LOCATION, this is an
     ;; easier packaging up of the call to it.
-    ;; 
+    ;;
     (line-primary (line)
       (declare (fixnum line))
       (location-line (line-primary-location line)))
@@ -1186,7 +1186,7 @@
       (dotimes (i (nlines) cache)
 	(when (and (not (location-reserved-p location))
 		   (line-full-p i))
-	  (let* ((home-loc (compute-primary-cache-location-from-location 
+	  (let* ((home-loc (compute-primary-cache-location-from-location
 			    cache location))
 		 (home (location-line (if (location-reserved-p home-loc)
 					  (next-location home-loc)
@@ -1262,7 +1262,7 @@
 	  (find-free-cache-line primary cache wrappers)
 	(when (or forcep emptyp)
 	  (when (not emptyp)
-	    (push (cons (line-wrappers free) (line-value free)) 
+	    (push (cons (line-wrappers free) (line-value free))
 		  (cache-overflow cache)))
 	  ;;(fill-line free wrappers value)
 	  (let ((line free))
@@ -1319,14 +1319,14 @@
 
 ;;;
 ;;; Returns NIL or (values <field> <cache-vector>)
-;;; 
+;;;
 ;;; This is only called when it isn't possible to put the entry in the cache
 ;;; the easy way.  That is, this function assumes that FILL-CACHE-P has been
 ;;; called as returned NIL.
 ;;;
 ;;; If this returns NIL, it means that it wasn't possible to find a wrapper
 ;;; field for which all of the entries could be put in the cache (within the
-;;; limit).  
+;;; limit).
 ;;;
 (defun adjust-cache (cache wrappers value free-old-cache-p)
   (with-local-cache-functions (cache)
@@ -1350,7 +1350,7 @@
 		     (return (maybe-check-cache ncache)))
 	      (flush-cache-vector-internal (cache-vector ncache))))))))
 
-		       
+
 ;;;
 ;;; returns: (values <cache>)
 ;;;
@@ -1382,7 +1382,7 @@
 ;;;
 ;;; This is the heart of the cache filling mechanism.  It implements the decisions
 ;;; about where entries are placed.
-;;; 
+;;;
 ;;; Find a line in the cache at which a new entry can be inserted.
 ;;;
 ;;;   <line>
@@ -1429,7 +1429,7 @@
 	       (return nil)))
 	   (when (= line (the fixnum (1- (nlines)))) (setq wrappedp t)))))
       ;; Do all the displacing.
-      (loop 
+      (loop
        (when (null (cdr lines)) (return nil))
        (let ((dline (pop lines))
 	     (line (car lines)))
@@ -1463,7 +1463,7 @@
 ;;;
 ;;; This preallocation only creates about 25% more caches than PCL itself
 ;;; uses.  Some ports may want to preallocate some more of these.
-;;; 
+;;;
 (eval-when (load)
   (dolist (n-size '((1 513)(3 257)(3 129)(14 128)(6 65)(2 64)(7 33)(16 32)
 		    (16 17)(32 16)(64 9)(64 8)(6 5)(128 4)(35 2)))
@@ -1480,5 +1480,4 @@
 		   pcl::*free-caches*)
 	  l)
 	#'> :key #'cadr))
-
 

@@ -1,7 +1,7 @@
 ;;				-[Thu Feb 22 08:38:07 1990 by jkf]-
 ;; cpatch.cl
 ;;  compiler patch for the fast clos
-;;  
+;;
 ;; copyright (c) 1990 Franz Inc.
 ;;
 
@@ -27,6 +27,4 @@
   (re move.l `(d #.r-function-start-adj #.*fcnout-reg*) '#.*ctr2-reg*)
   (re jmpl '(d 0 #.*ctr2-reg*) *zero-reg*)
   (re nop))
-  
-  
 

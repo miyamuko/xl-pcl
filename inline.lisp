@@ -71,7 +71,7 @@
 				(return nil))))))
 	    (multiple-value-bind (walked-lambda call-next-method-p closurep
 						next-method-p-p)
-		(walk-method-lambda method-lambda required-parameters env 
+		(walk-method-lambda method-lambda required-parameters env
 				    slots calls)
 	      (multiple-value-bind (ignore walked-declarations walked-lambda-body)
 		  (extract-declarations (cddr walked-lambda))
@@ -82,8 +82,8 @@
 		  (multiple-value-bind (slot-name-lists call-list)
 		      (slot-name-lists-from-slots slots calls)
 		    (let ((pv-table-symbol (make-symbol "pv-table")))
-		      (setq plist 
-			    `(,@(when slot-name-lists 
+		      (setq plist
+			    `(,@(when slot-name-lists
 				  `(:slot-name-lists ,slot-name-lists))
 			      ,@(when call-list
 				  `(:call-list ,call-list))
@@ -102,21 +102,21 @@
 		(values `(lambda (.method-args. .next-methods.)
 			   (simple-lexical-method-functions
 			       (,lambda-list .method-args. .next-methods.
-				:call-next-method-p ,call-next-method-p 
+				:call-next-method-p ,call-next-method-p
 				:next-method-p-p ,next-method-p-p
 				:closurep ,closurep
 				:applyp ,applyp)
 			     ,@walked-declarations
 			     ,@walked-lambda-body))
-			`(,@(when plist 
+			`(,@(when plist
 			      `(:plist ,plist))
-			  ,@(when documentation 
+			  ,@(when documentation
 			      `(:documentation ,documentation)))))))))))
 
 (define-inline-function slot-value (instance slot-name) (form closure-p env)
   :predicate (and (not closure-p) (constantp slot-name))
   :inline-arguments (required-parameters slots)
-  :inline (optimize-slot-value     
+  :inline (optimize-slot-value
 	   slots
 	   (can-optimize-access form required-parameters env)
 	   form))
@@ -171,7 +171,7 @@
 		  (if (eq *boot-state* 'complete)
 		      (standard-generic-function-p (gdefinition (car form)))
 		      (funcallable-instance-p (gdefinition (car form)))))
-	     (optimize-generic-function-call 
+	     (optimize-generic-function-call
 	      form required-parameters env slots calls))
 	    (t form))))
 
@@ -198,9 +198,9 @@
 			    ,#'(lambda (form closure-p env)
 				 (if (and (not closure-p)
 					  (constantp (caddr form)))
-				     
-    (let ((walked-lambda (walk-form method-lambda env 
-				    (make-walk-function 
+
+    (let ((walked-lambda (walk-form method-lambda env
+				    (make-walk-function
 				     `((call-next-method-p
 					,#'(lambda (form closure-p env)
 					     (setq call-next-method-p 't)
@@ -251,13 +251,11 @@
 	    (setq pv-table (intern-pv-table :slot-name-lists snl
 					    :call-list cl))
 	    (when pv-table (set pv-table-symbol pv-table))
-	    (set-mf-property :pv-table pv-table)))    
+	    (set-mf-property :pv-table pv-table)))
 	(loop (when (null plist) (return nil))
-	      (set-mf-property (pop plist) (pop plist)))      
+	      (set-mf-property (pop plist) (pop plist)))
 	(when method
-	  (set-mf-property :method method))    
+	  (set-mf-property :method method))
 	(when return-function-p
 	  (or mf (method-function-from-fast-function mff)))))))
-
-
 

@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -36,7 +36,7 @@
 ;;; heavily commented to make that easier.
 ;;;
 ;;; Implementation-specific version of this file already exist for:
-;;; 
+;;;
 ;;;    Symbolics Genera family     genera-low.lisp
 ;;;    Lucid Lisp                  lucid-low.lisp
 ;;;    Xerox 1100 family           xerox-low.lisp
@@ -47,7 +47,7 @@
 ;;;    H.P. Common Lisp            hp-low.lisp
 ;;;    Golden Common Lisp          gold-low.lisp
 ;;;    Ti Explorer                 ti-low.lisp
-;;;    
+;;;
 ;;;
 ;;; These implementation-specific files are loaded after this file.  Because
 ;;; none of the macros defined by this file are used in functions defined by
@@ -60,7 +60,7 @@
 ;;; system please send mail to CommonLoops.pa@Xerox.com.
 ;;;
 ;;; Thanks.
-;;; 
+;;;
 
 (in-package :pcl)
 
@@ -84,7 +84,7 @@
 
 ;;;
 ;;; without-interrupts
-;;; 
+;;;
 ;;; OK, Common Lisp doesn't have this and for good reason.  But For all of
 ;;; the Common Lisp's that PCL runs on today, there is a meaningful way to
 ;;; implement this.  WHAT I MEAN IS:
@@ -127,14 +127,14 @@
 
 #+new-kcl-wrapper
 (progn
-(defvar *init-vector* (make-array 40 :fill-pointer 1 :adjustable t 
+(defvar *init-vector* (make-array 40 :fill-pointer 1 :adjustable t
 				  :initial-element nil))
 
 (defun get-init-list (i)
   (declare (fixnum i)(special *slot-unbound*))
   (loop (when (< i (fill-pointer *init-vector*))
 	  (return (aref *init-vector* i)))
-	(vector-push-extend 
+	(vector-push-extend
 	 (cons *slot-unbound*
 	       (aref *init-vector* (1- (fill-pointer *init-vector*))))
 	 *init-vector*)))
@@ -189,7 +189,7 @@
 ;;; at the value of a special variable.  Be careful, there are places in the
 ;;; code which actually use ..slot-unbound.. rather than this variable.  So
 ;;; much for modularity
-;;; 
+;;;
 (defvar *slot-unbound* '..slot-unbound..)
 
 (defmacro %allocate-static-slot-storage--class (no-of-slots)
@@ -203,7 +203,7 @@
   `(wrapper-class* (std-instance-wrapper ,instance)))
 
 
-  ;;   
+  ;;
 ;;;;;; FUNCTION-ARGLIST
   ;;
 ;;; Given something which is functionp, function-arglist should return the
@@ -239,7 +239,7 @@
 ;;; except that it has the name.
 ;;;
 ;;; In all cases, set-function-name must return the new (or same) function.
-;;; 
+;;;
 (defun set-function-name (function new-name)
   (declare (notinline set-function-name-1 intern-function-name))
   (set-function-name-1 function
@@ -269,7 +269,7 @@
 ;;; watching out for recursive calls to the compiler or not calling the
 ;;; compiler in certain cases or allowing the compiler not to be present.
 ;;;
-;;; This starts out with several variables and support functions which 
+;;; This starts out with several variables and support functions which
 ;;; should be conditionalized for any new port of PCL.  Note that these
 ;;; default to reasonable values, many new ports won't need to look at
 ;;; these values at all.
@@ -383,7 +383,7 @@
 	(cons included-name slot-description-list)))
 
 (unless (fboundp 'structure-functions-exist-p)
-  (setf (symbol-function 'structure-functions-exist-p) 
+  (setf (symbol-function 'structure-functions-exist-p)
 	#'(lambda () nil)))
 
 (defun default-structurep (x)

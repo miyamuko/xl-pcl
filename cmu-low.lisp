@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -23,9 +23,9 @@
 ;;;
 ;;; Suggestions, comments and requests for improvements are also welcome.
 ;;; *************************************************************************
-;;; 
+;;;
 ;;; This is the CMU Lisp version of the file low.
-;;; 
+;;;
 
 (in-package :pcl)
 
@@ -71,7 +71,7 @@
 
 ;;; We have this here and in fin.lisp, 'cause PCL wants to compile this
 ;;; file first.
-;;; 
+;;;
 (defsetf funcallable-instance-name set-funcallable-instance-name)
 
 ;;; And returns the function, not the *name*.

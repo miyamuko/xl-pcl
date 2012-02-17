@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -25,7 +25,7 @@
 ;;; *************************************************************************
 ;;;
 
-  ;;   
+  ;;
 ;;;;;; FUNCALLABLE INSTANCES
   ;;
 
@@ -72,7 +72,7 @@ explicitly marked saying who wrote it.
 ;;; The first part of the file contains the implementation dependent code to
 ;;; implement funcallable instances.  Each implementation must provide the
 ;;; following functions and macros:
-;;; 
+;;;
 ;;;    ALLOCATE-FUNCALLABLE-INSTANCE-1 ()
 ;;;       should create and return a new funcallable instance.  The
 ;;;       funcallable-instance-data slots must be initialized to NIL.
@@ -104,7 +104,7 @@ explicitly marked saying who wrote it.
 ;;;       is possible (and worthwhile) to optimize the computation of
 ;;;       data-name's offset in the data part of the fin.
 ;;;       This must be SETF'able.
-;;;       
+;;;
 
 (eval-when (compile load eval)
 (defconstant funcallable-instance-data
@@ -139,7 +139,7 @@ explicitly marked saying who wrote it.
 ;;;
 ;;; This code was largely written by JonL@Lucid.com.  Problems with it should
 ;;; be referred to him.
-;;; 
+;;;
 #+Lucid
 (progn
 
@@ -153,7 +153,7 @@ explicitly marked saying who wrote it.
 
 ;;;
 ;;; The inner closure of this function will have its code vector replaced
-;;;  by a hand-coded fast jump to the function that is stored in the 
+;;;  by a hand-coded fast jump to the function that is stored in the
 ;;;  captured-lexical variable.  In effect, that code is a hand-
 ;;;  optimized version of the code for this inner closure function.
 ;;;
@@ -162,7 +162,7 @@ explicitly marked saying who wrote it.
   #'(lambda (&rest args)
       (apply function args)))
 
-(eval-when (eval) 
+(eval-when (eval)
   (compile 'make-trampoline)
   )
 
@@ -170,7 +170,7 @@ explicitly marked saying who wrote it.
 (defun binary-assemble (codes)
   (let* ((ncodes (length codes))
 	 (code-vec #-LCL3.0 (lucid::new-code ncodes)
-		   #+LCL3.0 (lucid::with-current-area 
+		   #+LCL3.0 (lucid::with-current-area
 				lucid::*READONLY-NON-POINTER-AREA*
 			      (lucid::new-code ncodes))))
     (declare (fixnum ncodes))
@@ -186,7 +186,7 @@ explicitly marked saying who wrote it.
 ;;; See comment following definition of MAKE-TRAMPOLINE -- this is just
 ;;;  the "hand-optimized" machine instructions to make it work.
 ;;;
-(defvar *mattress-pad-code* 
+(defvar *mattress-pad-code*
 	(binary-assemble
 		#+MC68000
 		'(#x2A6D #x11 #x246D #x1 #x4EEA #x5)
@@ -235,7 +235,7 @@ explicitly marked saying who wrote it.
 	(fin-index fin-size))
     (declare (fixnum fin-index)
 	     (type lucid::procedure new-fin))
-    (dotimes (i (length funcallable-instance-data)) 
+    (dotimes (i (length funcallable-instance-data))
       ;; Initialize the new funcallable-instance.  As part of our contract,
       ;; we have to make sure the initial value of all the funcallable
       ;; instance data slots is NIL.
@@ -243,7 +243,7 @@ explicitly marked saying who wrote it.
       (setf (lucid::procedure-ref new-fin fin-index) nil))
     ;;
     ;; "Assemble" the initial function by installing a fast "trampoline" code;
-    ;; 
+    ;;
     (setf (lucid::procedure-ref new-fin lucid::procedure-code)
 	  *mattress-pad-code*)
     ;; Disable argcount checking in the "mattress-pad" code for
@@ -251,7 +251,7 @@ explicitly marked saying who wrote it.
     #+PA (setf (sys:procedure-ref new-fin lucid::procedure-arg-count) -1)
     #+MIPS (progn
 	     (setf (sys:procedure-ref new-fin lucid::procedure-min-args) 0)
-	     (setf (sys:procedure-ref new-fin lucid::procedure-max-args) 
+	     (setf (sys:procedure-ref new-fin lucid::procedure-max-args)
 		   call-arguments-limit))
     ;; but start out with the function to be run as an error call.
     (setf (lucid::procedure-ref new-fin fin-trampoline-fun-index)
@@ -267,7 +267,7 @@ explicitly marked saying who wrote it.
       (progn
 	(setf (lucid::procedure-ref fin fin-trampoline-fun-index) new-value)
 	fin)
-      (progn 
+      (progn
 	(unless (functionp new-value)
 	  (error "~S is not a function." new-value))
 	;; 'new-value' is an interpreted function.  Install a
@@ -276,12 +276,12 @@ explicitly marked saying who wrote it.
 					   (make-trampoline new-value)))))
 
 (defmacro funcallable-instance-data-1 (instance data)
-  `(lucid::procedure-ref 
+  `(lucid::procedure-ref
 	   ,instance
 	   (the fixnum
 		(- (- fin-size 1)
 		   (the fixnum (funcallable-instance-data-position ,data))))))
-  
+
 );end of #+Lucid
 
 
@@ -291,7 +291,7 @@ explicitly marked saying who wrote it.
 ;;; a CDR-coded list.  I know of no way to add a special bit to say that the
 ;;; closure is a FIN, so for now, closures are marked as FINS by storing a
 ;;; special marker in the last cell of the environment.
-;;; 
+;;;
 ;;;  The new structure of a fin is:
 ;;;     (lex-env lex-fun *marker* fin-data0 fin-data1)
 ;;;  The value returned by allocate is a lexical-closure pointing to the start
@@ -303,7 +303,7 @@ explicitly marked saying who wrote it.
 ;;;  Most of the fin operations speed up a little (by as much as 30% on a
 ;;;  3650), at least one nasty bug is fixed, and so far at least I've not
 ;;;  seen any problems at all with this code.   - mike thome (mthome@bbn.com)
-;;;      
+;;;
 #+(and Genera (not Genera-Release-8))
 (progn
 
@@ -319,7 +319,7 @@ explicitly marked saying who wrote it.
     ;; a dotted pair, because (1) the machine doesn't care and (2) if we
     ;; did the garbage collector would reclaim everything after the lexical
     ;; function.
-    ;; 
+    ;;
     (setf (sys:%p-contents-offset new-fin 2) *funcallable-instance-marker*)
     (setf (si:lexical-closure-function new-fin)
 	  #'(lambda (ignore &rest ignore-them-too)
@@ -373,7 +373,7 @@ explicitly marked saying who wrote it.
 
 ;;;
 ;;; Make funcallable instances print out properly.
-;;; 
+;;;
 (defvar *print-lexical-closure* nil)
 
 (defun pcl-print-lexical-closure (exp stream slashify-p &optional (depth 0))
@@ -691,7 +691,7 @@ dbg:
 ;;; Note that there is code in xerox-low which lets us access the fields of
 ;;; compiled-closures and which defines the closure-overlay record.  That
 ;;; code is there because there are some clients of it in that file.
-;;;      
+;;;
 #+Xerox
 (progn
 
@@ -731,7 +731,7 @@ dbg:
       (when env
 	(setq env
 	      (il:\\getbaseptr env (* funcallable-instance-closure-size 2)))
-	(when (il:typep env 'fin-env-pointer) 
+	(when (il:typep env 'fin-env-pointer)
 	  (setf (fin-env-pointer-pointer env) nil)))))
   nil)					;Return NIL so GC can proceed
 
@@ -790,7 +790,7 @@ dbg:
   #'(lambda (&rest args)
       (apply function args)))
 
-        
+
 (defmacro funcallable-instance-data-1 (fin data)
   `(il:\\getbaseptr (il:fetch (il:compiled-closure il:environment) il:of ,fin)
 		    (* (- funcallable-instance-closure-size
@@ -839,7 +839,7 @@ dbg:
   (called-fin-without-function))
 
 
-(eval-when (eval) 
+(eval-when (eval)
   (compile 'make-trampoline)
   (compile 'init-fin-fun))
 
@@ -858,7 +858,7 @@ dbg:
 ;; The code vector of this object has some hand-coded instructions which
 ;; do a very fast jump into the real fin handler function.  The function
 ;; which is the fin object *never* creates a frame on the stack.
-  
+
 
 (defun allocate-funcallable-instance-1 ()
   (let ((fin (compiler::.primcall 'sys::new-function))
@@ -967,7 +967,7 @@ dbg:
   )
 
 (defun allocate-funcallable-instance-1 ()
-  (let ((new-fin (compiler::.primcall 
+  (let ((new-fin (compiler::.primcall
 		   'sys::new-function
 		   funcallable-instance-constant-count)))
     ;; Have to set the procedure function to something for two reasons.
@@ -996,13 +996,13 @@ dbg:
 	 (set-funcallable-instance-function fin (make-trampoline new-value)))
         (t
          ;; tack the instance variables at the end of the constant vector
-	 
+
          (setf (excl::fn_code fin)	; this must be before fn_start
 	       (excl::fn_code new-value))
          (setf (excl::fn_start fin) (excl::fn_start new-value))
-         
+
          (setf (excl::fn_closure fin) (excl::fn_closure new-value))
-	 ; only replace the symdef slot if the new value is an 
+	 ; only replace the symdef slot if the new value is an
 	 ; interned symbol or some other object (like a function spec)
 	 (let ((newsym (excl::fn_symdef new-value)))
 	   (excl:if* (and newsym (or (not (symbolp newsym))
@@ -1013,16 +1013,16 @@ dbg:
 	 (setf (excl::fn_locals fin) (excl::fn_locals new-value))
          (setf (excl::fn_flags fin) (logior (excl::fn_flags new-value)
                                             funcallable-instance-flag-bit))
-	 
+
 	 ;; on a sun4 we copy over the constants
 	 (dotimes (i (excl::function-constant-count new-value))
-	   (setf (excl::function-constant fin i) 
+	   (setf (excl::function-constant fin i)
 		 (excl::function-constant new-value i)))
 	 ;(format t "all done copy from ~s to ~s" new-value fin)
 	 )))
 
 (defmacro funcallable-instance-data-1 (instance data)
-  `(excl::function-constant ,instance 
+  `(excl::function-constant ,instance
 			   (- funcallable-instance-constant-count
 			      (funcallable-instance-data-position ,data)
 			      1)))
@@ -1032,11 +1032,11 @@ dbg:
 #+(and gsgc cray)
 (progn
 
-;; The cray is like the sun4 in that the constant vector is included in the  
+;; The cray is like the sun4 in that the constant vector is included in the
 ;; function object itself.  But a mattress pad must be used anyway, because
 ;; the function start address is copied in the symbol object, and cannot be
-;; updated when the fin is changed.  
-;; We place the funcallable-instance-function into the first constant slot,  
+;; updated when the fin is changed.
+;; We place the funcallable-instance-function into the first constant slot,
 ;; and leave enough constant slots after that for the instance data.
 
 (eval-when (compile load eval)
@@ -1064,7 +1064,7 @@ dbg:
     (setf (excl::fn_start fin) (excl::fn_start mattress-fun))
     (setf (excl::fn_flags fin) (logior (excl::fn_flags init)
 				       funcallable-instance-flag-bit))
-    
+
     fin))
 
 ;; This function gets its code vector modified with a hand-coded fast jump
@@ -1099,7 +1099,7 @@ dbg:
 )
 
 (defmacro funcallable-instance-data-1 (instance data)
-  `(excl::function-constant ,instance 
+  `(excl::function-constant ,instance
 			    (+ (funcallable-instance-data-position ,data)
 			       fin-instance-dtat-slot)))
 
@@ -1173,9 +1173,9 @@ dbg:
              (dotimes (i ndata)
                (setf (svref new-cvec (- (+ nconstants ndata) i 1))
                      (svref old-cvec (- old-cvec-length i 1)))))))
-    
+
     (dotimes (i nconstants) (setf (svref new-cvec i) (svref cvec i)))
-    
+
     new-cvec))
 
 (defun funcallable-instance-data-1 (instance data)
@@ -1187,7 +1187,7 @@ dbg:
 
 (defun set-funcallable-instance-data-1 (instance data new-value)
   (let ((constant (excl::fn_constant instance)))
-    (setf (svref constant (- (length constant) 
+    (setf (svref constant (- (length constant)
                              (1+ (funcallable-instance-data-position data))))
           new-value)))
 
@@ -1200,7 +1200,7 @@ dbg:
 ;;; In Vaxlisp
 ;;; This code was originally written by:
 ;;;    vanroggen%bach.DEC@DECWRL.DEC.COM
-;;; 
+;;;
 #+(and dec vax common)
 (progn
 
@@ -1274,7 +1274,7 @@ dbg:
   ;;; The offset of the function's name & the max number of real closure slots.
   ;;;
   (defconstant fin-name-slot 14)
-  
+
   ;;; The offset of the data slots.
   ;;;
   (defconstant fin-data-offset 15))
@@ -1385,7 +1385,7 @@ dbg:
        ,n-val)))
 ;;;
 (defsetf funcallable-instance-data-1 %set-funcallable-instance-data-1)
-                
+
 ); End of #+cmu progn
 
 
@@ -1508,7 +1508,7 @@ make_turbo_trampoline_internal(base0)
 )
 
 #+IBCL
-(progn ; From Rainy Day PCL.  
+(progn ; From Rainy Day PCL.
 
 (defvar *funcallable-instance-marker* (list "Funcallable Instance Marker"))
 
@@ -1559,12 +1559,12 @@ make_turbo_trampoline_internal(base0)
 		    (setf (car fin-env-tail)
 			  (if (< i new-env-size)
 			      (car new-env-tail)
-			      nil)))		  
+			      nil)))
 		  (set-cclosure-self fin (cclosure-self new-value))
 		  (set-cclosure-data fin (cclosure-data new-value))
 		  (set-cclosure-start fin (cclosure-start new-value))
 		  (set-cclosure-size fin (cclosure-size new-value)))
-                 (t                 
+                 (t
                   (set-funcallable-instance-function
                     fin
                     (make-trampoline new-value))))))
@@ -1582,7 +1582,7 @@ make_turbo_trampoline_internal(base0)
 	 (set-cclosure-self fin (cfun-self new-value))
 	 (set-cclosure-data fin (cfun-data new-value))
 	 (set-cclosure-start fin (cfun-start new-value))
-	 (set-cclosure-size fin (cfun-size new-value)))	 
+	 (set-cclosure-size fin (cfun-size new-value)))
         (t
          (set-funcallable-instance-function fin
                                             (make-trampoline new-value))))
@@ -1640,7 +1640,7 @@ make_turbo_trampoline_internal(base0)
     (fin-set-mem-hword)
     (prim::@set-svref fin 2 fundef)
     (prim::@set-svref fin 3 static-link)
-    (prim::@set-svref fin 4 0) 
+    (prim::@set-svref fin 4 0)
     (impl::PlantclosureHook fin)
     fin))
 
@@ -1684,7 +1684,7 @@ make_turbo_trampoline_internal(base0)
 ;;; GCLISP supports named structures that are specially marked as funcallable.
 ;;; This allows FUNCALLABLE-INSTANCE-P to be a normal structure predicate,
 ;;; and allows ALLOCATE-FUNCALLABLE-INSTANCE-1 to be a normal boa-constructor.
-;;; 
+;;;
 #+GCLISP
 (progn
 
@@ -1718,7 +1718,7 @@ make_turbo_trampoline_internal(base0)
 ;;; Explorer Common Lisp
 ;;; This code was originally written by:
 ;;;    Dussud%Jenner@csl.ti.com
-;;;    
+;;;
 #+ti
 (progn
 
@@ -1754,7 +1754,7 @@ make_turbo_trampoline_internal(base0)
   (let* ((new-fin (allocate-funcallable-instance-2)))
     (setf (car (nthcdr (1- funcallable-instance-closure-size)
 		       (lexical-closure-environment new-fin)))
-	  *funcallable-instance-marker*) 
+	  *funcallable-instance-marker*)
     new-fin))
 
 (eval-when (eval) (compile 'allocate-funcallable-instance-1))
@@ -1787,7 +1787,7 @@ make_turbo_trampoline_internal(base0)
 		    (setf (car fin-env-tail)
 			  (if (< i new-env-size)
 			      (car new-env-tail)
-			      nil)))		  
+			      nil)))
 		  (setf (lexical-closure-function fin)
 			(lexical-closure-function new-value)))
 		 (t
@@ -1804,7 +1804,7 @@ make_turbo_trampoline_internal(base0)
 	(apply function args))))
 
 (eval-when (eval) (compile 'make-trampoline))
-	
+
 (defmacro funcallable-instance-data-1 (fin data)
   `(let ((env (lexical-closure-environment ,fin)))
      (nth (- funcallable-instance-closure-size
@@ -1850,7 +1850,7 @@ make_turbo_trampoline_internal(base0)
     (let ((fin (system::alloc-funcallable-instance)))
       (system::set-fin-function fin #'un-initialized-fin)
       fin))
-	     
+
 (defun funcallable-instance-p (object)
   (typep object 'lisp::funcallable-instance))
 
@@ -1887,14 +1887,14 @@ make_turbo_trampoline_internal(base0)
 ;;;
 #+:coral
 (progn
-  
+
 (defconstant ccl::$v_istruct 22)
 (defvar ccl::initial-fin-slots (make-list (length funcallable-instance-data)))
 (defconstant ccl::fin-function 1)
 (defconstant ccl::fin-data (+ ccl::FIN-function 1))
 
 (defun allocate-funcallable-instance-1 ()
-  (apply #'ccl::%gvector 
+  (apply #'ccl::%gvector
          ccl::$v_istruct
          'ccl::funcallable-instance
          #'(lambda (&rest ignore)
@@ -1929,19 +1929,19 @@ make_turbo_trampoline_internal(base0)
   (ccl::%uvset fin ccl::FIN-function new-value))
 
 (defmacro funcallable-instance-data-1 (fin data-name)
-  `(ccl::%uvref ,fin 
+  `(ccl::%uvref ,fin
                 (+ (funcallable-instance-data-position ,data-name)
 		   ccl::FIN-data)))
 
 (defsetf funcallable-instance-data-1 (fin data) (new-value)
-  `(ccl::%uvset ,fin 
+  `(ccl::%uvset ,fin
                 (+ (funcallable-instance-data-position ,data) ccl::FIN-data)
                 ,new-value))
 
 ); End of #+:coral
 
 
-  
+
 ;;;; Slightly Higher-Level stuff built on the implementation-dependent stuff.
 ;;;
 ;;;
@@ -1957,6 +1957,4 @@ make_turbo_trampoline_internal(base0)
 
 (defmacro fsc-instance-slots (fin)
   `(funcallable-instance-data-1 ,fin 'slots))
-
-
 

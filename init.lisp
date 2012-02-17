@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -26,7 +26,7 @@
 ;;;
 ;;;
 ;;; This file defines the initialization and related protocols.
-;;; 
+;;;
 
 (in-package :pcl)
 
@@ -85,7 +85,7 @@
   (apply #'shared-initialize instance t initargs))
 
 (defmethod reinitialize-instance ((instance slot-object) &rest initargs)
-  #||  
+  #||
   (check-initargs-1
    (class-of instance) initargs
    (list (list* 'reinitialize-instance instance initargs)
@@ -194,7 +194,7 @@
     instance))
 
 
-;;; 
+;;;
 ;;; if initargs are valid return nil, otherwise signal an error
 ;;;
 (defun check-initargs-1 (class initargs call-list &optional (plist-p t) (error-p t))

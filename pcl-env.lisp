@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -28,9 +28,9 @@
 
 (in-package "PCL")
 
-;; 
+;;
 ;; Protect the Corporation
-;; 
+;;
 (eval-when (eval load)
   (format *terminal-io*
     "~&;PCL-ENV Copyright (c) 1987, 1988, 1989, by ~
@@ -54,8 +54,8 @@
 	 ;; the printer that we have done the printing ourselves.
 	 (print-object x stream)
 	 t)
-	(t 
-	 ;; Internal printing (again, see the IRM section 25.3.3). 
+	(t
+	 ;; Internal printing (again, see the IRM section 25.3.3).
 	 ;; Return a list containing the string of characters that
 	 ;; would be printed, if the object were being printed for
 	 ;; real.
@@ -119,7 +119,7 @@
   "Return the full name of a method, given the generic-function name, the method
 qualifiers, and the arg-types"
   ;; The name of the method is:
-  ;;      (<generic-function-name> <qualifier-1> .. 
+  ;;      (<generic-function-name> <qualifier-1> ..
   ;;         (<arg-specializer-1>..))
   (labels ((remove-trailing-ts (l)
 	     (if (null l)
@@ -171,16 +171,16 @@ arg-types."
 
 ;;; Converting generic defining macros into DEFDEFINER macros
 
-(defmacro make-defdefiner (definer-name definer-type type-description &body 
+(defmacro make-defdefiner (definer-name definer-type type-description &body
 					definer-options)
   "Make the DEFINER-NAME use DEFDEFINER, defining items of type DEFINER-TYPE"
   (let ((old-definer-macro-name (intern (string-append definer-name
 						       " old definition")
 					(symbol-package definer-name)))
-	(old-definer-macro-expander (intern (string-append definer-name 
+	(old-definer-macro-expander (intern (string-append definer-name
 							   " old expander")
 					    (symbol-package definer-name))))
-    `(progn 
+    `(progn
       ;; First, move the current defining function off to some safe
       ;; place
       (unmake-defdefiner ',definer-name)
@@ -263,11 +263,11 @@ arg-types."
 ;;; Initialize the PCL env
 
 (defun initialize-pcl-env nil
-  "Initialize the Xerox PCL environment" 
+  "Initialize the Xerox PCL environment"
   ;; Set up SourceManager DEFDEFINERS for classes and methods.
   ;;
   ;; Make sure to define methods before classes, so that (IL:FILES?) will build
-  ;; filecoms that have classes before methods. 
+  ;; filecoms that have classes before methods.
   (unless (il:hasdef 'methods 'il:filepkgtype)
     (make-defdefiner defmethod methods "methods"
 		     (:name (lambda (form)
@@ -284,7 +284,7 @@ arg-types."
 			  (let* ((gf (gf-named name))
 				 (method (when gf
 					   (get-method gf qualifiers
-						       (mapcar #'find-class 
+						       (mapcar #'find-class
 							       arg-types)))))
 			    (when method (remove-method gf method))))))))
   ;; Include support for DEFGENERIC, if that is defined
@@ -353,7 +353,7 @@ arg-types."
   (il:inspectw.create x '\\internal-inspect-slot-names
               '\\internal-inspect-slot-value
               '\\internal-inspect-setf-slot-value
-              '\\internal-inspect-slot-name-command nil nil 
+              '\\internal-inspect-slot-name-command nil nil
               '\\internal-inspect-title nil where
               #'(lambda (n v)		;Same effect as NIL, but avoids bug in
 		  (declare (ignore v))	; INSPECTW.CREATE
@@ -390,12 +390,12 @@ window"
 			il:|SetPropertyMenu|)
 		       (t (il:setq il:|SetPropertyMenu|
 				   (il:|create| il:menu il:items il:_
-				       '((set 'set 
+				       '((set 'set
 					  "Allows a new value to be entered"
 					  )))))))
-    (set 
+    (set
      ;; The user want to set the value
-     (il:ersetq (prog ((il:oldvalueitem (il:itemofpropertyvalue slot-name 
+     (il:ersetq (prog ((il:oldvalueitem (il:itemofpropertyvalue slot-name
 								window))
 		       il:newvalue il:pwindow)
 		   (il:ttydisplaystream (il:setq il:pwindow
@@ -403,12 +403,12 @@ window"
 		   (il:clearbuf t t)
 		   (il:resetlst
 		    (il:resetsave (il:\\itemw.flipitem il:oldvalueitem window)
-				  (list 'il:\\itemw.flipitem 
+				  (list 'il:\\itemw.flipitem
 					il:oldvalueitem window))
 		    (il:resetsave (il:tty.process (il:this.process)))
 		    (il:resetsave (il:printlevel 4 3))
-		    (il:|printout| t "Enter the new " 
-			slot-name " for " x t 
+		    (il:|printout| t "Enter the new "
+			slot-name " for " x t
 			"The expression read will be EVALuated."
 			t "> ")
 		    (il:setq il:newvalue (il:lispx (il:lispxread t t)
@@ -482,7 +482,7 @@ window"
 			;;The function won't be seen when compiled, so only show
 			;;it if INTERPFLG it true
 			xcl::interpflg)
-		       (t 
+		       (t
 			;; Interesting by default.
 			t)))))
        (cons (case (car xcl::name)
@@ -521,7 +521,7 @@ window"
 
 (cl:in-package "PCL")
 
-(defun il:debugger-stack-frame-prop-names (il:framespec) 
+(defun il:debugger-stack-frame-prop-names (il:framespec)
   ;; Frame prop-names are structures of the form
   ;; (LABEL-FN VALUE-FN SETF-FN EDIT-FN DATA)
   (let ((il:pos (car il:framespec))
@@ -620,12 +620,12 @@ window"
 									 il:novalue))
 					   (or (il:setq il:argname (il:stkargname
 								    il:i il:pos))
-					       (il:setq il:argname (il:concat 
-								    "local " 
+					       (il:setq il:argname (il:concat
+								    "local "
 								    il:pvar)))
 					   )
 				      il:collect
-				      (il:build-name :arg-name il:argname 
+				      (il:build-name :arg-name il:argname
 						     :arg-number il:i))))
                (and il:slots (cons (il:make-frame-prop-name :data "locals")
                                    il:slots)))))))))
@@ -638,7 +638,7 @@ window"
   (il:apply* (il:frame-prop-name-setf-fn il:prop-name)
 	     il:prop-name il:framespec il:newvalue))
 
-(defun il:debugger-stack-frame-value-command (il:datum il:prop-name 
+(defun il:debugger-stack-frame-value-command (il:datum il:prop-name
 						       il:framespec il:window)
   (il:apply* (il:frame-prop-name-inspect-fn il:prop-name)
 	     il:datum il:prop-name il:framespec il:window))
@@ -674,10 +674,10 @@ window"
 		       #'(il:lambda (il:item il:menu il:button)
 			   (declare (ignore il:item il:menu))
 			   (case il:button
-			     (il:left (il:promptprint 
+			     (il:left (il:promptprint
 				       "Open a frame inspector on this stack frame"
 				       ))
-			     (il:middle (il:promptprint 
+			     (il:middle (il:promptprint
 					 "Inspect/Edit this function"))
 			     ))
 		       il:menuoutlinesize il:_ 0
@@ -691,21 +691,21 @@ window"
 					  (eql (il:|fetch| (il:menu il:whenselectedfn)
 						   il:|of| (car il:btw))
 					       (il:function il:backtrace-item-selected)))
-			   il:|do|                       
-			   (return il:atw)))       
+			   il:|do|
+			   (return il:atw)))
        (il:deletemenu (car (il:windowprop il:btw 'il:menu))
 		      nil il:btw)
        (il:windowprop il:btw 'il:extent nil)
        (il:clearw il:btw))
       ((il:setq il:btw (il:createw (il:region-next-to (il:windowprop il:ttywindow 'il:region)
-						      (il:widthifwindow (il:imin (il:|fetch| (il:menu 
+						      (il:widthifwindow (il:imin (il:|fetch| (il:menu
 											      il:imagewidth
 											      )
 										     il:|of| il:bkmenu)
 										 il:|MaxBkMenuWidth|))
 						      (il:|fetch| (il:region il:height) il:|of| il:ttyregion
 							  )
-						      'il:left)))   
+						      'il:left)))
        (il:attachwindow il:btw il:ttywindow (cond
 					      ((il:igreaterp (il:|fetch| (il:region il:left)
 								 il:|of| (il:windowprop
@@ -726,7 +726,7 @@ window"
 								     il:btw
 								     'il:height)
 								    (il:|fetch| (il:menu il:imageheight
-											 ) il:|of| 
+											 ) il:|of|
 											   il:bkmenu
 											   ))))))
 
@@ -738,7 +738,7 @@ window"
 				    ))
       (cond
 	((il:setq il:olditem (il:|fetch| (il:menu il:menuuserdata) il:|of| il:menu))
-	 (il:menudeselect il:olditem il:menu)        
+	 (il:menudeselect il:olditem il:menu)
 	 ))
       (il:setq il:ttywindow (il:windowprop (il:wfrommenu il:menu)
 					   'il:mainwindow))
@@ -747,16 +747,16 @@ window"
 				 il:bkpos))
       (let ((il:lp (il:windowprop il:ttywindow 'il:lastpos)))
 	(and il:lp (il:stknth 0 il:pos il:lp)))
-      (il:menuselect il:item il:menu)                
+      (il:menuselect il:item il:menu)
       (if (eq il:button 'il:middle)
-	  (progn 
+	  (progn
 
 
 	    (il:resetsave nil (list 'il:relstk il:pos))
 	    (il:inspect/as/function (il:|fetch| (il:bkmenuitem il:frame-name)
 					il:|of| il:item)
 				    il:pos il:ttywindow))
-	  (progn 
+	  (progn
 
 
 	    (il:setq il:framewindow
@@ -815,32 +815,32 @@ window"
                        xcl::interesting-p xcl::last-frame-consumed xcl::use-frame xcl::label)
                       (loop (when (null xcl::next-frame)
                                   (return))
-                            (multiple-value-setq (xcl::interesting-p xcl::last-frame-consumed 
+                            (multiple-value-setq (xcl::interesting-p xcl::last-frame-consumed
                                                         xcl::use-frame xcl::label)
                                    (funcall xcl::filter-fn xcl::next-frame))
                             (when (null xcl::last-frame-consumed)
-                                                            
+
                                 (setf xcl::last-frame-consumed xcl::next-frame))
-                            (when xcl::interesting-p        
+                            (when xcl::interesting-p
                                 (when (null xcl::use-frame)
                                       (setf xcl::use-frame xcl::last-frame-consumed))
-                                                             
+
                                 (when (null xcl::label)
                                     (setf xcl::label (il:stkname xcl::use-frame))
                                     (if (member xcl::label '(eval il:eval il:apply apply)
                                                :test
                                                'eq)
                                         (setf xcl::label (il:stkarg 1 xcl::use-frame))))
-                                                            
+
                                 (loop (cond
                                          ((not (typep xcl::next-frame 'il:stackp))
                                           (error "~%Use-frame ~S not found" xcl::use-frame))
                                          ((xcl::stack-eql xcl::next-frame xcl::use-frame)
                                           (return))
                                          (t (incf xcl::frame-number)
-                                            (setf xcl::next-frame (il:stknth -1 xcl::next-frame 
+                                            (setf xcl::next-frame (il:stknth -1 xcl::next-frame
                                                                          xcl::next-frame)))))
-                                                             
+
                                 (xcl::collect-item (il:|create| il:bkmenuitem
                                                           il:label il:_ (let ((*print-level* 2)
                                                                               (*print-length* 3)
@@ -852,20 +852,20 @@ window"
                                                                               (*print-array* nil)
                                                                               (il:*print-structure*
                                                                                nil))
-                                                                             (prin1-to-string 
+                                                                             (prin1-to-string
                                                                                     xcl::label))
                                                           il:bkmenuinfo il:_ xcl::frame-number
                                                           il:frame-name il:_ xcl::label)))
-                                                             
+
                             (loop (cond
                                      ((not (typep xcl::next-frame 'il:stackp))
-                                      (error "~%Last-frame-consumed ~S not found" 
+                                      (error "~%Last-frame-consumed ~S not found"
                                              xcl::last-frame-consumed))
                                      ((prog1 (xcl::stack-eql xcl::next-frame xcl::last-frame-consumed
                                                     )
                                           (incf xcl::frame-number)
-                                          (setf xcl::next-frame (il:stknth -1 xcl::next-frame 
-                                                             
+                                          (setf xcl::next-frame (il:stknth -1 xcl::next-frame
+
                                                                        xcl::next-frame)))
                                       (return)))))))
          (rest xcl::items)))
@@ -894,7 +894,7 @@ window"
 	       il:items il:_ (dbg::collect-backtrace-items tty-window skip)
 	       il:whenselectedfn il:_ 'dbg::backtrace-item-selected
 	       il:menuoutlinesize il:_ 0
-	       il:menufont il:_ il:backtracefont 
+	       il:menufont il:_ il:backtracefont
 	       il:menucolumns il:_ 1
 	       il:whenheldfn il:_
 	       #'(il:lambda (item menu button)
@@ -947,9 +947,9 @@ window"
 	    (il:windowprop btw 'il:process
 			   (il:windowprop tty-window 'il:process))))
      (il:addmenu bkmenu btw (il:|create| il:position
-				il:xcoord il:_ 0 
+				il:xcoord il:_ 0
 				il:ycoord il:_ (- (il:windowprop btw 'il:height)
-						  (il:|fetch| (il:menu 
+						  (il:|fetch| (il:menu
 							       il:imageheight)
 						      il:|of| bkmenu))))
      ;; IL:ADDMENU sets up buttoneventfn for window that we don't
@@ -1003,7 +1003,7 @@ window"
 	(loop (when (null next-frame) (return))
 	      ;; Get the values of INTERSTINGP, LAST-FRAME-CONSUMED,
 	      ;; FRAME-TO-USE, and LABEL-TO-USE
-	      (multiple-value-setq (interestingp last-frame-consumed 
+	      (multiple-value-setq (interestingp last-frame-consumed
 						 frame-to-use label-to-use)
 		(funcall filter next-frame))
 	      (when (null last-frame-consumed)
@@ -1043,7 +1043,7 @@ window"
 
 	      ;; Update NEXT-POS
 	      (loop (cond ((not (typep next-frame 'il:stackp))
-			   (error "~%Last-frame-consumed ~S not found" 
+			   (error "~%Last-frame-consumed ~S not found"
 				  last-frame-consumed))
 			  ((prog1
 			       (xcl::stack-eql next-frame last-frame-consumed)
@@ -1064,10 +1064,10 @@ window"
 					  (il:windowprop window 'il:dsp)))
 		  (tty-window (il:windowprop window 'il:mainwindow))
 		  (last-pos (il:windowprop tty-window 'dbg::lastpos)))
-                        
+
 	     ;; don't have to worry about releasing POS because we
 	     ;; only look at it here (nobody here hangs on to it)
-	     ;; and we will be around for less time than LASTPOS. 
+	     ;; and we will be around for less time than LASTPOS.
 	     ;; The debugger is responsible for releasing LASTPOS.
 	     (il:inspect/as/function (cond
 				       ((and selection
@@ -1146,22 +1146,22 @@ window"
     ;; gives the user a menu choice of editors.
     (il:menu (il:|create| il:menu
 		 il:items il:_ (cond ((il:ccodep function)
-				      '((il:|InspectCode| 'il:inspectcode 
+				      '((il:|InspectCode| 'il:inspectcode
 					 "Shows the compiled code.")
-					(il:|DisplayEdit| 'ed 
+					(il:|DisplayEdit| 'ed
 					 "Edit it with the display editor")
-					(il:|TtyEdit| 'il:ef 
+					(il:|TtyEdit| 'il:ef
 					 "Edit it with the standard editor")))
 				     ((il:closure-p function)
-				      '((il:|Inspect| 'inspect 
+				      '((il:|Inspect| 'inspect
 					 "Inspect this object")))
-				     (t '((il:|DisplayEdit| 'ed 
+				     (t '((il:|DisplayEdit| 'ed
 					   "Edit it with the display editor")
-					  (il:|TtyEdit| 'il:ef 
+					  (il:|TtyEdit| 'il:ef
 					   "Edit it with the standard editor"))))
 		 il:centerflg il:_ t)))
 
-;; 
+;;
 
 
 ;; PCL specific extensions to the debugger
@@ -1182,10 +1182,10 @@ window"
   (declare (ignore debugger-window))
   (let ((editor (il:select.fns.editor name)))
     (case editor
-      ((nil) 
+      ((nil)
        ;; No editor chosen, so don't do anything
        nil)
-      (il:inspectcode 
+      (il:inspectcode
        ;; Inspect the compiled code
        (let ((frame (xcl::stack-pointer-frame stack-pointer)))
 	 (if (and (il:stackp stack-pointer)
@@ -1194,7 +1194,7 @@ window"
 			       (cond ((eq (il:\\get-compiled-code-base name)
 					  code-base)
 				      name)
-				     (t 
+				     (t
 				      ;; Function executing in this frame is not
 				      ;; the one in the definition cell of its
 				      ;; name, so fetch the real code.  Have to
@@ -1202,7 +1202,7 @@ window"
 				      (il:make-compiled-closure code-base))))
                              nil nil nil (xcl::stack-frame-pc frame))
 	     (il:inspectcode name))))
-      (ed 
+      (ed
        ;; Use the standard editor.
        ;; This used to take care to apply the editor in the debugger
        ;; process, so forms evaluated in the editor happen in the
@@ -1210,7 +1210,7 @@ window"
        ;; more, now that lexical variables are the way to go.  Better to
        ;; use the LEX debugger command (thank you, Herbie) and
        ;; shift-select pieces of code from the editor into the debugger
-       ;; window. 
+       ;; window.
        (ed name `(,@xcl::*function-types* :display)))
       (otherwise (funcall editor name)))))
 
@@ -1267,7 +1267,7 @@ window"
 	 ;; right stuff is on the stack.  Specifically, the closure's ccode,
 	 ;; and the first local variable has to be a ptrhunk big enough to be
 	 ;; a FIN environment, and fin-env-fin of that ptrhunk has to point
-	 ;; to a generic function whose ccode and environment match. 
+	 ;; to a generic function whose ccode and environment match.
 	 (let ((n-args (il:stknargs frame))
 	       (env nil)
 	       (gf nil))
@@ -1285,7 +1285,7 @@ window"
 		;; whose environment is the same as env?
 		(eq (xcl::compiled-closure-env gf) env)
 		;; and whose code is the same as the code for this
-		;; frame? 
+		;; frame?
 		(function-matches-frame-p gf frame))
 	       gf
 	       nil))))

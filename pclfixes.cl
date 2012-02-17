@@ -1,7 +1,7 @@
 ;;; This file adds the :METHOD capability to DEFGENERIC. It comes from
 ;;; keim-1.0.tar.z (file ags/prog/pcl-fixes.lisp) a theorem prover.
-;;; It is lacking in the May Day, March 92, August 28 92, and 
-;;; Sept 16 92 (f) versions of PCL, but appears in July 92 PCL.  
+;;; It is lacking in the May Day, March 92, August 28 92, and
+;;; Sept 16 92 (f) versions of PCL, but appears in July 92 PCL.
 
 ;;; -*- syntax: common-lisp; package: pcl; base: 10; mode: lisp -*-
 ;;; Here is the copyright notice from PCL:
@@ -13,11 +13,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -34,7 +34,7 @@
 ;;; This file adds the ability to use the :method option in defgenerics.
 ;;; This is lacking in May Day, March 92, and August 28 92 PCL.
 ;;; as well as Sept 16 92 PCL (f)
-;;; It appears, however, to be in July 92 PCL.  
+;;; It appears, however, to be in July 92 PCL.
 ;;; This file is intended to only be loaded when using PCL. (i.e., #+pcl).
 ;;; "5/1/90  May Day PCL (REV 2)"
 ;;; "5/1/90  May Day PCL (REV 4b)"
@@ -42,8 +42,8 @@
 ;;; "August 28 92 PCL (a)"
 
 (in-package "PCL")
-(progn 
-  (when (some #'(lambda (x) (search x *pcl-system-date* 
+(progn
+  (when (some #'(lambda (x) (search x *pcl-system-date*
 				    :test #'string-equal))
 	      (list "March 92" "August 28 92"
 		    "September 16 92 PCL (f)" ))
@@ -58,7 +58,7 @@
 	  ;; INITARG takes this screwy new argument to get around a bad
 	  ;; interaction between lexical macros and setf in the Lucid
 	  ;; compiler.
-	  ;; 
+	  ;;
 	  (macrolet ((initarg (key &optional new)
 		       (if new
 			   `(setf (getf initargs ,key) ,new)
@@ -89,10 +89,10 @@
 		     (duplicate-option :method-class)
 		   (initarg :method-class `',(cadr option))))
 		(:method
-		 (push `(defmethod ,function-specifier 
+		 (push `(defmethod ,function-specifier
 			    ,@(cdr option))
-		       methods)	     
-					;(error			
+		       methods)
+					;(error
 					;  "DEFGENERIC doesn't support the :METHOD option yet.")
 		 )))
 	    (let ((declarations (initarg :declarations)))
@@ -121,7 +121,7 @@
 	  ;; INITARG takes this screwy new argument to get around a bad
 	  ;; interaction between lexical macros and setf in the Lucid
 	  ;; compiler.
-	  ;; 
+	  ;;
 	  (macrolet ((initarg (key &optional new)
 		       (if new
 			   `(setf (getf initargs ,key) ,new)
@@ -152,7 +152,7 @@
 		     (duplicate-option :method-class)
 		   (initarg :method-class `',(cadr option))))
 		(:method
-		 (push `(defmethod ,function-specifier 
+		 (push `(defmethod ,function-specifier
 			    ,@(cdr option))
 		       methods)
 					;	      (error

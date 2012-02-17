@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -47,7 +47,7 @@
   (let ((instance nil)
 	(arglist  ())
 	(closure-variables ())
-	(field (first-wrapper-cache-number-index))) 
+	(field (first-wrapper-cache-number-index)))
     ;;we need some field to do the fast obsolete check
     (ecase reader/writer
       (:reader (setq instance (dfun-arg-symbol 0)
@@ -101,7 +101,7 @@
 		     (ecase 1-or-2-class
 		       (1 (emit-check-1-class-wrapper wrapper 'wrapper-0 'trap))
 		       (2 (emit-check-2-class-wrapper wrapper 'wrapper-0 'wrapper-1 'trap)))
-		     
+
 		     (if class-slot-p
 			 (flatten-lap
 			  (opcode :move (operand :cvar 'index) csv)
@@ -113,7 +113,7 @@
 			(ecase reader/writer
 			   (:reader (emit-get-slot slots index 'trap inst))
 			   (:writer (emit-set-slot slots index (car arglist) inst)))))
-	      
+
 		     (opcode :label 'trap)
 		     (emit-miss 'miss-fn))
 	      (when slots (deallocate-register slots))
@@ -195,23 +195,23 @@
 		       (emit-miss 'miss-fn))
 		     index
 		     (list nil slots)))))))
-  
+
 
 
 (defun emit-checking (metatypes applyp)
   (let ((dlap-lambda-list (make-dlap-lambda-list metatypes applyp)))
-    (generating-lap '(field cache-vector mask size 
-		      #-excl-sun4 emf #+excl-sun4 function 
+    (generating-lap '(field cache-vector mask size
+		      #-excl-sun4 emf #+excl-sun4 function
 		      miss-fn)
 		    dlap-lambda-list
       (emit-dlap (remove '&rest dlap-lambda-list)
-		 metatypes		 
+		 metatypes
 		 'trap
 		 (with-lap-registers ((#-excl-sun4 emf #+excl-sun4 function t))
 		   (flatten-lap
-		     (opcode :move (operand :cvar 
+		     (opcode :move (operand :cvar
 					    #-excl-sun4 'emf #+excl-sun4 'function)
-			     #-excl-sun4 emf 
+			     #-excl-sun4 emf
 			     #+excl-sun4 function)
 		     #-excl-sun4 (opcode :emf-call emf)
 		     #+excl-sun4 (opcode :jmp function)))
@@ -376,7 +376,7 @@
 	  (opcode :fix= location primary miss-label)
 	  (opcode :fix= location size 'set-location-to-min)
 	  (opcode :label 'continue)
-	  (emit-check-1-wrapper-in-cache cache-vector location wrapper hit) 
+	  (emit-check-1-wrapper-in-cache cache-vector location wrapper hit)
 	  (opcode :go 'loop)
 	  (opcode :label 'set-location-to-min)
 	  (opcode :izerop primary miss-label)
@@ -385,7 +385,7 @@
       miss)))
 
 ;;;
-;;; The function below implements CACHE-VECTOR-LOCK-COUNT as the first entry 
+;;; The function below implements CACHE-VECTOR-LOCK-COUNT as the first entry
 ;;; in a cache (svref cache-vector 0).  This should probably be abstracted.
 ;;;
 (defun emit-1-t-dlap (wrapper wrapper-move hit miss miss-label value)
@@ -437,7 +437,7 @@
 			 (next-location index)
 			 (line-size index))	;Line size holds a constant
 						;that can be folded in if there was
-						;a way to add a constant to 
+						;a way to add a constant to
 						;an index register
       (flatten-lap
 	(apply #'flatten-lap wrapper-moves)
@@ -468,7 +468,7 @@
 ;;;
 
 (defun emit-check-1-wrapper-in-cache (cache-vector location wrapper hit-code)
-  (let ((exit-emit-check-1-wrapper-in-cache 
+  (let ((exit-emit-check-1-wrapper-in-cache
 	  (make-symbol "exit-emit-check-1-wrapper-in-cache")))
     (with-lap-registers ((cwrapper #-structure-wrapper vector
 				   #+structure-wrapper t))
@@ -505,7 +505,7 @@
 (defun emit-lock-count-test (initial-lock-count cache-vector hit-label)
   ;;
   ;; jumps to hit-label if cache-vector-lock-count consistent, otherwise, continues
-  ;; 
+  ;;
   (with-lap-registers ((new-lock-count t))
     (flatten-lap
       (opcode :move (operand :cref cache-vector 0) new-lock-count) ;get new cache-vector-lock-count
@@ -523,7 +523,7 @@
     (opcode :fix= primary (operand :constant (index-value->index 1)) miss-label)
     (opcode :move (operand :constant (index-value->index 1)) location)
     (opcode :go cont-label)))
-     
+
 
 ;; From cache.lisp
 (defun emit-cache-vector-ref (cache-vector-operand location-operand)
@@ -539,7 +539,7 @@
   (operand :iref cnv-operand field-operand))
 
 (defun emit-1-wrapper-compute-primary-cache-location (wrapper primary wrapper-cache-no)
-  (with-lap-registers ((mask index) 
+  (with-lap-registers ((mask index)
 		       #+structure-wrapper (cnv fixnum-vector))
     (let ((field wrapper-cache-no))
       (flatten-lap

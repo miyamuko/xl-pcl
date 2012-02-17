@@ -1,10 +1,10 @@
 (DEFINE-FILE-INFO PACKAGE "XCL" READTABLE "XCL")
-(il:filecreated "28-Aug-87 18:42:36" il:{phylum}<pcl>pcl-env-internal.\;1 8356   
+(il:filecreated "28-Aug-87 18:42:36" il:{phylum}<pcl>pcl-env-internal.\;1 8356
 
       il:|changes| il:|to:|  (il:vars il:pcl-env-internalcoms)
                              (il:props (il:pcl-env-internal il:makefile-environment))
-                             (il:functions stack-eql stack-pointer-frame stack-frame-valid-p 
-                                    stack-frame-fn-header stack-frame-pc fnheader-debugging-info 
+                             (il:functions stack-eql stack-pointer-frame stack-frame-valid-p
+                                    stack-frame-fn-header stack-frame-pc fnheader-debugging-info
                                     stack-frame-name compiled-closure-fnheader compiled-closure-env)
 )
 
@@ -17,83 +17,83 @@
 
 (il:* il:|;;;| "***************************************")
 
-                                   
+
 
 (il:* il:|;;;| " Copyright (c) 1987 Xerox Corporation.  All rights reserved.")
 
-                                   
+
 
 (il:* il:|;;;| "")
 
-                                   
+
 
 (il:* il:|;;;| "Use and copying of this software and preparation of derivative works based upon this software are permitted.  Any distribution of this software or derivative works must comply with all applicable United States export control laws.")
 
-                                   
+
 
 (il:* il:|;;;| " ")
 
-                                   
+
 
 (il:* il:|;;;| "This software is made available AS IS, and Xerox Corporation makes no  warranty about the software, its performance or its conformity to any  specification.")
 
-                                   
+
 
 (il:* il:|;;;| " ")
 
-                                   
+
 
 (il:* il:|;;;| "Any person obtaining a copy of this software is requested to send their name and post office or electronic mail address to:")
 
-                                   
+
 
 (il:* il:|;;;| "   CommonLoops Coordinator")
 
-                                   
+
 
 (il:* il:|;;;| "   Xerox Artifical Intelligence Systems")
 
-                                   
+
 
 (il:* il:|;;;| "   2400 Hanover St.")
 
-                                   
+
 
 (il:* il:|;;;| "   Palo Alto, CA 94303")
 
-                                   
+
 
 (il:* il:|;;;| "(or send Arpanet mail to CommonLoops-Coordinator.pa@Xerox.arpa)")
 
-                                   
+
 
 (il:* il:|;;;| "")
 
-                                   
+
 
 (il:* il:|;;;| " Suggestions, comments and requests for improvements are also welcome.")
 
-                                   
+
 
 (il:* il:|;;;| " *************************************************************************")
 
-                                   
+
 
 (il:* il:|;;;| "")
 
-                                   (il:declare\: il:dontcopy (il:prop il:makefile-environment 
+                                   (il:declare\: il:dontcopy (il:prop il:makefile-environment
                                                                     il:pcl-env-internal))
-                                                             (il:* il:\; 
+                                                             (il:* il:\;
                                                              "We're off to hack the system...")
 
                                    (il:declare\: il:eval@compile il:dontcopy (il:files pcl::abc)
-                                          
-          
+
+
           (il:* il:|;;| "The Deltas and The East and The Freeze")
 )
-                                   (il:functions stack-eql stack-pointer-frame stack-frame-valid-p 
-                                          stack-frame-fn-header stack-frame-pc 
-                                          fnheader-debugging-info stack-frame-name 
+                                   (il:functions stack-eql stack-pointer-frame stack-frame-valid-p
+                                          stack-frame-fn-header stack-frame-pc
+                                          fnheader-debugging-info stack-frame-name
                                           compiled-closure-fnheader compiled-closure-env)))
 
 
@@ -113,7 +113,7 @@
 
 
 
-(il:* il:|;;;| 
+(il:* il:|;;;|
 "Use and copying of this software and preparation of derivative works based upon this software are permitted.  Any distribution of this software or derivative works must comply with all applicable United States export control laws."
 )
 
@@ -125,7 +125,7 @@
 
 
 
-(il:* il:|;;;| 
+(il:* il:|;;;|
 "This software is made available AS IS, and Xerox Corporation makes no  warranty about the software, its performance or its conformity to any  specification."
 )
 
@@ -137,7 +137,7 @@
 
 
 
-(il:* il:|;;;| 
+(il:* il:|;;;|
 "Any person obtaining a copy of this software is requested to send their name and post office or electronic mail address to:"
 )
 
@@ -186,7 +186,7 @@
 
 (il:* il:|;;;| "")
 
-(il:declare\: il:dontcopy 
+(il:declare\: il:dontcopy
 
 (il:putprops il:pcl-env-internal il:makefile-environment (:package "XCL" :readtable "XCL"))
 )
@@ -195,7 +195,7 @@
 
 (il:* il:\; "We're off to hack the system...")
 
-(il:declare\: il:eval@compile il:dontcopy 
+(il:declare\: il:eval@compile il:dontcopy
 (il:filesload pcl::abc)
 )
 
@@ -230,18 +230,18 @@
                                                            il:wordsperquad
                                                            (* size 2))))
                                                  (past-name-table-in-words (+ (il:fetch (il:fnheader
-                                                                                         
+
                                                                                      il:overheadwords
                                                                                          )
                                                                                  il:of fnheader)
                                                                               name-table-words)))
-                                                (and (= (- start-pc (* il:bytesperword 
+                                                (and (= (- start-pc (* il:bytesperword
                                                                        past-name-table-in-words))
                                                         il:bytespercell)
-          
+
           (il:* il:|;;| "It's got a debugging-info list.")
 
-                                                     (il:\\getbaseptr fnheader 
+                                                     (il:\\getbaseptr fnheader
                                                             past-name-table-in-words))))
 
 

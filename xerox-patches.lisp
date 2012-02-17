@@ -8,11 +8,11 @@
 ;;; based upon this software are permitted.  Any distribution of this
 ;;; software or derivative works must comply with all applicable United
 ;;; States export control laws.
-;;; 
+;;;
 ;;; This software is made available AS IS, and Xerox Corporation makes no
 ;;; warranty about the software, its performance or its conformity to any
 ;;; specification.
-;;; 
+;;;
 ;;; Any person obtaining a copy of this software is requested to send their
 ;;; name and post office or electronic mail address to:
 ;;;   CommonLoops Coordinator
@@ -209,7 +209,7 @@
 	  (setf (compiler::labels-body compiler::node)
 		(compiler::meta-substitute (cdr compiler::fn-pair)
 					   (car compiler::fn-pair)
-					   (compiler::labels-body compiler::node))) 
+					   (compiler::labels-body compiler::node)))
 	  (when (not compiler::*subst-occurred*)
 	    ;; Wasn't in the body - try the other functions.
 	    (dolist (compiler::target-pair (compiler::labels-funs compiler::node))
