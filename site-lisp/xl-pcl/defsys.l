@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:(PCL LISP 1000); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: user; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -201,9 +202,31 @@
        with-output-to-string write write-byte write-char write-line
        write-string write-to-string y-or-n-p yes-or-no-p zerop))))
 
-(in-package :walker :use '(:lisp))
-(in-package :iterate :use '(:lisp :walker))
-(in-package :pcl :use '(:walker :iterate :lisp))
+(require "ansify")
+
+(defpackage :xl-walker
+  (:nicknames :walker)
+  (:use
+   :lisp :editor))
+
+(defpackage :xl-iterate
+  (:nicknames :iterate)
+  (:use
+   :lisp :editor
+   :xl-walker))
+
+(defpackage :xl-pcl
+  (:nicknames :pcl)
+  (:use
+   :lisp :editor
+   :xl-walker :xl-iterate))
+
+(pushnew :setf *features*)
+(ansify::install :xl-walker)
+(ansify::install :xl-iterate)
+(ansify::install :xl-pcl)
+
+(in-package :pcl)
 
 (export (intern (symbol-name :iterate)		;Have to do this here,
 		(find-package :iterate))	;because in the defsystem
@@ -1027,3 +1050,6 @@ and load your system with:
 		#+cmu
 		(fmakunbound `(setf ,sym)))
 	      (setf (symbol-plist sym) nil)))))))
+
+
+(provide "xl-pcl/defsys")

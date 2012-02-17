@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:PCL; Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -407,3 +408,6 @@
     (initialize-internal-slot-gfs writer 'writer))
   (dolist (boundp boundps)
     (initialize-internal-slot-gfs boundp 'boundp)))
+
+
+(provide "xl-pcl/slots-boot")

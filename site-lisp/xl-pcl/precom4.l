@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:(PCL LISP 1000); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -25,8 +26,10 @@
 ;;; *************************************************************************
 ;;;
 
-(in-package 'pcl)
+(in-package :pcl)
 
 (precompile-function-generators pcl)		;this is half of a call to
 						;precompile-random-code-segments
 
+
+(provide "xl-pcl/precom4")

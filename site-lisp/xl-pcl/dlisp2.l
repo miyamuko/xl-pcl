@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:(PCL LISP 1000); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -178,3 +179,6 @@
 		  #+copy-&rest-arg (setq args (copy-list args))
 		  (invoke-emf emf args)))
 	  t))
+
+
+(provide "xl-pcl/dlisp2")

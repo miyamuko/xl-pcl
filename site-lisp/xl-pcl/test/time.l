@@ -1,4 +1,6 @@
-(in-package "PCL")
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
+(in-package :pcl)
 
 (proclaim '(optimize (speed 3)(safety 0)(compilation-speed 0)))
 

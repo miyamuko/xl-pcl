@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:(PCL Lisp 1000); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -1958,3 +1959,5 @@ make_turbo_trampoline_internal(base0)
 (defmacro fsc-instance-slots (fin)
   `(funcallable-instance-data-1 ,fin 'slots))
 
+
+(provide "xl-pcl/fin")

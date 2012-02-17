@@ -1,6 +1,9 @@
-;;;-*- Mode: Lisp; Syntax: Common-lisp; Package: user -*-
+; -*- mode: lisp; package: bench; encoding: shift_jis -*-
 
-(in-package :bench :use '(:lisp :pcl))
+(defpackage :bench
+  (:use :lisp :pcl))
+
+(in-package :bench)
 
 ;;;Here are a few homebrew benchmarks for testing out Lisp performance.
 ;;; BENCH-THIS-LISP: benchmarks for common lisp.

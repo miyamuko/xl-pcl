@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package: PCL; Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -401,3 +402,5 @@
 ;      "The method combination type STANDARD accepts no options."))
 ;  *standard-method-combination*)
 
+
+(provide "xl-pcl/combin")

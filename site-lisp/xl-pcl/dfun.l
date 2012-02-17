@@ -1,4 +1,5 @@
-;;; -*- Mode:LISP; Package:PCL; Base:10; Syntax:Common-Lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -1529,3 +1530,6 @@ And so, we are saved.
 				   (when (memq (type-of (gf-dfun-info gf)) type)
 				     (push gf gf-list))))
     gf-list))
+
+
+(provide "xl-pcl/dfun")

@@ -1,4 +1,5 @@
-;;;-*- Package: ITERATE; Syntax: Common-Lisp; Base: 10 -*-
+; -*- mode: lisp; package: iterate; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -26,7 +27,7 @@
 ;;;
 ;;; Original source {pooh/n}<pooh>vanmelle>lisp>iterate;4 created 27-Sep-88 12:35:33
 
-(in-package :iterate :use '(:lisp :walker))
+(in-package :iterate)
 
 
 (export '(iterate iterate* gathering gather with-gathering interval elements
@@ -1265,3 +1266,5 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 
 (define-walker-template prog1 (nil return walker::repeat (eval)))
 
+
+(provide "xl-pcl/iterate")

@@ -1,4 +1,4 @@
-;;;-*-Mode:LISP; Package:(PCL LISP 1000); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
 
 (in-package :pcl)
 
@@ -259,3 +259,5 @@
 	(when return-function-p
 	  (or mf (method-function-from-fast-function mff)))))))
 
+
+(provide "xl-pcl/inline")

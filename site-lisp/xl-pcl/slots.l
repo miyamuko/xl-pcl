@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package: PCL; Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -382,3 +383,5 @@
   #+new-kcl-wrapper
   (allocate-standard-instance (class-wrapper class)))
 
+
+(provide "xl-pcl/slots")

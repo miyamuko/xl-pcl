@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:(PCL (LISP WALKER)); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -696,3 +697,6 @@
           when called with arguments ~S."
 	  generic-function args)
   (apply generic-function args))
+
+
+(provide "xl-pcl/braid")

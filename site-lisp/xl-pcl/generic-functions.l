@@ -1,4 +1,4 @@
-;;;-*-Mode:LISP; Package:PCL; Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
 
 (in-package :pcl)
 
@@ -776,3 +776,5 @@
 (defgeneric writer-method-class (class direct-slot &rest initargs))
 ;          (slot-class t)
 
+
+(provide "xl-pcl/generic-functions")

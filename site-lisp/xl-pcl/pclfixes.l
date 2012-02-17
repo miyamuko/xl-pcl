@@ -1,9 +1,10 @@
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;; This file adds the :METHOD capability to DEFGENERIC. It comes from
 ;;; keim-1.0.tar.z (file ags/prog/pcl-fixes.lisp) a theorem prover.
 ;;; It is lacking in the May Day, March 92, August 28 92, and
 ;;; Sept 16 92 (f) versions of PCL, but appears in July 92 PCL.
 
-;;; -*- syntax: common-lisp; package: pcl; base: 10; mode: lisp -*-
 ;;; Here is the copyright notice from PCL:
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -41,7 +42,8 @@
 ;;; "March 92 PCL (2a)"
 ;;; "August 28 92 PCL (a)"
 
-(in-package "PCL")
+(in-package :pcl)
+
 (progn
   (when (some #'(lambda (x) (search x *pcl-system-date*
 				    :test #'string-equal))
@@ -171,3 +173,5 @@
 
   )
 
+
+(provide "xl-pcl/pclfixes")

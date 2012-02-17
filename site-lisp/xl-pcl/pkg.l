@@ -1,4 +1,5 @@
-;;;-*-Mode:LISP; Package:(PCL (LISP WALKER)); Base:10; Syntax:Common-lisp -*-
+; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
+
 ;;;
 ;;; *************************************************************************
 ;;; Copyright (c) 1985, 1986, 1987, 1988, 1989, 1990 Xerox Corporation.
@@ -25,7 +26,7 @@
 ;;; *************************************************************************
 ;;;
 
-(in-package ':walker :use '(:lisp))
+(in-package :walker)
 
 (export '(define-walker-template
 	  walk-form
@@ -39,14 +40,14 @@
 	  macroexpand-all
 	  ))
 
-(in-package :iterate :use '(:lisp :walker))
+(in-package :iterate)
 
 (export '(iterate iterate* gathering gather with-gathering interval elements
 	  list-elements list-tails plist-elements eachtime while until
 	  collecting joining maximizing minimizing summing
 	  *iterate-warnings*))
 
-(in-package :pcl :use '(:lisp :walker :iterate))
+(in-package :pcl)
 
 ;;;
 ;;; Some CommonLisps have more symbols in the Lisp package than the ones that
@@ -364,3 +365,6 @@
 		    :wrapper-cache-number-mask :wrapper-cache-number-vector-length
 		    :wrapper-layout :wrapper-cache-number-vector
 		    :wrapper-state :wrapper-class :wrapper-length))))
+
+
+(provide "xl-pcl/pkg")
