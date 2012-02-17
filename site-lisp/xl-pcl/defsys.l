@@ -228,6 +228,22 @@
 
 (in-package :pcl)
 
+(defun pathname (name)
+  name)
+
+(defun make-pathname (&key name type defaults)
+  (if (and name type)
+      (merge-pathnames (format nil "~A.~A" name type)
+                       (directory-namestring defaults))
+    defaults))
+
+(defun probe-file (pathspec)
+  (when (file-exist-p pathspec)
+    (truename pathspec)))
+
+(defun file-write-date (path)
+  (file-write-time path))
+
 (export (intern (symbol-name :iterate)		;Have to do this here,
 		(find-package :iterate))	;because in the defsystem
 	(find-package :iterate))		;(later in this file)
@@ -427,7 +443,9 @@ and load your system with:
           #+HP-HPLabs            HP-HPLabs
           #+:gclisp              gclisp
           #+pyramid              pyramid
-          #+:coral               coral))
+          #+:coral               coral
+          #+xyzzy                xyzzy
+          ))
 
 ;;;
 ;;; When you get a copy of PCL (by tape or by FTP), the sources files will
@@ -481,8 +499,9 @@ and load your system with:
 	 #+:gclisp                           ("LSP"   . "F2S")
 	 #+pyramid                           ("clisp" . "o")
 	 #+:coral                            ("lisp"  . "fasl")
+	 #+:xyzzy                            ("l"  . "lc")
 	 #-(or symbolics (and dec common vax) KCL IBCL Xerox
-	       lucid excl :CMU HP TI :gclisp pyramid coral)
+	       lucid excl :CMU HP TI :gclisp pyramid coral xyzzy)
 	                                     ("lisp"  . "lbin"))))
 
 (defvar *pathname-extensions*
@@ -525,7 +544,7 @@ and load your system with:
   (let ((modules ()))
     (labels ((get-module (name)
                (or (find name modules :key #'module-name)
-                   (progn (setq modules (cons (make-module name) modules))
+                   (progn (setq modules (cons (make-module :name name) modules))
                           (car modules))))
              (parse-spec (spec)
                (if (eq spec 't)
@@ -693,7 +712,9 @@ and load your system with:
 		 (unless print-only
 		   (let  ((name (module-name m)))
 		     (compile-file (make-source-pathname name)
+                                   #-xyzzy
 				   :output-file
+                                   #-xyzzy
 				   (make-pathname :defaults
 						  (make-binary-pathname name)
 						  :version :newest))))))
@@ -794,7 +815,8 @@ and load your system with:
     #+LUCID (or lucid::*source-pathname* (bad-time))
     #+akcl   si:*load-pathname*
     #+cmu17 *load-truename*
-    #-(or Lispm excl Xerox (and dec vax common) LUCID akcl cmu17) nil))
+    #+xyzzy (directory-namestring *load-pathname*)
+    #-(or Lispm excl Xerox (and dec vax common) LUCID akcl cmu17 xyzzy) nil))
 
 #-(or (and cmu (not cmu17)) Symbolics)
 (defvar *pcl-directory*

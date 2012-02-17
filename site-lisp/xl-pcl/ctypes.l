@@ -26,6 +26,12 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/defclass")
+  (require "xl-pcl/defcombin")
+  )
+
 (in-package :pcl)
 
 ;;;

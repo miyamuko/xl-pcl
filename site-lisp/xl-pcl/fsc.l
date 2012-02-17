@@ -39,6 +39,16 @@
 ;;; workings of this metaclass and the standard-class metaclass.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/defclass")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/low")
+  (require "xl-pcl/fin")
+  (require "xl-pcl/cache")
+  )
+
 (in-package :pcl)
 
 (defmethod wrapper-fetcher ((class funcallable-standard-class))

@@ -28,6 +28,11 @@
 ;;; The basics of the PCL wrapper cache mechanism.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/low")
+  )
+
 (in-package :pcl)
 ;;;
 ;;; The caching algorithm implemented:
@@ -131,6 +136,14 @@
 (defconstant *nkeys-limit* 256)
 )
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+(defun print-cache (cache stream depth)
+  (declare (ignore depth))
+  (printing-random-thing (cache stream)
+    (format stream "cache ~D ~S ~D"
+	    (cache-nkeys cache) (cache-valuep cache) (cache-nlines cache))))
+)
+
 (defstruct (cache
 	     (:print-function print-cache)
 	     (:constructor make-cache ())
@@ -147,12 +160,6 @@
   (max-location 0 :type fixnum)
   (vector #() :type simple-vector)
   (overflow nil :type list))
-
-(defun print-cache (cache stream depth)
-  (declare (ignore depth))
-  (printing-random-thing (cache stream)
-    (format stream "cache ~D ~S ~D"
-	    (cache-nkeys cache) (cache-valuep cache) (cache-nlines cache))))
 
 #+akcl
 (si::freeze-defstruct 'cache)
@@ -406,6 +413,13 @@
       (setf (aref cnv i) (get-wrapper-cache-number)))
     cnv))
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+(defun print-wrapper (wrapper stream depth)
+  (declare (ignore depth))
+  (printing-random-thing (wrapper stream)
+    (format stream "Wrapper ~S" (wrapper-class wrapper))))
+)
+
 (defstruct (wrapper
 	     #+new-kcl-wrapper (:include si::basic-wrapper)
 	     (:print-function print-wrapper)
@@ -449,11 +463,6 @@
 			   :slot-position slot-positions
 			   :size (* size #.(si::size-of t))
 			   :class class)))
-
-(defun print-wrapper (wrapper stream depth)
-  (declare (ignore depth))
-  (printing-random-thing (wrapper stream)
-    (format stream "Wrapper ~S" (wrapper-class wrapper))))
 
 (defmacro first-wrapper-cache-number-index ()
   0)
@@ -860,13 +869,13 @@
 
 (defun dfun-arg-symbol (arg-number)
   (or (nth arg-number (the list *dfun-arg-symbols*))
-      (intern (format nil ".ARG~A." arg-number) *the-pcl-package*)))
+      (intern (format nil ".arg~A." arg-number) *the-pcl-package*)))
 
 (defvar *slot-vector-symbols* '(.SLOTS0. .SLOTS1. .SLOTS2. .SLOTS3.))
 
 (defun slot-vector-symbol (arg-number)
   (or (nth arg-number (the list *slot-vector-symbols*))
-      (intern (format nil ".SLOTS~A." arg-number) *the-pcl-package*)))
+      (intern (format nil ".slots~A." arg-number) *the-pcl-package*)))
 
 (defun make-dfun-lambda-list (metatypes applyp)
   (gathering1 (collecting)

@@ -52,6 +52,10 @@
 ;;; mechanisms is in the first part of the file, the real walker follows it.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  )
+
 (in-package :walker)
 
 ;;;
@@ -983,7 +987,7 @@
   (push (list thing :lexical-var) (cadddr (env-lock env))))
 
 
-(defun VARIABLE-LEXICAL-P (var env)
+(defun variable-lexical-p (var env)
   (let ((entry (member var (env-lexical-variables env) :key #'car)))
     (when (eq (cadar entry) :lexical-var)
       entry)))
@@ -994,9 +998,9 @@
       entry)))
 
 
-(defvar *VARIABLE-DECLARATIONS* '(special))
+(defvar *variable-declarations* '(special))
 
-(defun VARIABLE-DECLARATION (declaration var env)
+(defun variable-declaration (declaration var env)
   (if (not (member declaration *variable-declarations*))
       (error "~S is not a recognized variable declaration." declaration)
       (let ((id (or (variable-lexical-p var env) var)))
@@ -1005,7 +1009,7 @@
 		     (eq (cadr decl) id))
 	    (return decl))))))
 
-(defun VARIABLE-SPECIAL-P (var env)
+(defun variable-special-p (var env)
   (or (not (null (variable-declaration 'special var env)))
       (variable-globally-special-p var)))
 
@@ -1047,11 +1051,12 @@
 				    (get symbol
 					 'clc::globally-special-in-compiler))
   #+:CORAL                      (ccl::proclaimed-special-p symbol)
+  #+:xyzzy			(si:*specialp symbol)
   #-(or Genera Cloe-Runtime Lucid Xerox Excl KCL IBCL (and dec vax common) :CMU HP-HPLabs
-	GCLisp TI pyramid :CORAL)
+	GCLisp TI pyramid :CORAL xyzzy)
   (or (not (null (member symbol *globally-special-variables* :test #'eq)))
       (when (eval `(flet ((ref () ,symbol))
-		     (let ((,symbol '#,(list nil)))
+		     (let ((,symbol (list nil)))
 		       (and (boundp ',symbol) (eq ,symbol (ref))))))
 	(push symbol *globally-special-variables*)
 	t)))
@@ -1138,36 +1143,36 @@
 ;;;;;; The actual templates
   ;;
 
-(define-walker-template BLOCK                (NIL NIL REPEAT (EVAL)))
-(define-walker-template CATCH                (NIL EVAL REPEAT (EVAL)))
-(define-walker-template COMPILER-LET         walk-compiler-let)
-(define-walker-template DECLARE              walk-unexpected-declare)
-(define-walker-template EVAL-WHEN            (NIL QUOTE REPEAT (EVAL)))
-(define-walker-template FLET                 walk-flet)
-(define-walker-template FUNCTION             (NIL CALL))
-(define-walker-template GO                   (NIL QUOTE))
-(define-walker-template IF                   walk-if)
-(define-walker-template LABELS               walk-labels)
-(define-walker-template LAMBDA               walk-lambda)
-(define-walker-template LET                  walk-let)
-(define-walker-template LET*                 walk-let*)
-(define-walker-template LOCALLY              walk-locally)
-(define-walker-template MACROLET             walk-macrolet)
-(define-walker-template MULTIPLE-VALUE-CALL  (NIL EVAL REPEAT (EVAL)))
-(define-walker-template MULTIPLE-VALUE-PROG1 (NIL RETURN REPEAT (EVAL)))
-(define-walker-template MULTIPLE-VALUE-SETQ  walk-multiple-value-setq)
-(define-walker-template MULTIPLE-VALUE-BIND  walk-multiple-value-bind)
-(define-walker-template PROGN                (NIL REPEAT (EVAL)))
-(define-walker-template PROGV                (NIL EVAL EVAL REPEAT (EVAL)))
-(define-walker-template QUOTE                (NIL QUOTE))
-(define-walker-template RETURN-FROM          (NIL QUOTE REPEAT (RETURN)))
-(define-walker-template SETQ                 walk-setq)
-(define-walker-template SYMBOL-MACROLET      walk-symbol-macrolet)
-(define-walker-template TAGBODY              walk-tagbody)
-(define-walker-template THE                  (NIL QUOTE EVAL))
-#+cmu(define-walker-template EXT:TRULY-THE   (NIL QUOTE EVAL))
-(define-walker-template THROW                (NIL EVAL EVAL))
-(define-walker-template UNWIND-PROTECT       (NIL RETURN REPEAT (EVAL)))
+(define-walker-template block                (nil nil repeat (eval)))
+(define-walker-template catch                (nil eval repeat (eval)))
+(define-walker-template compiler-let         walk-compiler-let)
+(define-walker-template declare              walk-unexpected-declare)
+(define-walker-template eval-when            (nil quote repeat (eval)))
+(define-walker-template flet                 walk-flet)
+(define-walker-template function             (nil call))
+(define-walker-template go                   (nil quote))
+(define-walker-template if                   walk-if)
+(define-walker-template labels               walk-labels)
+(define-walker-template lambda               walk-lambda)
+(define-walker-template let                  walk-let)
+(define-walker-template let*                 walk-let*)
+(define-walker-template locally              walk-locally)
+(define-walker-template macrolet             walk-macrolet)
+(define-walker-template multiple-value-call  (nil eval repeat (eval)))
+(define-walker-template multiple-value-prog1 (nil return repeat (eval)))
+(define-walker-template multiple-value-setq  walk-multiple-value-setq)
+(define-walker-template multiple-value-bind  walk-multiple-value-bind)
+(define-walker-template progn                (nil repeat (eval)))
+(define-walker-template progv                (nil eval eval repeat (eval)))
+(define-walker-template quote                (nil quote))
+(define-walker-template return-from          (nil quote repeat (return)))
+(define-walker-template setq                 walk-setq)
+(define-walker-template symbol-macrolet      walk-symbol-macrolet)
+(define-walker-template tagbody              walk-tagbody)
+(define-walker-template the                  (nil quote eval))
+#+cmu(define-walker-template ext:truly-the   (nil quote eval))
+(define-walker-template throw                (nil eval eval))
+(define-walker-template unwind-protect       (nil return repeat (eval)))
 
 ;;; The new special form.
 ;(define-walker-template pcl::LOAD-TIME-EVAL       (NIL EVAL))
@@ -1175,11 +1180,11 @@
 ;;;
 ;;; And the extra templates...
 ;;;
-(define-walker-template DO      walk-do)
-(define-walker-template DO*     walk-do*)
-(define-walker-template PROG    walk-prog)
-(define-walker-template PROG*   walk-prog*)
-(define-walker-template COND    (NIL REPEAT ((TEST REPEAT (EVAL)))))
+(define-walker-template do      walk-do)
+(define-walker-template do*     walk-do*)
+(define-walker-template prog    walk-prog)
+(define-walker-template prog*   walk-prog*)
+(define-walker-template cond    (nil repeat ((test repeat (eval)))))
 
 #+Genera
 (progn
@@ -1219,11 +1224,11 @@
   (let ((walk-form-expand-macros-p t))
     (walk-form form environment)))
 
-(defun WALK-FORM (form
+(defun walk-form (form
 		  &optional environment
 			    (walk-function
 			      #'(lambda (subform context env)
-				  (declare (ignore context env))
+;				  (declare (ignore context env))
 				  subform)))
   (walker-environment-bind (new-env environment :walk-function walk-function)
     (walk-form-internal form :eval new-env)))
@@ -1247,7 +1252,7 @@
 ;;; equivalence between this nested-walk-form function and two seperate
 ;;; walk-forms.
 ;;;
-(defun NESTED-WALK-FORM (whole
+(defun nested-walk-form (whole
 			 form
 			 &optional environment
 				   (walk-function
@@ -1369,12 +1374,12 @@
 (defun walk-template (form template context env)
   (if (atom template)
       (ecase template
-        ((EVAL FUNCTION TEST EFFECT RETURN)
-         (walk-form-internal form :EVAL env))
-        ((QUOTE NIL) form)
-        (SET
-          (walk-form-internal form :SET env))
-        ((LAMBDA CALL)
+        ((eval function test effect return)
+         (walk-form-internal form :eval env))
+        ((quote nil) form)
+        (set
+          (walk-form-internal form :set env))
+        ((lambda call)
 	 (cond ((or (symbolp form)
 		    (and (listp form)
 			 (= (length form) 2)
@@ -1384,7 +1389,7 @@
 	       ((sys:validate-function-spec form) form)
 	       (t (walk-form-internal form context env)))))
       (case (car template)
-        (REPEAT
+        (repeat
           (walk-template-handle-repeat form
                                        (cdr template)
 				       ;; For the case where nothing happens
@@ -1398,7 +1403,7 @@
 						   form))
                                        context
 				       env))
-        (IF
+        (if
 	  (walk-template form
 			 (if (if (listp (cadr template))
 				 (eval (cadr template))
@@ -1407,7 +1412,7 @@
 			     (cadddr template))
 			 context
 			 env))
-        (REMOTE
+        (remote
           (walk-template form (cadr template) context env))
         (otherwise
           (cond ((atom form) form)

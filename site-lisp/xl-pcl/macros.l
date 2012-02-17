@@ -32,6 +32,11 @@
 ;;; loaded before it can be compiled.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/walk")
+  )
+
 (in-package :pcl)
 
 (proclaim '(declaration
@@ -163,7 +168,7 @@
 
 #+Lucid
 (eval-when (compile load eval)
-  (eval `(defstruct ,(intern "FASLESCAPE" (find-package 'lucid)))))
+  (eval `(defstruct ,(intern "faslescape" (find-package 'lucid)))))
 
 (defvar *keyword-package* (find-package 'keyword))
 
@@ -613,10 +618,10 @@
   (dolist (name accessors) (do-standard-defsetf-1 name)))
 
 (defun do-standard-defsetf-1 (function-name)
-  #+setf
+  #+(and setf (not xyzzy))
   (declare (ignore function-name))
-  #+setf nil
-  #-setf
+  #+(and setf (not xyzzy)) nil
+  #-(and setf (not xyzzy))
   (unless (and (setfboundp function-name)
 	       (get function-name 'standard-setf))
     (setf (get function-name 'standard-setf) t)
@@ -706,6 +711,7 @@
   #+:coral (or (get symbol 'ccl::setf-inverse)
 	       (get symbol 'ccl::setf-method-expander))
   #+cmu (fboundp `(setf ,symbol))
+  #+xyzzy (fboundp `(setf ,symbol))
   #-(or Genera Lucid KCL Xerox :coral cmu) nil)
 
 );eval-when

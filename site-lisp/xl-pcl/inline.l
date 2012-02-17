@@ -237,7 +237,7 @@
 	(when mff
 	  (let ((name `(,(or (get (car method-spec) 'fast-sym)
 			     (setf (get (car method-spec) 'fast-sym)
-				   (intern (format nil "FAST-~A"
+				   (intern (format nil "fast-~A"
 						   (car method-spec))
 					   *the-pcl-package*)))
 			 ,@(cdr method-spec))))

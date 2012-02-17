@@ -27,8 +27,12 @@
 ;;;
 ;;; Original source {pooh/n}<pooh>vanmelle>lisp>iterate;4 created 27-Sep-88 12:35:33
 
-(in-package :iterate)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/walk")
+  )
 
+(in-package :iterate)
 
 (export '(iterate iterate* gathering gather with-gathering interval elements
                 list-elements list-tails plist-elements eachtime while until
@@ -875,6 +879,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
                  (declare (ignore finish))
                  ,expr))
 
+#-xyzzy
 (defmacro while (expr)
        `#'(lambda (finish)
                  (unless ,expr (funcall finish))))
@@ -887,7 +892,7 @@ NIL => never; :USER => those resulting from user code; T => always, even if it's
 
 
 (defmacro gathering (clauses &body body &environment env)
-       (or (optimize-gathering-form clauses body env)
+       (or #-xyzzy (optimize-gathering-form clauses body env) ;; 「変数が定義されていません」ってエラーになる
            (simple-expand-gathering-form clauses body env)))
 
 (defmacro with-gathering (clauses gather-body &body use-body)

@@ -29,6 +29,15 @@
 ;;; This file defines the initialization and related protocols.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/vector")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/low")
+  (require "xl-pcl/fast-init")
+  )
+
 (in-package :pcl)
 
 (defmethod make-instance ((class symbol) &rest initargs)

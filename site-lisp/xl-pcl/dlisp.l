@@ -26,6 +26,14 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/low")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/fin")
+  (require "xl-pcl/cache")
+  )
+
 (in-package :pcl)
 
 ;;; This file is (almost) functionally equivalent to dlap.lisp,
@@ -249,7 +257,7 @@
 	 (wrapper-bindings (mapcan #'(lambda (arg mt)
 				       (unless (eq mt 't)
 					 (incf index)
-					 `((,(intern (format nil "WRAPPER-~D" index)
+					 `((,(intern (format nil "wrapper-~D" index)
 					             *the-pcl-package*)
 					    ,(emit-fetch-wrapper mt arg 'miss
 					      (pop slot-regs))))))

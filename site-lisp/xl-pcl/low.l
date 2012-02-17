@@ -63,6 +63,11 @@
 ;;; Thanks.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/macros")
+  )
+
 (in-package :pcl)
 
 (eval-when (compile load eval)
@@ -70,15 +75,13 @@
 )
 
 (defmacro %svref (vector index)
-  `(locally (declare #.*optimize-speed*
-		     (inline svref))
+  `(progn
 	    (svref (the simple-vector ,vector) (the fixnum ,index))))
 
 (defsetf %svref %set-svref)
 
 (defmacro %set-svref (vector index new-value)
-  `(locally (declare #.*optimize-speed*
-		     (inline svref))
+  `(progn
      (setf (svref (the simple-vector ,vector) (the fixnum ,index))
 	   ,new-value)))
 
@@ -110,6 +113,19 @@
 ;;;
 ;;;  Very Low-Level representation of instances with meta-class standard-class.
 ;;;
+(eval-when (:compile-toplevel :load-toplevel :execute)
+(defun print-std-instance (instance stream depth) ;A temporary definition used
+  (declare (ignore depth))		          ;for debugging the bootstrap
+  (printing-random-thing (instance stream)        ;code of PCL (See high.lisp).
+    (let ((class (class-of instance)))
+      (if (or (eq class (find-class 'standard-class nil))
+	      (eq class (find-class 'funcallable-standard-class nil))
+	      (eq class (find-class 'built-in-class nil)))
+	  (format stream "~a ~a" (early-class-name class)
+		  (early-class-name instance))
+	  (format stream "~a" (early-class-name class))))))
+)
+
 #-new-kcl-wrapper
 (progn
 (defstruct (std-instance (:predicate std-instance-p)
@@ -170,17 +186,6 @@
 (defmacro get-slots-or-nil (inst)
   `(cond ((std-instance-p ,inst) (std-instance-slots ,inst))
 	 ((fsc-instance-p ,inst) (fsc-instance-slots ,inst))))
-
-(defun print-std-instance (instance stream depth) ;A temporary definition used
-  (declare (ignore depth))		          ;for debugging the bootstrap
-  (printing-random-thing (instance stream)        ;code of PCL (See high.lisp).
-    (let ((class (class-of instance)))
-      (if (or (eq class (find-class 'standard-class nil))
-	      (eq class (find-class 'funcallable-standard-class nil))
-	      (eq class (find-class 'built-in-class nil)))
-	  (format stream "~a ~a" (early-class-name class)
-		  (early-class-name instance))
-	  (format stream "~a" (early-class-name class))))))
 
 ;;;
 ;;; This is the value that we stick into a slot to tell us that it is unbound.

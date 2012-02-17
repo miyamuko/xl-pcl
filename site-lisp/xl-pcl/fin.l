@@ -67,6 +67,11 @@ explicitly marked saying who wrote it.
 
 |#
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/low")
+  )
+
 (in-package :pcl)
 
 ;;;

@@ -28,6 +28,14 @@
 ;;; Permutation vectors.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/cache")
+  (require "xl-pcl/fin")
+  )
+
 (in-package :pcl)
 
 (defmacro instance-slot-index (wrapper slot-name)
@@ -640,7 +648,7 @@
       default
       (let* ((index (gensym))
 	     (value index))
-	`(locally (declare #.*optimize-speed*)
+	`(progn
 	  (let ((,index (pvref ,pv ,pv-offset)))
 	    (setq ,value (typecase ,index
 			   ,@(when (or (null type) (eq type ':instance))
@@ -674,7 +682,7 @@
   (if (eq type ':default)
       default
       (let* ((index (gensym)))
-	`(locally (declare #.*optimize-speed*)
+	`(progn
 	  (let ((,index (pvref ,pv ,pv-offset)))
 	    (typecase ,index
 	      ,@(when (or (null type) (eq type ':instance))
@@ -710,7 +718,7 @@
   (if (eq type ':default)
       default
       (let* ((index (gensym)))
-	`(locally (declare #.*optimize-speed*)
+	`(progn
 	  (let ((,index (pvref ,pv ,pv-offset)))
 	    (typecase ,index
 	      ,@(when (or (null type) (eq type ':instance))
@@ -1007,7 +1015,7 @@
 	   (name `(,(or (get (car fname) 'method-sym)
 			(setf (get (car fname) 'method-sym)
 			      (let ((str (symbol-name (car fname))))
-				(if (string= "FAST-" str :end2 5)
+				(if (string= "fast-" str :end2 5)
 				    (intern (subseq str 5) *the-pcl-package*)
 				    (car fname)))))
 		    ,@(cdr fname))))

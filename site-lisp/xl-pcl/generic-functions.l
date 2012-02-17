@@ -1,5 +1,10 @@
 ; -*- mode: lisp; package: pcl; encoding: shift_jis -*-
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/boot")
+  )
+
 (in-package :pcl)
 
 ;;; class predicates

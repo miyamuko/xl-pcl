@@ -26,6 +26,12 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/fin")
+  )
+
 (in-package :pcl)
 
 #|
@@ -228,7 +234,7 @@ work during bootstrapping.
 ;;;
 ;;;
 ;;;
-(defmacro DEFMETHOD (&rest args &environment env)
+(defmacro defmethod (&rest args &environment env)
   #+(or (not :lucid) :lcl3.0)
   (declare (arglist name
 		    {method-qualifier}*
@@ -1120,7 +1126,7 @@ work during bootstrapping.
 	(when mff
 	  (let ((name `(,(or (get (car method-spec) 'fast-sym)
 			     (setf (get (car method-spec) 'fast-sym)
-				   (intern (format nil "FAST-~A"
+				   (intern (format nil "fast-~A"
 						   (car method-spec))
 					   *the-pcl-package*)))
 			 ,@(cdr method-spec))))
@@ -1186,7 +1192,7 @@ work during bootstrapping.
 (defun keyword-spec-name (x)
   (let ((key (if (atom x) x (car x))))
     (if (atom key)
-	(intern (symbol-name key) (find-package "KEYWORD"))
+	(intern (symbol-name key) (find-package :keyword))
 	(car key))))
 
 (defun ftype-declaration-from-lambda-list (lambda-list #+cmu name)

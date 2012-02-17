@@ -26,6 +26,13 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/low")
+  (require "xl-pcl/cache")
+  )
+
 (in-package :pcl)
 
 #|
@@ -216,34 +223,40 @@ And so, we are saved.
 ;;;     slot indexes.  Because each cache line is more than one element
 ;;;     long, a cache lock count is used.
 ;;;
+(eval-when (:compile-toplevel :load-toplevel :execute)
+(defun print-dfun-info (dfun-info stream depth)
+  (printing-random-thing (dfun-info stream)
+    (format stream "~A" (type-of dfun-info))))
+)
+
 (defstruct (dfun-info
 	     (:constructor nil)
 	     (:print-function print-dfun-info))
   (cache nil))
 
-(defun print-dfun-info (dfun-info stream depth)
-  (declare (ignore depth) (stream stream))
-  (printing-random-thing (dfun-info stream)
-    (format stream "~A" (type-of dfun-info))))
-
 (defstruct (no-methods
 	     (:constructor no-methods-dfun-info ())
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 (defstruct (initial
 	     (:constructor initial-dfun-info ())
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 (defstruct (initial-dispatch
 	     (:constructor initial-dispatch-dfun-info ())
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 (defstruct (dispatch
 	     (:constructor dispatch-dfun-info ())
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 (defstruct (default-method-only
 	     (:constructor default-method-only-dfun-info ())
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 ;without caching:
@@ -256,6 +269,7 @@ And so, we are saved.
 ;  one-class two-class one-index n-n
 (defstruct (accessor-dfun-info
 	     (:constructor nil)
+	     (:print-function print-dfun-info)
 	     (:include dfun-info))
   accessor-type) ; (member reader writer)
 
@@ -264,6 +278,7 @@ And so, we are saved.
 
 (defstruct (one-index-dfun-info
 	     (:constructor nil)
+	     (:print-function print-dfun-info)
 	     (:include accessor-dfun-info))
   index)
 
@@ -272,10 +287,12 @@ And so, we are saved.
 
 (defstruct (n-n
 	     (:constructor n-n-dfun-info (accessor-type cache))
+	     (:print-function print-dfun-info)
 	     (:include accessor-dfun-info)))
 
 (defstruct (one-class
-	     (:constructor one-class-dfun-info (accessor-type index wrapper0))
+	     (:constructor one-class-dfun-info (accessor-type index wrapper0 &optional cache))
+	     (:print-function print-dfun-info)
 	     (:include one-index-dfun-info))
   wrapper0)
 
@@ -283,7 +300,8 @@ And so, we are saved.
   `(one-class-wrapper0 ,di))
 
 (defstruct (two-class
-	     (:constructor two-class-dfun-info (accessor-type index wrapper0 wrapper1))
+	     (:constructor two-class-dfun-info (accessor-type index wrapper0 wrapper1 &optional cache))
+	     (:print-function print-dfun-info)
 	     (:include one-class))
   wrapper1)
 
@@ -293,10 +311,13 @@ And so, we are saved.
 (defstruct (one-index
 	     (:constructor one-index-dfun-info
 			   (accessor-type index cache))
+	     (:print-function print-dfun-info)
 	     (:include one-index-dfun-info)))
 
 (defstruct (checking
 	     (:constructor checking-dfun-info (function cache))
+	     (:print-function print-dfun-info)
+	     (:print-function print-dfun-info)
 	     (:include dfun-info))
   function)
 
@@ -305,10 +326,12 @@ And so, we are saved.
 
 (defstruct (caching
 	     (:constructor caching-dfun-info (cache))
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 (defstruct (constant-value
 	     (:constructor constant-value-dfun-info (cache))
+	     (:print-function print-dfun-info)
 	     (:include dfun-info)))
 
 (defmacro dfun-update (generic-function function &rest args)

@@ -26,6 +26,10 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/defsys")
+  )
+
 (in-package :walker)
 
 (export '(define-walker-template

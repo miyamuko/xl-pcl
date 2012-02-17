@@ -26,6 +26,11 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/low")
+  )
+
 (in-package :pcl)
 
 ;;;
@@ -133,7 +138,7 @@
 ;;; has been defined, the real definition of LOAD-DEFCLASS is installed by the
 ;;; file defclass.lisp
 ;;;
-(defmacro DEFCLASS (name direct-superclasses direct-slots &rest options)
+(defmacro defclass (name direct-superclasses direct-slots &rest options)
   (declare (indentation 2 4 3 1))
   (expand-defclass name direct-superclasses direct-slots options))
 

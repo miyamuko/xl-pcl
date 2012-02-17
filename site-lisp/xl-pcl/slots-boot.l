@@ -26,6 +26,15 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/vector")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/cache")
+  (require "xl-pcl/fin")
+  )
+
 (in-package :pcl)
 
 (defmacro slot-symbol (slot-name type)

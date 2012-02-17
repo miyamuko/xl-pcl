@@ -26,6 +26,12 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  )
+
 (in-package :pcl)
 
 (defun get-method-function (method &optional method-alist wrappers)
@@ -157,9 +163,9 @@
 
 (defun get-effective-method-gensym ()
   (or (pop *rebound-effective-method-gensyms*)
-      (let ((new (intern (format nil "EFFECTIVE-METHOD-GENSYM-~D"
+      (let ((new (intern (format nil "effective-method-gensym-~D"
 				 (length *global-effective-method-gensyms*))
-			 "PCL")))
+			 :pcl)))
 	(setq *global-effective-method-gensyms*
 	      (append *global-effective-method-gensyms* (list new)))
 	new)))

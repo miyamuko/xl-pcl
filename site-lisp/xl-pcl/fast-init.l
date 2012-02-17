@@ -29,6 +29,12 @@
 ;;; This file defines the optimized make-instance functions.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/low")
+  )
+
 (in-package :pcl)
 
 (defvar *compile-make-instance-functions-p* nil)
@@ -125,7 +131,7 @@
 		(*print-length* nil) (*print-level* nil)
 		(*print-circle* nil) (*print-case* :upcase)
 		(*print-pretty* nil))
-	    (intern (format nil "MAKE-INSTANCE ~S ~S ~S"
+	    (intern (format nil "make-instance ~S ~S ~S"
 			    class-name keys allow-other-keys-p))))))))
 
 (defun make-instance-1 (class initargs)
@@ -133,7 +139,7 @@
 
 (defmacro define-cached-reader (type name trap)
   (let ((reader-name (intern (format nil "~A-~A" type name)))
-	(cached-name (intern (format nil "~A-CACHED-~A" type name))))
+	(cached-name (intern (format nil "~A-cached-~A" type name))))
     `(defmacro ,reader-name (info)
        `(let ((value (,',cached-name ,info)))
 	  (if (eq value ':unknown)
@@ -159,11 +165,11 @@
 (defmacro define-initialize-info ()
   (let ((cached-slot-names
 	 (mapcar #'(lambda (name)
-		     (intern (format nil "CACHED-~A" name)))
+		     (intern (format nil "cached-~A" name)))
 		 initialize-info-cached-slots))
 	(cached-names
 	 (mapcar #'(lambda (name)
-		     (intern (format nil "~A-CACHED-~A"
+		     (intern (format nil "~A-cached-~A"
 				     'initialize-info name)))
 		 initialize-info-cached-slots)))
     `(progn

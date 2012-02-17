@@ -26,6 +26,11 @@
 ;;; *************************************************************************
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/low")
+  )
+
 (in-package :pcl)
 
 (eval-when (compile load eval)
@@ -417,13 +422,13 @@
 (defun make-type-predicate-name (name &optional kind)
   (if (symbol-package name)
       (intern (format nil
-		      "~@[~A ~]TYPE-PREDICATE ~A ~A"
+		      "~@[~A ~]type-predicate ~A ~A"
 		      kind
 		      (package-name (symbol-package name))
 		      (symbol-name name))
 	      *the-pcl-package*)
       (make-symbol (format nil
-			   "~@[~A ~]TYPE-PREDICATE ~A"
+			   "~@[~A ~]type-predicate ~A"
 			   kind
 			   (symbol-name name)))))
 
@@ -435,7 +440,7 @@
 (defun get-built-in-class-symbol (class-name)
   (or (cadr (assq class-name *built-in-class-symbols*))
       (let ((symbol (intern (format nil
-				    "*THE-CLASS-~A*"
+				    "*the-class-~A*"
 				    (symbol-name class-name))
 			    *the-pcl-package*)))
 	(push (list class-name symbol) *built-in-class-symbols*)
@@ -444,7 +449,7 @@
 (defun get-built-in-wrapper-symbol (class-name)
   (or (cadr (assq class-name *built-in-wrapper-symbols*))
       (let ((symbol (intern (format nil
-				    "*THE-WRAPPER-OF-~A*"
+				    "*the-wrapper-of-~A*"
 				    (symbol-name class-name))
 			    *the-pcl-package*)))
 	(push (list class-name symbol) *built-in-wrapper-symbols*)
@@ -533,12 +538,10 @@
     (array      (t)        (vector)                 (t)
      #2A((NIL)))
     (vector     (array
-		 sequence) (string bit-vector)      (array sequence t)
+		 sequence) (string)      (array sequence t)
      #())
     (string     (vector)   ()                       (vector array sequence t)
      "")
-    (bit-vector (vector)   ()                       (vector array sequence t)
-     #*1)
     (character  (t)        ()                       (t)
      #\c)
 

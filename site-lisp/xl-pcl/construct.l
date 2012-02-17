@@ -383,11 +383,19 @@
 ;;; a new type at the end with the behavior.
 ;;;
 
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/defclass")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/low")
+  )
+
 (defvar *constructor-code-types* ())
 
 (defmacro define-constructor-code-type (type arglist &body body)
   (let ((fn-name (intern (format nil
-				 "CONSTRUCTOR-CODE-GENERATOR ~A ~A"
+				 "constructor-code-generator ~A ~A"
 				 (package-name (symbol-package type))
 				 (symbol-name type))
 			 *the-pcl-package*)))

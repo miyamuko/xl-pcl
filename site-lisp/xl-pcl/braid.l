@@ -35,6 +35,16 @@
 ;;;
 ;;;
 
+
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (require "xl-pcl/pkg")
+  (require "xl-pcl/boot")
+  (require "xl-pcl/defs")
+  (require "xl-pcl/low")
+  (require "xl-pcl/fin")
+  (require "xl-pcl/cache")
+  )
+
 (in-package :pcl)
 
 (defun allocate-standard-instance (wrapper &optional (slots-init nil slots-init-p))
@@ -110,7 +120,7 @@
 (defmacro initial-classes-and-wrappers (&rest classes)
   `(progn
      ,@(mapcar #'(lambda (class)
-		   (let ((wr (intern (format nil "~A-WRAPPER" class)
+		   (let ((wr (intern (format nil "~A-wrapper" class)
 				     *the-pcl-package*)))
 		     `(setf ,wr ,(if (eq class 'standard-generic-function)
 				     '*sgf-wrapper*
@@ -201,7 +211,7 @@
 				  (t (make-wrapper (length slots) class))))
 		   (proto nil))
 	      (when (eq name 't) (setq *the-wrapper-of-t* wrapper))
-	      (set (intern (format nil "*THE-CLASS-~A*" (symbol-name name))
+	      (set (intern (format nil "*the-class-~A*" (symbol-name name))
 			   *the-pcl-package*)
 		   class)
 	      (dolist (slot slots)
@@ -616,7 +626,7 @@
   (let ((*specials* ()))
     (declare (special *specials*))
     (let ((inner (make-built-in-wrapper-of-body-2 tree var get-symbol)))
-      `(locally (declare (special .,*specials*)) ,inner))))
+      `(progn (declare (special .,*specials*)) ,inner))))
 
 (defun make-built-in-wrapper-of-body-2 (tree var get-symbol)
   (declare (special *specials*))
