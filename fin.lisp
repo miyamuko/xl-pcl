@@ -66,7 +66,7 @@ explicitly marked saying who wrote it.
 
 |#
 
-(in-package 'pcl)
+(in-package :pcl)
 
 ;;;
 ;;; The first part of the file contains the implementation dependent code to
@@ -130,8 +130,6 @@ explicitly marked saying who wrote it.
           setting its funcallable-instance-function."))
 
 
-
-
 ;;;
 ;;; In Lucid Lisp, compiled functions and compiled closures have the same
 ;;; representation.  They are called procedures.  A procedure is a basically
@@ -160,7 +158,7 @@ explicitly marked saying who wrote it.
 ;;;  optimized version of the code for this inner closure function.
 ;;;
 (defun make-trampoline (function)
-  (declare (optimize (speed 3) (safety 0)(compilation-speed 0)(space 0)))
+  (declare (optimize (speed 3) (safety 0)))
   #'(lambda (&rest args)
       (apply function args)))
 
@@ -170,17 +168,16 @@ explicitly marked saying who wrote it.
 
 
 (defun binary-assemble (codes)
-  (declare (list codes))
   (let* ((ncodes (length codes))
 	 (code-vec #-LCL3.0 (lucid::new-code ncodes)
 		   #+LCL3.0 (lucid::with-current-area 
 				lucid::*READONLY-NON-POINTER-AREA*
 			      (lucid::new-code ncodes))))
-    (declare (type index ncodes))
+    (declare (fixnum ncodes))
     (do ((l codes (cdr l))
-	 (i 0 (the index (1+ i))))
+	 (i 0 (1+ i)))
 	((null l) nil)
-      (declare (type index i))
+      (declare (fixnum i))
       (setf (lucid::code-ref code-vec i) (car l)))
     code-vec))
 
@@ -224,10 +221,8 @@ explicitly marked saying who wrote it.
   (if (not (lucid::procedurep x))
       (error "Can't make a non-procedure a fin.")
       (setf (lucid::procedure-ref x lucid::procedure-flags)
-	    (logior (the index
-                         (expt 2 (the index
-                                      procedure-is-funcallable-instance-bit-position)))
-		    (the index
+	    (logior (expt 2 procedure-is-funcallable-instance-bit-position)
+		    (the fixnum
 			 (lucid::procedure-ref x lucid::procedure-flags))))))
 
 
@@ -238,13 +233,13 @@ explicitly marked saying who wrote it.
                                                 ;incorrectly
   (let ((new-fin (lucid::new-procedure fin-size))
 	(fin-index fin-size))
-    (declare (type index fin-index)
+    (declare (fixnum fin-index)
 	     (type lucid::procedure new-fin))
-    (dotimes (i (length (the list funcallable-instance-data)) )
+    (dotimes (i (length funcallable-instance-data)) 
       ;; Initialize the new funcallable-instance.  As part of our contract,
       ;; we have to make sure the initial value of all the funcallable
       ;; instance data slots is NIL.
-      (setf fin-index (the index (1- fin-index)))
+      (decf fin-index)
       (setf (lucid::procedure-ref new-fin fin-index) nil))
     ;;
     ;; "Assemble" the initial function by installing a fast "trampoline" code;
@@ -257,7 +252,7 @@ explicitly marked saying who wrote it.
     #+MIPS (progn
 	     (setf (sys:procedure-ref new-fin lucid::procedure-min-args) 0)
 	     (setf (sys:procedure-ref new-fin lucid::procedure-max-args) 
-		   (the index call-arguments-limit)))
+		   call-arguments-limit))
     ;; but start out with the function to be run as an error call.
     (setf (lucid::procedure-ref new-fin fin-trampoline-fun-index)
 	  #'called-fin-without-function)
@@ -283,10 +278,10 @@ explicitly marked saying who wrote it.
 (defmacro funcallable-instance-data-1 (instance data)
   `(lucid::procedure-ref 
 	   ,instance
-	   (the index
-		(- (the index (- (the index fin-size) 1))
-		   (the index (funcallable-instance-data-position ,data))))))
-
+	   (the fixnum
+		(- (- fin-size 1)
+		   (the fixnum (funcallable-instance-data-position ,data))))))
+  
 );end of #+Lucid
 
 
@@ -362,7 +357,7 @@ explicitly marked saying who wrote it.
                                             (make-trampoline new-value)))))
 
 (defun make-trampoline (function)
-  (declare #.*optimize-speed*)
+  (declare (optimize (speed 3) (safety 0)))
   #'(lambda (&rest args)
       #+Genera (declare (dbg:invisible-frame :pcl-internals))
       (apply function args)))
@@ -886,7 +881,7 @@ dbg:
 ;; This function is never linked in and never appears on the stack.
 
 (defun funcallable-instance-mattress-pad ()
-  (declare #.*optimize-speed*)
+  (declare (optimize (speed 3) (safety 0)))
   'nil)
 
 (eval-when (eval)
@@ -1077,7 +1072,7 @@ dbg:
 ;; This function is never linked in and never appears on the stack.
 
 (defun funcallable-instance-mattress-pad ()
-  (declare #.*optimize-speed*)
+  (declare (optimize (speed 3) (safety 0)))
   'nil)
 
 (eval-when (eval)
@@ -1166,19 +1161,17 @@ dbg:
 (defun add-instance-vars (cvec old-cvec)
   ;; create a constant vector containing everything in the given constant
   ;; vector plus space for the instance variables
-  (let* ((nconstants (cond (cvec (length (the simple-vector cvec))) (t 0)))
+  (let* ((nconstants (cond (cvec (length cvec)) (t 0)))
          (ndata (length funcallable-instance-data))
-         (old-cvec-length (if old-cvec (length (the simple-vector old-cvec)) 0))
+         (old-cvec-length (if old-cvec (length old-cvec) 0))
          (new-cvec nil))
-    (declare (fixnum nconstants ndate old-cvec-length))
-    (cond ((<= (the fixnum (+ nconstants ndata))  old-cvec-length)
+    (cond ((<= (+ nconstants ndata)  old-cvec-length)
            (setq new-cvec old-cvec))
           (t
-           (setq new-cvec (make-array (the fixnum (+ nconstants ndata))))
+           (setq new-cvec (make-array (+ nconstants ndata)))
            (when old-cvec
              (dotimes (i ndata)
-               (declare (fixnum i))
-               (setf (svref new-cvec (- (the fixnum (+ nconstants ndata)) i 1))
+               (setf (svref new-cvec (- (+ nconstants ndata) i 1))
                      (svref old-cvec (- old-cvec-length i 1)))))))
     
     (dotimes (i nconstants) (setf (svref new-cvec i) (svref cvec i)))
@@ -1187,11 +1180,8 @@ dbg:
 
 (defun funcallable-instance-data-1 (instance data)
   (let ((constant (excl::fn_constant instance)))
-    (declare (simple-vector constant))
-    (svref constant (- (the fixnum (length constant))
-                       (the fixnum
-                            (1+ (the fixnum
-                                     (funcallable-instance-data-position data))))))))
+    (svref constant (- (length constant)
+                       (1+ (funcallable-instance-data-position data))))))
 
 (defsetf funcallable-instance-data-1 set-funcallable-instance-data-1)
 
@@ -1367,9 +1357,9 @@ dbg:
 (defmacro funcallable-instance-data-1 (fin slot)
   (if (constantp slot)
       `(sys:%primitive c:closure-ref ,fin
-                       (+ (or (position ,slot funcallable-instance-data)
-                              (error "Unknown slot: ~S." ,slot))
-                          fin-data-offset))
+                       ,(+ (or (position (eval slot) funcallable-instance-data)
+                               (error "Unknown slot: ~S." (eval slot)))
+                           fin-data-offset))
       (ext:once-only ((n-slot slot))
         `(kernel:%closure-index-ref
           ,fin
@@ -1384,9 +1374,13 @@ dbg:
     `(progn
        (kernel:%set-funcallable-instance-info
         ,n-fin
-        (+ (or (position ,n-slot funcallable-instance-data)
-               (error "Unknown slot: ~S." ,n-slot))
-           fin-data-offset)
+	,(if (constantp slot)
+	     (+ (or (position (eval slot) funcallable-instance-data)
+		    (error "Unknown slot: ~S." (eval slot)))
+		fin-data-offset)
+	     `(+ (or (position ,n-slot funcallable-instance-data)
+		     (error "Unknown slot: ~S." ,n-slot))
+		 fin-data-offset))
         ,n-val)
        ,n-val)))
 ;;;
@@ -1452,8 +1446,8 @@ dbg:
         ((not (functionp new-value))
          (error "~S is not a function." new-value))
         ((and (cclosurep new-value)
-              (<= (the index (length (the list (%cclosure-env new-value))))
-                  (the index funcallable-instance-available-size)))
+              (<= (length (%cclosure-env new-value))
+                  funcallable-instance-available-size))
          (%set-cclosure fin new-value funcallable-instance-available-size))
         (t
          (set-funcallable-instance-function
@@ -1466,14 +1460,12 @@ dbg:
   (let* ((pos-form (macroexpand `(funcallable-instance-data-position ,data)
                                 env))
          (index-form (if (constantp pos-form)
-                         (the index
-                              (- (the index funcallable-instance-closure-size)
-                                 (the index (eval pos-form))
-                                 2))
-                         `(the index
-                               (- (the index funcallable-instance-closure-size)
-                                  (the index (funcallable-instance-data-position ,data))
-                                  2)))))
+                         (- funcallable-instance-closure-size
+                            (eval pos-form)
+                            2)
+                         `(- funcallable-instance-closure-size
+                             (funcallable-instance-data-position ,data)
+                             2))))
     `(car (%cclosure-env-nthcdr ,index-form ,fin))))
 
 
@@ -1621,54 +1613,6 @@ make_turbo_trampoline_internal(base0)
 )
 
 
-;;; In CLISP, compiled functions (also called compiled closures) are just
-;;; a vector of constants, with one slot containing the bytecode. This means
-;;; that constants and closure variables are intermixed in the procedure
-;;; vector.
-;;;
-#+CLISP
-(progn
-  (let* ((mother-fin
-           #'(lambda (&rest args) (declare (compile)) (apply '#:G0 args))
-         )
-         (mother-fin-code
-           (sys::make-code-vector (sys::closure-codevec mother-fin))
-        ))
-    (defun allocate-funcallable-instance-1 ()
-      (sys::%make-closure 'FUNCALLABLE-INSTANCE mother-fin-code
-                          '#.(make-list (+ 1 (length funcallable-instance-data)) #| :initial-element nil |# )
-    ) )
-    (proclaim '(inline funcallable-instance-p))
-    (defun funcallable-instance-p (obj)
-      (and (sys::closurep obj) (eq (sys::%record-ref obj 1) mother-fin-code))
-    )
-  )
-  (defun set-funcallable-instance-function (fin new-value)
-    (let ((dummy-sym '#:G0))
-      (setf (symbol-function dummy-sym) new-value) ; coerce to a function
-      (setf (sys::%record-ref fin 2) (symbol-function dummy-sym))
-    )
-    new-value
-  )
-  (defmacro funcallable-instance-data-1 (instance-form data-form)
-    (let ((position-form
-            (if (and (consp data-form)
-                     (eq (car data-form) 'quote)
-                     (boundp 'funcallable-instance-data)
-                )
-              (or (position (cadr data-form) funcallable-instance-data :test #'eq)
-                  (progn
-                    (warn "Unknown funcallable-instance data: ~S." (cadr data-form))
-                    `(error "Unknown funcallable-instance data: ~S." ',(cadr data-form))
-              )   )
-              `(position ,data-form funcallable-instance-data :test #'eq)
-         )) )
-      `(sys::%record-ref ,instance-form (+ 3 ,position-form))
-  ) )
-)
-
-
-
 ;;;
 ;;; In H.P. Common Lisp
 ;;; This code was originally written by:
@@ -1943,222 +1887,58 @@ make_turbo_trampoline_internal(base0)
 ;;;
 #+:coral
 (progn
-  #-:cltl2 
-  (progn
-    (defconstant ccl::$v_istruct 22)
-    (defvar ccl::initial-fin-slots (make-list (length funcallable-instance-data)))
-    (defconstant ccl::fin-function 1)
-    (defconstant ccl::fin-data (+ ccl::FIN-function 1))
-    
-    (defun allocate-funcallable-instance-1 ()
-      (apply #'ccl::%gvector 
-             ccl::$v_istruct
-             'ccl::funcallable-instance
-             #'(lambda (&rest ignore)
-                 (declare (ignore ignore))
-	         (called-fin-without-function))
-             ccl::initial-fin-slots))
-    
-    #+:ccl-1.3
-    (eval-when (eval compile load)
-      
-      ;;; Make uvector-based objects (like funcallable instances) print better.
-      (defun print-uvector-object (obj stream &optional print-level)
-        (declare (ignore print-level))
-        (print-object obj stream))
-      
-      ;;; Inform the print system about funcallable instance uvectors.
-      (pushnew (cons 'ccl::funcallable-instance #'print-uvector-object)
-	       ccl:*write-uvector-alist*
-	       :test #'equal)
-      
-      )
-    
-    (defun funcallable-instance-p (x)
-      (and (eq (ccl::%type-of x) 'ccl::internal-structure)
-           (eq (ccl::%uvref x 0) 'ccl::funcallable-instance)))
-    
-    (defun set-funcallable-instance-function (fin new-value)
-      (unless (funcallable-instance-p fin)
-        (error "~S is not a funcallable-instance." fin))
-      (unless (functionp new-value)
-        (error "~S is not a function." new-value))
-      (ccl::%uvset fin ccl::FIN-function new-value))
-    
-    (defmacro funcallable-instance-data-1 (fin data-name)
-      `(ccl::%uvref ,fin 
-                    (+ (funcallable-instance-data-position ,data-name)
-		       ccl::FIN-data)))
-    
-    (defsetf funcallable-instance-data-1 (fin data) (new-value)
-      `(ccl::%uvset ,fin 
-                    (+ (funcallable-instance-data-position ,data) ccl::FIN-data)
-                    ,new-value)))
-  ) ; end of :coral
-  #+(and coral :cltl2) (in-package :ccl)
-  #+(and coral :cltl2)
   
-  (eval-when (:compile-toplevel :execute)
-    
-    (require "LISPEQU")
-    (require "LAPMACROS"))
-  
-  #+(and :coral :cltl2)
-  (progn
-    
-    (defun uninitialized-fin-function (&rest rest)
-      (error "Uninitialized funcallable instance called with args:~%~s" rest))
-    
-    (defvar *funcallable-instance-marker* '*funcallable-instance-marker*)
-    (declaim (inline internal-allocate-funcallable-instance-1 
-                     internal-funcallable-instance-p
-                     set-internal-funcallable-instance-function
-                     internal-funcallable-instance-data-1
-                     set-internal-funcallable-instance-data-1))
-    
-    (defun internal-allocate-funcallable-instance-1 ()
-      ;;;
-      ;;;This makes an funcallable instance
-      ;;;
-      (%make-lfun
-   (vector 'funcallable-instance
-           #'uninitialized-fin-function
-           *funcallable-instance-marker*
-           nil)
-   '#.(coerce (list #x4ef9 0 1          ; jmp fin-function
-                    0 2                 ; *funcallable-instance-marker*
-                    0 3                 ; fin-data
-                    0 0)                ; function-name
-              '(vector (signed-byte 16)))
-   '#.(coerce (list 2 $lm_longimm 6 $lm_longimm 10 $lm_longimm 14 $lm_longimm)
-              '(vector (signed-byte 16))) 
-   (ash 1 $lfbits-rest-bit)   ; bits
-   (ash 1 $lfatr-resident-bit)))
-    
-    (defun internal-funcallable-instance-p (fin)
-      (and (functionp fin)
-           (lap-inline (*funcallable-instance-marker* fin)
-             (move.l arg_z atemp0)
-             (move.l nilreg acc)
-             (if# (and (eq (cmp.w ($ #x4ef9) @atemp0))
-                       (eq (cmp.l (atemp0 6) arg_y)))
-               (add.l ($ $t_val) acc)))))
-    
-    (defmacro require-fin (fin)
-      `(unless (internal-funcallable-instance-p ,fin)
-         (error "~s is not a funcallable-instance." ,fin)))
-    
-    (defun set-internal-funcallable-instance-function (fin new-value)
-      (require-fin fin)
-      (unless (functionp new-value)
-        (error "~s is not a function" new-value))
-      ; This will make arglist work on funcallable instances
-      ; after arglist is fixed by patch 2 for MCL 2.0
-      `(let ((bits (lfun-bits fin))
-             (new-bits (ccl::lfun-bits new-value)))
-         (lfun-bits fin (logior (logand new-bits $lfbits-args-mask)
-                                (logand bits (lognot $lfbits-args-mask)))))
-      ; Here's where the real work happens
-      (lap-inline (fin new-value)
-        (move.l arg_y atemp0)
-        (move.l arg_z (atemp0 2))
-        (sub.l ($ $sym.fapply) atemp0)
-        (jsr_subprim $mmu_flush_sym_cache))
-      new-value)
-  
-  (defun internal-funcallable-instance-data-1 (fin)
-    (require-fin fin)
-    (lap-inline (fin)
-      (move.l arg_z atemp0)
-      (move.l (atemp0 10) acc)))
-  
-  (defun set-internal-funcallable-instance-data-1 (fin data)
-    (require-fin fin)
-    (lap-inline (fin data)
-      (move.l arg_y atemp0)
-      (move.l arg_z (atemp0 10))
-      (movereg arg_z acc)))
-) ; end of (and :coral :cltl2)
+(defconstant ccl::$v_istruct 22)
+(defvar ccl::initial-fin-slots (make-list (length funcallable-instance-data)))
+(defconstant ccl::fin-function 1)
+(defconstant ccl::fin-data (+ ccl::FIN-function 1))
 
-#+(and :coral :cltl2) (in-package :pcl)
-#+(and :coral cltl2)
-(progn 
+(defun allocate-funcallable-instance-1 ()
+  (apply #'ccl::%gvector 
+         ccl::$v_istruct
+         'ccl::funcallable-instance
+         #'(lambda (&rest ignore)
+             (declare (ignore ignore))
+	     (called-fin-without-function))
+         ccl::initial-fin-slots))
 
+#+:ccl-1.3
+(eval-when (eval compile load)
 
-(defmacro allocate-funcallable-instance-1 ()
-;;;
-;;;This makes a funcallable instance, with a data slot
-;;;initialize to a new vector intialized to the size of the 
-;;;funcallable-instance-data list
-;;;
-  `(let ((fin (ccl::internal-allocate-funcallable-instance-1)))
-    (ccl::set-internal-funcallable-instance-data-1 fin
-                                     (make-array 
-                                        (length funcallable-instance-data)  
-                                        :initial-element nil))
-  fin))                             
-                                     
-        
-(defmacro funcallable-instance-p (fin)
-  `(ccl::internal-funcallable-instance-p ,fin))
+;;; Make uvector-based objects (like funcallable instances) print better.
+(defun print-uvector-object (obj stream &optional print-level)
+  (declare (ignore print-level))
+  (print-object obj stream))
 
-(defmacro set-funcallable-instance-function (fin new-value)
-  `(ccl::set-internal-funcallable-instance-function ,fin ,new-value))
-
-         
-
-(defmacro funcallable-instance-data-1 (fin data-name)
-  `(svref (ccl::internal-funcallable-instance-data-1 ,fin) 
-         (funcallable-instance-data-position ,data-name)))
-
-(defmacro set-funcallable-instance-data-1 (fin data-name new-value)
-  `(setf (svref (ccl::internal-funcallable-instance-data-1 ,fin) 
-               (funcallable-instance-data-position ,data-name)) ,new-value))
-               
-
-(defsetf funcallable-instance-data-1 set-funcallable-instance-data-1)
+;;; Inform the print system about funcallable instance uvectors.
+(pushnew (cons 'ccl::funcallable-instance #'print-uvector-object)
+	 ccl:*write-uvector-alist*
+	 :test #'equal)
 
 )
 
-
-;;; In Utah Common Lisp, closures (and other things) are represented in the
-;;; heap as (1) code that sets up some registers and then jumps to the code
-;;; stored in the code pointer and (2) slots that hold the code pointer, heap
-;;; pointer, and so on.  We use this "thunk" type to represent FINs.  The code
-;;; pointer holds the funcallable-instance-function, the heap pointer holds a
-;;; vector with the FIN data.
-
-#+UCL
-(progn
-
-(defun allocate-funcallable-instance-1 ()
-  (let ((thunk (ucl::make-thunk #'ucl::closure-stub
-				'|PCL Generic Function|
-				(vector nil nil)
-				(ucp::@funtoaddr #'called-fin-without-function)
-				nil)))
-    thunk))
-
-(defun funcallable-instance-p (fin)
-  (and (ucl::conscode-p fin)
-       (eq (ucl::conscode-type fin) '|PCL Generic Function|)))
+(defun funcallable-instance-p (x)
+  (and (eq (ccl::%type-of x) 'ccl::internal-structure)
+       (eq (ccl::%uvref x 0) 'ccl::funcallable-instance)))
 
 (defun set-funcallable-instance-function (fin new-value)
   (unless (funcallable-instance-p fin)
-    (error "~S is not a PCL generic function." fin))
-  (ucl::setf-closure-code-ptr fin (ucp::@funtoaddr new-value)))
+    (error "~S is not a funcallable-instance." fin))
+  (unless (functionp new-value)
+    (error "~S is not a function." new-value))
+  (ccl::%uvset fin ccl::FIN-function new-value))
 
 (defmacro funcallable-instance-data-1 (fin data-name)
-  `(svref (ucl::conscode-heap ,fin)
-	  (funcallable-instance-data-position ,data-name)))
+  `(ccl::%uvref ,fin 
+                (+ (funcallable-instance-data-position ,data-name)
+		   ccl::FIN-data)))
 
-(defsetf funcallable-instance-data-1 (fin data-name) (new-value)
-  `(setf (svref (ucl::conscode-heap ,fin)
-		(funcallable-instance-data-position ,data-name))
-	 ,new-value))
+(defsetf funcallable-instance-data-1 (fin data) (new-value)
+  `(ccl::%uvset ,fin 
+                (+ (funcallable-instance-data-position ,data) ccl::FIN-data)
+                ,new-value))
 
-); End of #+UCL
-
+); End of #+:coral
 
 
   
@@ -2178,13 +1958,5 @@ make_turbo_trampoline_internal(base0)
 (defmacro fsc-instance-slots (fin)
   `(funcallable-instance-data-1 ,fin 'slots))
 
-(defun allocate-funcallable-instance (wrapper allocate-static-slot-storage-copy)
-  (declare (type simple-vector allocate-static-slot-storage-copy))
-  (let ((fin (allocate-funcallable-instance-1))
-        (slots
-          (%allocate-static-slot-storage--class
-            allocate-static-slot-storage-copy)))
-    (setf (fsc-instance-wrapper fin) wrapper
-          (fsc-instance-slots fin) slots)
-    fin))
+
 

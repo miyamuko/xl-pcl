@@ -25,9 +25,9 @@
 ;;; *************************************************************************
 ;;;
 
-(in-package 'pcl)
+(in-package :pcl)
 
-#-(or :ccl-1.3 :cltl2)
+#-:ccl-1.3
 (ccl::add-transform 'std-instance-p 
                      :inline 
                      #'(lambda (call)
@@ -38,12 +38,9 @@
 
 (eval-when (eval compile load)
   (proclaim '(inline std-instance-p)))
-#-:cltl2
+
 (defun printing-random-thing-internal (thing stream)
   (prin1 (ccl::%ptr-to-int thing) stream))
-#+:cltl2
-(defun printing-random-thing-internal (thing stream)
-  (prin1 (ccl::%address-of thing) stream))
 
 (defun set-function-name-1 (function new-name uninterned-name)
   (declare (ignore uninterned-name))

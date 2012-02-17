@@ -25,7 +25,7 @@
 ;;; *************************************************************************
 ;;;
 
-(in-package 'pcl)
+(in-package :pcl)
 
 (fix-early-generic-functions)
 (setq *boot-state* 'complete)
@@ -37,5 +37,4 @@
 (defun print-std-instance (instance stream depth)
   (declare (ignore depth))
   (print-object instance stream))
-
 

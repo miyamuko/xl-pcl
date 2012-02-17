@@ -51,7 +51,7 @@
 ;;; mechanisms is in the first part of the file, the real walker follows it.
 ;;; 
 
-(in-package 'walker)
+(in-package :walker)
 
 ;;;
 ;;; The user entry points are walk-form and nested-walked-form.  In addition,
@@ -62,12 +62,14 @@
 ;;; 
 (export '(define-walker-template
 	  walk-form
+	  walk-form-expand-macros-p
 	  nested-walk-form
 	  variable-lexical-p
 	  variable-special-p
 	  variable-globally-special-p
 	  *variable-declarations*
 	  variable-declaration
+	  macroexpand-all
 	  ))
 
 
@@ -138,70 +140,35 @@
 ;;;   
 ;;;
 #+:Coral
-(progn 
-  #-:cltl2
-  (progn
-    
-    (defmacro with-augmented-environment
-	      ((new-env old-env &key functions macros) &body body)
-      `(let ((,new-env (with-augmented-environment-internal ,old-env
-                         ,functions
-                         ,macros)))
-         ,@body))
-    
-    (defun with-augmented-environment-internal (env functions macros)
-      (dolist (f functions)
-        (push (list* f 'function (gensym)) env))
-      (dolist (m macros)
-        (push (list* (car m) 'ccl::macro (cadr m)) env))
-      env)
-    
-    (defun environment-function (env fn)
-      (let ((entry (assoc fn env :test #'equal)))
-        (and entry
-	     (eq (cadr entry) 'function)
-	     (cddr entry))))
-    
-    (defun environment-macro (env macro)
-      (let ((entry (assoc macro env :test #'equal)))
-        (and entry
-	     (eq (cadr entry) 'ccl::macro)
-	     (cddr entry))))
-    
-    )
-  #+:cltl2                              ; This isn't Coral specific
-     (defmacro with-augmented-environment
-	      ((new-env old-env &key functions macros) &body body)
-      `(let ((,new-env (with-augmented-environment-internal ,old-env
-                         ,functions
-                         ,macros)))
-         ,@body))
-                                       ; Should work in any ClTl2 implimentation
-  #+cltl2(progn
-    (defun with-augmented-environment-internal (env functions macros)
-      (let ((functions-and-defs
-             (mapcar #'(lambda (f)
-                         (car f) ) functions))
-            (macros-and-defs
-             (mapcar #'(lambda (m)
-                         (list (car m) (cadr m))) macros)))
-        (cl:augment-environment env
-                                :function functions-and-defs :macro macros-and-defs)
-        )
-      )
-    
-    (defun environment-function (env fn)
-      (multiple-value-bind (type )
-                           (cl:function-information fn env)
-        (eql type :function)))
-    
-    (defun environment-macro (env fn)
-      (multiple-value-bind (type )
-                           (cl:function-information fn env)
-        (if (eql type :macro)
-          (macro-function fn env ))))
-    
-    ));#+:Coral
+(progn
+
+(defmacro with-augmented-environment
+	  ((new-env old-env &key functions macros) &body body)
+  `(let ((,new-env (with-augmented-environment-internal ,old-env
+							,functions
+							,macros)))
+     ,@body))
+
+(defun with-augmented-environment-internal (env functions macros)
+  (dolist (f functions)
+    (push (list* f 'function (gensym)) env))
+  (dolist (m macros)
+    (push (list* (car m) 'ccl::macro (cadr m)) env))
+  env)
+
+(defun environment-function (env fn)
+  (let ((entry (assoc fn env :test #'equal)))
+    (and entry
+	 (eq (cadr entry) 'function)
+	 (cddr entry))))
+
+(defun environment-macro (env macro)
+  (let ((entry (assoc macro env :test #'equal)))
+    (and entry
+	 (eq (cadr entry) 'ccl::macro)
+	 (cddr entry))))
+
+);#+:Coral
 
 
 ;;;
@@ -239,21 +206,24 @@
      ,@body))
 
 (defun with-augmented-environment-internal (env functions macros)
-  (dolist (f functions)
-    (push (list* f 'function #'unbound-lexical-function) env))
-  (dolist (m macros)
-    (push (list* (car m) 'excl::macro (cadr m)) env))
-  env)
+  (let (#+allegro-v4.1 (env-tail (cdr env)) #+allegro-v4.1 (env (car env)))
+    (dolist (f functions)
+      (push (list* f 'function #'unbound-lexical-function) env))
+    (dolist (m macros)
+      (push (list* (car m) 'excl::macro (cadr m)) env))
+    #-allegro-v4.1 env #+allegro-v4.1 (cons env env-tail)))
 
 (defun environment-function (env fn)
-  (let ((entry (assoc fn env :test #'equal)))
+  (let* (#+allegro-v4.1 (env (car env))
+	 (entry (assoc fn env :test #'equal)))
     (and entry
 	 (or (eq (cadr entry) 'function)
 	     (eq (cadr entry) 'compiler::function-value))
 	 (cddr entry))))
 
 (defun environment-macro (env macro)
-  (let ((entry (assoc macro env :test #'equal)))
+  (let* (#+allegro-v4.1 (env (car env))
+	 (entry (assoc macro env :test #'equal)))
     (and entry
 	 (eq (cadr entry) 'excl::macro)
 	 (cddr entry))))
@@ -651,54 +621,6 @@
 	       (caddr entry)))))
 );#+(or KCL IBCL)
 
-;;;
-;;; In CLISP Common Lisp, the macroexpansion environment has the form
-;;;   NIL  or  #(sym1 def1 ... symn defn next-env)
-;;; where next-env is an macroexpansion environment of the same form.
-;;; A def entry herein is a cons (SYS::MACRO . macroexpansion-function)
-;;; for macros, and a symbol (a gensym in compiler, or NIL during
-;;; interpretation of LABELS) or a function object for functions.
-;;;
-
-#+CLISP
-(progn
-  (defmacro with-augmented-environment
-            ((new-env old-env &key functions macros) &body body)
-    `(let ((,new-env (with-augmented-environment-internal
-                       ,old-env ,functions ,macros
-          ))         )
-       ,@body
-     )
-  )
-  (defun with-augmented-environment-internal (env functions macros)
-    (let* ((new-env (make-array (+ (* (+ (length functions) (length macros)) 2) 1)))
-           (i 0))
-      (dolist (f functions)
-        (setf (svref new-env i) f) (incf i)
-        (setf (svref new-env i) #'unbound-lexical-function) (incf i)
-      )
-      (dolist (m macros)
-        (setf (svref new-env i) (first m)) (incf i)
-        (setf (svref new-env i) (cons 'sys::macro (second m))) (incf i)
-      )
-      (setf (svref new-env i) env)
-      new-env
-  ) )
-  (defun environment-function (env fn)
-    (let ((h (sys::fenv-assoc fn env)))
-      (or (eq h 'T) ; fenv-assoc didn't find anything
-          (sys::closurep h) (symbolp h)
-  ) ) )
-  (defun environment-macro (env macro)
-    (let ((h (sys::fenv-assoc macro env)))
-      (if (and (consp h) (eq (car h) 'sys::macro))
-        (cdr h) ; macroexpansion-function
-        nil ; anything
-  ) ) )
-);#+CLISP
-
-
-
 
 ;;;   --- TI Explorer --
 
@@ -941,15 +863,17 @@
   ;; we have no idea what to use for the environment.  So we just blow it
   ;; off, 'cause anything real we do would be wrong.  We still have to
   ;; make an entry so we can tell functions from macros.
-  (c::make-lexenv :default (or env (c::make-null-environment))
-		  :functions
-		  (append (mapcar #'(lambda (f)
-				      (cons (car f) (c::make-functional)))
-				  functions)
-			  (mapcar #'(lambda (m)
-				      (list* (car m) 'c::macro
-					     (coerce (cadr m) 'function)))
-				  macros))))
+  (let ((env (or env (c::make-null-environment))))
+    (c::make-lexenv 
+      :default env
+      :functions
+      (append (mapcar #'(lambda (f)
+			  (cons (car f) (c::make-functional :lexenv env)))
+		      functions)
+	      (mapcar #'(lambda (m)
+			  (list* (car m) 'c::macro
+				 (coerce (cadr m) 'function)))
+		      macros)))))
 
 (defun environment-function (env fn)
   (when env
@@ -966,40 +890,6 @@
 	   (function-lambda-expression (cddr entry))))))
 
 ); end of #+:CMU
-
-
-;;;
-;;; UCL versions.
-;;;
-
-#+UCL
-(progn
-
-(defmacro with-augmented-environment
-  ((new-env old-env &key functions macros) &body body)
-  `(let ((,new-env (with-augmented-environment-internal ,old-env
-							,functions ,macros)))
-     ,@body))
-
-(defun with-augmented-environment-internal (env functions macros)
-  (dolist (f functions)
-    (push (ucp::make-function-contour :name f) env))
-  (dolist (m macros)
-    (push (ucp::make-function-contour :name (car m)
-				      :macro-p (cadr m)) env))
-  env)
-
-(defun environment-function (env name)
-  (let ((entry (ucp::find-function-contour name env)))
-    (and entry
-	 (not (ucp::function-contour-macro-p entry)))))
-
-(defun environment-macro (env name)
-  (let ((entry (ucp::find-function-contour name env)))
-    (and entry
-	 (ucp::function-contour-macro-p entry))))
-)
-;; End of #+:UCL
 
 
 
@@ -1103,11 +993,11 @@
       entry)))
 
 
-(defvar *VARIABLE-DECLARATIONS* (list 'special))
+(defvar *VARIABLE-DECLARATIONS* '(special))
 
 (defun VARIABLE-DECLARATION (declaration var env)
   (if (not (member declaration *variable-declarations*))
-      (error "~S is not a reckognized variable declaration." declaration)
+      (error "~S is not a recognized variable declaration." declaration)
       (let ((id (or (variable-lexical-p var env) var)))
 	(dolist (decl (env-declarations env))
 	  (when (and (eq (car decl) declaration)
@@ -1136,7 +1026,7 @@
 ;;;
 #-(or Genera Cloe-Runtime Lucid Xerox Excl KCL IBCL (and dec vax common) :CMU HP-HPLabs
       GCLisp TI pyramid)
-(defvar *globally-special-variables* '(*evalhook* *applyhook* *macroexpand-hook*))
+(defvar *globally-special-variables* ())
 
 (defun variable-globally-special-p (symbol)
   #+Genera                      (si:special-variable-p symbol)
@@ -1156,9 +1046,8 @@
 				    (get symbol
 					 'clc::globally-special-in-compiler))
   #+:CORAL                      (ccl::proclaimed-special-p symbol)
-  #+UCL                         (get symbol 'ucl::special-variable)
   #-(or Genera Cloe-Runtime Lucid Xerox Excl KCL IBCL (and dec vax common) :CMU HP-HPLabs
-	GCLisp TI pyramid :CORAL UCL)
+	GCLisp TI pyramid :CORAL)
   (or (not (null (member symbol *globally-special-variables* :test #'eq)))
       (when (eval `(flet ((ref () ,symbol))
 		     (let ((,symbol '#,(list nil)))
@@ -1261,6 +1150,7 @@
 (define-walker-template LAMBDA               walk-lambda)
 (define-walker-template LET                  walk-let)
 (define-walker-template LET*                 walk-let*)
+(define-walker-template LOCALLY              walk-locally)
 (define-walker-template MACROLET             walk-macrolet)
 (define-walker-template MULTIPLE-VALUE-CALL  (NIL EVAL REPEAT (EVAL)))
 (define-walker-template MULTIPLE-VALUE-PROG1 (NIL RETURN REPEAT (EVAL)))
@@ -1274,6 +1164,7 @@
 (define-walker-template SYMBOL-MACROLET      walk-symbol-macrolet)
 (define-walker-template TAGBODY              walk-tagbody)
 (define-walker-template THE                  (NIL QUOTE EVAL))
+#+cmu(define-walker-template EXT:TRULY-THE   (NIL QUOTE EVAL))
 (define-walker-template THROW                (NIL EVAL EVAL))
 (define-walker-template UNWIND-PROTECT       (NIL RETURN REPEAT (EVAL)))
 
@@ -1318,10 +1209,14 @@
 (progn
   (define-walker-template ccl:%stack-block walk-let)
   )
-#+(or :cltl2 UCL)
-(define-walker-template LOCALLY             walk-locally)
 
 
+
+(defvar walk-form-expand-macros-p nil)
+
+(defun macroexpand-all (form &optional environment)
+  (let ((walk-form-expand-macros-p t))
+    (walk-form form environment)))
 
 (defun WALK-FORM (form
 		  &optional environment
@@ -1415,8 +1310,6 @@
 ;;;     3. Otherwise, assume it is a function call. "
 ;;;     
 
-(defvar walk-form-expand-macros-p nil)
-
 (defun walk-form-internal (form context env)
   ;; First apply the walk-function to perform whatever translation
   ;; the user wants to this form.  If the second value returned
@@ -1483,7 +1376,7 @@
         ((LAMBDA CALL)
 	 (cond ((or (symbolp form)
 		    (and (listp form)
-			 (= (length (the list form)) 2)
+			 (= (length form) 2)
 			 (eq (car form) 'setf)))
 		form)
 	       #+Lispm
@@ -1498,10 +1391,9 @@
 				       ;; call to length.
 				       (if (null (cddr template))
 					   ()
-					   (nthcdr (- (length (the list form))
+					   (nthcdr (- (length form)
 						      (length
-							(the list
-                                                             (cddr template))))
+							(cddr template)))
 						   form))
                                        context
 				       env))
@@ -1646,7 +1538,7 @@
 					 &aux arg)
   (cond ((null arglist) ())
         ((symbolp (setq arg (car arglist)))
-         (or (member arg lambda-list-keywords :test #'eq)
+         (or (member arg lambda-list-keywords)
              (note-lexical-binding arg env))
          (recons arglist
                  arg
@@ -1655,26 +1547,24 @@
 			       env
                                (and destructuringp
 				    (not (member arg
-						 lambda-list-keywords
-                                                 :test #'eq))))))
+						 lambda-list-keywords))))))
         ((consp arg)
-         (prog1
-	     (recons arglist
-		     (if destructuringp
-			 (walk-arglist arg context env destructuringp)
-			 (relist* arg
-				  (car arg)
-				  (walk-form-internal (cadr arg) :eval env)
-				  (cddr arg)))
-		     (walk-arglist (cdr arglist) context env nil))
-	   (if (symbolp (car arg))
-	       (note-lexical-binding (car arg) env)
-	       (note-lexical-binding (cadar arg) env))
-	   (or (null (cddr arg))
-	       (not (symbolp (caddr arg)))
-	       (note-lexical-binding (caddr arg) env))))
-	(t
-	 (error "Can't understand something in the arglist ~S" arglist))))
+         (prog1 (recons arglist
+			(if destructuringp
+			    (walk-arglist arg context env destructuringp)
+			    (relist* arg
+				     (car arg)
+				     (walk-form-internal (cadr arg) :eval env)
+				     (cddr arg)))
+			(walk-arglist (cdr arglist) context env nil))
+                (if (symbolp (car arg))
+                    (note-lexical-binding (car arg) env)
+                    (note-lexical-binding (cadar arg) env))
+                (or (null (cddr arg))
+                    (not (symbolp (caddr arg)))
+                    (note-lexical-binding (caddr arg) env))))
+          (t
+	   (error "Can't understand something in the arglist ~S" arglist))))
 
 (defun walk-let (form context env)
   (walk-let/let* form context env nil))
@@ -1710,20 +1600,14 @@
       (relist*
 	form let/let* walked-bindings walked-body))))
 
-#+(or cltl2 UCL)
-(defun walk-locally (form context env )
-  (declare (ignore context ))
-  
+(defun walk-locally (form context env)
+  (declare (ignore context))
   (let* ((locally (car form))
-	 
-	 (body (cddr form))
-	 
+	 (body (cdr form))
 	 (walked-body
 	  (walk-declarations body #'walk-repeat-eval env)))
     (relist*
-     form locally  walked-body)))
-
-
+     form locally walked-body)))
 
 (defun walk-prog/prog* (form context old-env sequentialp)
   (walker-environment-bind (new-env old-env)
@@ -1791,18 +1675,11 @@
     (if (some #'(lambda (var)
 		  (variable-symbol-macro-p var env))
 	      vars)
-	(let* ((expanded
-                 (let ((sets NIL)
-                       (temps NIL)
-                       (temp NIL))
-                   (dolist (var vars)
-                     (setf temp (gensym))
-                     (push `(setq ,var ,temp) sets)
-                     (push temp temps))
-                  `(multiple-value-bind
-                      ,(nreverse temps)
-                      ,(caddr form)
-                     ,@(nreverse sets))))
+	(let* ((temps (mapcar #'(lambda (var) (declare (ignore var)) (gensym)) vars))
+	       (sets (mapcar #'(lambda (var temp) `(setq ,var ,temp)) vars temps))
+	       (expanded `(multiple-value-bind ,temps 
+			       ,(caddr form)
+			     ,@sets))
 	       (walked (walk-form-internal expanded context env)))
 	  (if (eq walked expanded)
 	      form
@@ -1902,13 +1779,11 @@
 
 (defun walk-setq (form context env)
   (if (cdddr form)
-      (let* ((expanded
-               (let ((collect NIL)
-                     (ptr (cdr form)))
-                 (loop (push `(setq ,(car ptr) ,(cadr ptr)) collect)
-                       (setf ptr (cddr ptr))
-                       (unless ptr
-                         (return (nreverse collect))))))
+      (let* ((expanded (let ((rforms nil)
+			     (tail (cdr form)))
+			 (loop (when (null tail) (return (nreverse rforms)))
+			       (let ((var (pop tail)) (val (pop tail)))
+				 (push `(setq ,var ,val) rforms)))))
 	     (walked (walk-repeat-eval expanded env)))
 	(if (eq expanded walked)
 	    form
@@ -2039,7 +1914,7 @@
                        Even if this is what~%~
                        you intended, you should fix your source code."
 		      form
-		      (length (the list (cdr form))))
+		      (length (cdr form)))
 		(cons 'progn (cdddr form)))
 	      (cadddr form))))
     (relist form

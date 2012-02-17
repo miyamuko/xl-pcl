@@ -1,37 +1,6 @@
 ;;; -*- Mode: Lisp; Base: 10; Syntax: Common-Lisp; Package: DSYS -*-
 ;;; File: sysdef.lisp 
 ;;; Author: Richard Harris
-;;;
-;;;	ROSE - Rensselaer Object System for Engineering
-;;;	Common Lisp Implementation
-;;;
-;;; 			   Copyright (c) 1990 by 
-;;; 	      Rensselaer Polytechnic Institute, Troy, New York.
-;;; 			    All Rights Reserved
-;;;
-;;;	THE SOFTWARE AND ACCOMPANYING WRITTEN MATERIALS ARE PROVIDED
-;;;	\"AS IS\" AND WITHOUT ANY WARRANTY, INCLUDING BUT NOT LIMITED 
-;;;	TO THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-;;;	A PARTICULAR PURPOSE.  THE ENTIRE RISK AS TO THE QUALITY AND
-;;;	PERFORMANCE OF THE SOFTWARE AND USE OF THE ACCOMPANYING WRITTEN
-;;;	MATERIALS IS ASSUMED BY YOU.  IN NO EVENT SHALL RENSSELAER 
-;;;	POLYTECHNIC INSTITUTE BE LIABLE FOR ANY LOST REVENUE, LOST 
-;;;	PROFITS OR OTHER INCIDENTAL OR CONSEQUENTIAL DAMAGES, EVEN
-;;;	IF ADVISED OF THE POSSIBILITIES OF SUCH DAMAGES, WHERE DAMAGES
-;;;	ARISE OUT OF OR IN CONNECTION WITH THE USE OF, PERFORMANCE OR
-;;;	NONPERFORMANCE OF THIS SOFTWARE.
-;;;
-;;;	This software and accompanying written materials may not be 
-;;;	distributed outside your organization or outside the United 
-;;;	States of America without express written authorization from
-;;;	Rensselaer Polytechnic Institute.
-;;;
-;;;	This work has been sponsored in part by Defense Advanced Research 
-;;;	Projects Agency (DARPA) under contract number MDA972-88-C0047 for
-;;; 	DARPA Initiative in Concurrent Engineering (DICE).  This material
-;;;	may be reproduced by or for the U.S. Government pursuant to the 
-;;;	copyright license under the clause at DFARS 252.227-7013 7/26/90.
-;;; 
 
 (in-package "DSYS")
 
@@ -41,44 +10,7 @@
 (unless (boundp 'pcl::*redefined-functions*)
   (setq pcl::*redefined-functions* nil))
 
-(defun pcl::reset-pcl-package ()		; Try to do this safely
-  (let* ((vars '(pcl::*pcl-directory* 
-		 pcl::*default-pathname-extensions* 
-		 pcl::*pathname-extensions*
-		 pcl::*redefined-functions*))
-	 (names (mapcar #'symbol-name vars))
-	 (values (mapcar #'symbol-value vars)))
-    (let ((pkg (find-package "PCL")))
-      (do-symbols (sym pkg)
-	(when (eq pkg (symbol-package sym))
-	  (if (constantp sym)
-	      (unintern sym pkg)
-	      (progn
-		(makunbound sym)
-		(unless (eq sym 'pcl::reset-pcl-package)
-		  (fmakunbound sym))
-		#+cmu (fmakunbound `(setf ,sym))
-		(setf (symbol-plist sym) nil))))))
-    (let ((pkg (find-package "SLOT-ACCESSOR-NAME")))
-      (when pkg
-	(do-symbols (sym pkg)
-	  (makunbound sym)
-	  (fmakunbound sym)
-	  (setf (symbol-plist sym) nil))))
-    (let ((pcl (find-package "PCL")))
-      (mapcar #'(lambda (name value)
-		  (let ((var (intern name pcl)))
-		    (proclaim `(special ,var))
-		    (set var value)))
-	      names values))      
-    (dolist (sym pcl::*redefined-functions*)
-      (setf (symbol-function sym) (get sym ':definition-before-pcl)))
-    nil))
-
 (defun reset-pcl-package ()
-  #-cmu
-  (unless (compiled-function-p #'pcl::reset-pcl-package)
-    (compile 'pcl::reset-pcl-package))
   (pcl::reset-pcl-package)
   (let ((defsys (subfile '("pcl") :name "defsys")))
     (setq pcl::*pcl-directory* defsys)
@@ -111,7 +43,9 @@
 				 (lfi (get-loaded-file-info path)))
 			    (and lfi path-fwd (= path-fwd (lfi-fwd lfi)))))
 		      (pcl-binary-files)))
-    (reset-pcl-package)
+    (let ((b-s 'pcl::*boot-state*))
+      (when (and (boundp b-s) (symbol-value b-s))
+	(reset-pcl-package)))
     (pcl::load-pcl)))
 
 (defsystem pcl
@@ -133,9 +67,10 @@
    (progn
      (maybe-load-defsys t)
      (if (and (fboundp 'pcl::operation-transformations)
-	      (every #'(lambda (trans)
-			 (eq (car trans) :load))
-		     (pcl::operation-transformations 'pcl::pcl :compile)))
+	      (or (null (probe-file (subfile '("pcl") :name "defsys" :type "lisp")))
+		  (every #'(lambda (trans)
+			     (eq (car trans) :load))
+			 (pcl::operation-transformations 'pcl::pcl :compile))))
 	 (maybe-load-pcl)
 	 (let ((b-s 'pcl::*boot-state*))
 	   (when (and (boundp b-s) (symbol-value b-s))
@@ -145,7 +80,8 @@
 					 si::*system-directory*))
 	   (#+cmu with-compilation-unit #-cmu progn
 	    #+cmu (:optimize 
-		   '(optimize (user::debug-info #+small .5 #-small 2)
+		   '(optimize (user::debug-info #+(and small (not testing)) .5
+			                        #-(and small (not testing)) 2)
 		              (speed #+testing 1 #-testing 2)
 		              (safety #+testing 3 #-testing 0)
 		              #+ignore (user::inhibit-warnings 2))
@@ -157,11 +93,12 @@
 		       #-testing *fast-declaration*)
 	     (pcl::compile-pcl))
 	   (reset-pcl-package)
-	   (maybe-load-pcl t))))
+	   (maybe-load-pcl t)))
+     #+cmu (purify))
    :load
    (progn 
      (maybe-load-pcl)
-     #+cmu (lisp::purify))))
+     #+cmu (purify))))
 
 (defparameter *pcl-files*
   '((("systems") "lisp"
