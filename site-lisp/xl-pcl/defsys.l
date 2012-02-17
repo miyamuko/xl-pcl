@@ -810,52 +810,18 @@ and load your system with:
   ;;                                          of this file
   ;;
   (
-;  (rel-6-patches   t            t            ()                rel-6)
-;  (rel-7-1-patches t            t            ()                rel-7-1)
-   (rel-7-2-patches t            t            ()                rel-7-2)
-   (rel-8-patches   t            t            ()                rel-8)
-   (ti-patches      t            t            ()                ti)
-   (pyr-patches     t            t            ()                pyramid)
-   (xerox-patches   t            t            ()                xerox)
-   (kcl-patches     t            t            ()                kcl)
-   (ibcl-patches    t            t            ()                ibcl)
-   (gcl-patches     t            t            ()                gclisp)
-
    (pkg             t            t            ())
-   (sys-proclaim    t            t            ()                kcl)
    (walk            (pkg)        (pkg)        ())
    (iterate         t            t            ())
    (macros          t            t            ())
    (low             (pkg macros) t            (macros))
-
-
-   (genera-low     (low)         (low)        (low)            Genera)
-   (cloe-low	   (low)	 (low)	      (low)            Cloe)
-   (lucid-low      (low)         (low)        (low)            Lucid)
-   (Xerox-low      (low)         (low)        (low)            Xerox)
-   (ti-low         (low)         (low)        (low)            TI)
-   (vaxl-low       (low)         (low)        (low)            vaxlisp)
-   (kcl-low        (low)         (low)        (low)            KCL)
-   (ibcl-low       (low)         (low)        (low)            IBCL)
-   (excl-low       (low)         (low)        (low)            excl)
-   (cmu-low        (low)         (low)        (low)            CMU)
-   (hp-low         (low)         (low)        (low)            HP-HPLabs)
-   (gold-low       (low)         (low)        (low)            gclisp)
-   (pyr-low        (low)         (low)        (low)            pyramid)
-   (coral-low      (low)         (low)        (low)            coral)
 
    (fin         t                                   t (low))
    (defclass    t                                   t (low))
    (defs        t                                   t (defclass macros iterate))
    (fngen       t                                   t (low))
    (cache       t                                   t (low defs))
-   ;;(lap         t                                   t (low)    excl-sun4)
-   ;;(plap        t                                   t (low)    excl-sun4)
-   ;;(cpatch      t                                   t (low)    excl-sun4)
-   ;;(quadlap     t                                   t (low)    excl-sun4)
-   ;;(dlap        t                                   t (defs low fin cache lap)
-   ;;	                                                         excl-sun4)
-   ;;#-excl-sun4
+
    (dlisp       t                                   t (defs low fin cache))
    (dlisp2      t                                   t (low fin cache dlisp))
    (boot        t                                   t (defs fin))
