@@ -203,6 +203,7 @@
        write-string write-to-string y-or-n-p yes-or-no-p zerop))))
 
 (require "ansify")
+(require "ansi-loop")
 
 (defpackage :xl-walker
   (:nicknames :walker)
@@ -219,7 +220,11 @@
   (:nicknames :pcl)
   (:use
    :lisp :editor
-   :xl-walker :xl-iterate))
+   :xl-walker :xl-iterate)
+  (:shadowing-import-from :ansi-loop
+   :loop
+   :loop-finish
+   ))
 
 (pushnew :setf *features*)
 (ansify::install :xl-walker)

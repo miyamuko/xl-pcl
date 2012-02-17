@@ -37,6 +37,7 @@
 (in-package :pcl)
 
 (fix-early-generic-functions)
+(compute-standard-slot-locations)
 (setq *boot-state* 'complete)
 
 #+Lispm

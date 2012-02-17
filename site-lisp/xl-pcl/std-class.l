@@ -710,7 +710,8 @@
 	      (wrapper-no-of-instance-slots nwrapper) nslots
 	      wrapper nwrapper))
       (unless (eq owrapper nwrapper)
-	(update-pv-table-cache-info class)))))
+	(update-pv-table-cache-info class)
+	(maybe-update-standard-class-locations class)))))
 
 (defun compute-class-slots (eslotds)
   (gathering1 (collecting)
