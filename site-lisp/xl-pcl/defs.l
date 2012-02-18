@@ -536,7 +536,7 @@
 
 
     (array      (t)        (vector)                 (t)
-     #2A((NIL)))
+     #2A((nil)))
     (vector     (array
 		 sequence) (string)      (array sequence t)
      #())

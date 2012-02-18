@@ -865,13 +865,13 @@
 ;;; these symbols are bound.
 ;;;
 
-(defvar *dfun-arg-symbols* '(.ARG0. .ARG1. .ARG2. .ARG3.))
+(defvar *dfun-arg-symbols* '(.arg0. .arg1. .arg2. .arg3.))
 
 (defun dfun-arg-symbol (arg-number)
   (or (nth arg-number (the list *dfun-arg-symbols*))
       (intern (format nil ".arg~A." arg-number) *the-pcl-package*)))
 
-(defvar *slot-vector-symbols* '(.SLOTS0. .SLOTS1. .SLOTS2. .SLOTS3.))
+(defvar *slot-vector-symbols* '(.slots0. .slots1. .slots2. .slots3.))
 
 (defun slot-vector-symbol (arg-number)
   (or (nth arg-number (the list *slot-vector-symbols*))
