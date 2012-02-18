@@ -26,4 +26,8 @@
 (defun printing-random-thing-internal (thing stream)
   (format stream "~A" (si:address-of thing)))
 
+(defun set-function-name-1 (function new-name uninterned-name)
+  (si:*set-function-name function new-name)
+  function)
+
 (provide "xl-pcl/xyzzy-low")
